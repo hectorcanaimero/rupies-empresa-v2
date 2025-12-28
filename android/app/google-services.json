@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "68198251813",
+    "project_id": "rupies-brasil",
+    "storage_bucket": "rupies-brasil.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:68198251813:android:e0efc76ab4589119006ecc",
+        "android_client_info": {
+          "package_name": "com.rupies.companies"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV6VLLi88soQosXViesI3XV6r1Ep8dub4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:68198251813:android:09ddaf5349edec79006ecc",
+        "android_client_info": {
+          "package_name": "com.rupies.profissional"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV6VLLi88soQosXViesI3XV6r1Ep8dub4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
