@@ -1,0 +1,340 @@
+-- =====================================================
+-- MIGRATION: Views - Sistema de Assinaturas
+-- Data: 2025-12-28
+-- Descrição: Views otimizadas para queries comuns
+-- =====================================================
+
+-- =====================================================
+-- 1. VIEW: view_active_subscriptions
+-- Assinaturas ativas com detalhes do plano e usuário
+-- =====================================================
+
+CREATE OR REPLACE VIEW view_active_subscriptions AS
+SELECT
+  s.id AS subscription_id,
+  s.user_id,
+  u.email AS user_email,
+  u.display_name AS user_name,
+  u.name_contractor,
+  u.cpfcnpj,
+  s.status AS subscription_status,
+  s.billing_cycle,
+  s.current_period_start,
+  s.current_period_end,
+  s.trial_end,
+  s.cancel_at_period_end,
+  s.canceled_at,
+  s.created_at AS subscription_created_at,
+  p.id AS plan_id,
+  p.name AS plan_name,
+  p.price_monthly,
+  p.price_yearly,
+  p.features,
+  p.max_services_per_month,
+  p.max_contractors_contacted,
+  p.priority_support,
+  p.featured_listing,
+  p.analytics_dashboard,
+  -- Campos calculados
+  CASE
+    WHEN s.status = 'trialing' THEN 'Trial'
+    WHEN s.cancel_at_period_end THEN 'Cancelando'
+    WHEN s.status = 'active' THEN 'Ativo'
+    WHEN s.status = 'past_due' THEN 'Atrasado'
+    ELSE 'Outro'
+  END AS status_display,
+  CASE
+    WHEN s.trial_end > NOW() THEN s.trial_end
+    ELSE s.current_period_end
+  END AS expires_at,
+  CASE
+    WHEN s.billing_cycle = 'yearly' THEN p.price_yearly
+    ELSE p.price_monthly
+  END AS current_price
+FROM subscriptions s
+INNER JOIN subscription_plans p ON p.id = s.plan_id
+INNER JOIN users u ON u.id = s.user_id
+WHERE s.status IN ('active', 'trialing', 'past_due')
+ORDER BY s.created_at DESC;
+
+COMMENT ON VIEW view_active_subscriptions IS
+  'Todas as assinaturas ativas/trial com informações do usuário e plano';
+
+-- =====================================================
+-- 2. VIEW: view_subscription_metrics
+-- Métricas gerais do sistema de assinaturas
+-- =====================================================
+
+CREATE OR REPLACE VIEW view_subscription_metrics AS
+SELECT
+  -- Contagens por status
+  COUNT(*) FILTER (WHERE status = 'active') AS total_active,
+  COUNT(*) FILTER (WHERE status = 'trialing') AS total_trialing,
+  COUNT(*) FILTER (WHERE status = 'past_due') AS total_past_due,
+  COUNT(*) FILTER (WHERE status = 'canceled') AS total_canceled,
+  COUNT(*) FILTER (WHERE status = 'pending') AS total_pending,
+
+  -- MRR (Monthly Recurring Revenue)
+  SUM(
+    CASE
+      WHEN s.status IN ('active', 'trialing') AND s.billing_cycle = 'monthly' THEN p.price_monthly
+      WHEN s.status IN ('active', 'trialing') AND s.billing_cycle = 'yearly' THEN p.price_yearly / 12
+      ELSE 0
+    END
+  ) AS mrr,
+
+  -- ARR (Annual Recurring Revenue)
+  SUM(
+    CASE
+      WHEN s.status IN ('active', 'trialing') AND s.billing_cycle = 'monthly' THEN p.price_monthly * 12
+      WHEN s.status IN ('active', 'trialing') AND s.billing_cycle = 'yearly' THEN p.price_yearly
+      ELSE 0
+    END
+  ) AS arr,
+
+  -- Contagens por ciclo de cobrança
+  COUNT(*) FILTER (WHERE billing_cycle = 'monthly' AND status IN ('active', 'trialing')) AS monthly_subscriptions,
+  COUNT(*) FILTER (WHERE billing_cycle = 'yearly' AND status IN ('active', 'trialing')) AS yearly_subscriptions,
+
+  -- Cancelamentos
+  COUNT(*) FILTER (WHERE cancel_at_period_end = true) AS pending_cancellations,
+  COUNT(*) FILTER (WHERE canceled_at >= NOW() - INTERVAL '30 days') AS canceled_last_30_days,
+
+  -- Trial
+  COUNT(*) FILTER (WHERE status = 'trialing' AND trial_end > NOW()) AS active_trials,
+  COUNT(*) FILTER (WHERE status = 'trialing' AND trial_end <= NOW()) AS expired_trials
+
+FROM subscriptions s
+INNER JOIN subscription_plans p ON p.id = s.plan_id;
+
+COMMENT ON VIEW view_subscription_metrics IS
+  'Métricas agregadas do sistema de assinaturas (MRR, ARR, contagens)';
+
+-- =====================================================
+-- 3. VIEW: view_user_subscription_summary
+-- Resumo da assinatura por usuário (para o app)
+-- =====================================================
+
+CREATE OR REPLACE VIEW view_user_subscription_summary AS
+SELECT
+  u.id AS user_id,
+  u.email,
+  u.display_name,
+
+  -- Assinatura atual
+  s.id AS subscription_id,
+  s.status AS subscription_status,
+  p.name AS plan_name,
+  p.features,
+
+  -- Limites
+  p.max_services_per_month,
+  p.max_contractors_contacted,
+
+  -- Uso atual
+  COALESCE(usage.services_created, 0) AS services_used_this_month,
+  COALESCE(usage.contractors_contacted, 0) AS contractors_contacted_this_month,
+
+  -- Restante
+  CASE
+    WHEN p.max_services_per_month = -1 THEN -1
+    ELSE GREATEST(0, p.max_services_per_month - COALESCE(usage.services_created, 0))
+  END AS services_remaining,
+
+  CASE
+    WHEN p.max_contractors_contacted = -1 THEN -1
+    ELSE GREATEST(0, p.max_contractors_contacted - COALESCE(usage.contractors_contacted, 0))
+  END AS contacts_remaining,
+
+  -- Benefícios
+  p.priority_support,
+  p.featured_listing,
+  p.analytics_dashboard,
+
+  -- Período
+  s.current_period_start,
+  s.current_period_end,
+  s.trial_end,
+  s.cancel_at_period_end,
+
+  -- Flags
+  CASE WHEN s.status IN ('active', 'trialing') THEN true ELSE false END AS is_premium,
+  CASE WHEN s.status = 'trialing' THEN true ELSE false END AS is_trial,
+  CASE WHEN s.status = 'past_due' THEN true ELSE false END AS payment_failed
+
+FROM users u
+LEFT JOIN subscriptions s ON s.user_id = u.id
+  AND s.status IN ('active', 'trialing', 'past_due')
+  AND (s.current_period_end > NOW() OR s.trial_end > NOW())
+LEFT JOIN subscription_plans p ON p.id = s.plan_id
+LEFT JOIN subscription_usage usage ON usage.subscription_id = s.id
+  AND usage.period_start <= NOW()
+  AND usage.period_end >= NOW()
+WHERE u.isContractor = true  -- Apenas empresas
+ORDER BY u.created_at DESC;
+
+COMMENT ON VIEW view_user_subscription_summary IS
+  'Resumo completo da assinatura por usuário (usado no app)';
+
+-- =====================================================
+-- 4. VIEW: view_payment_history
+-- Histórico de pagamentos com detalhes
+-- =====================================================
+
+CREATE OR REPLACE VIEW view_payment_history AS
+SELECT
+  pt.id AS transaction_id,
+  pt.user_id,
+  u.email AS user_email,
+  u.display_name AS user_name,
+  pt.amount,
+  pt.currency,
+  pt.status AS payment_status,
+  pt.payment_method,
+  pt.due_date,
+  pt.payment_date,
+  pt.invoice_url,
+  pt.pix_qr_code_url,
+  pt.pix_copy_paste,
+  pt.boleto_bar_code,
+  pt.error_message,
+  pt.created_at AS transaction_created_at,
+  s.id AS subscription_id,
+  p.name AS plan_name,
+  s.billing_cycle,
+  -- Status display
+  CASE pt.status
+    WHEN 'pending' THEN 'Pendente'
+    WHEN 'confirmed' THEN 'Confirmado'
+    WHEN 'received' THEN 'Recebido'
+    WHEN 'overdue' THEN 'Vencido'
+    WHEN 'refunded' THEN 'Reembolsado'
+    WHEN 'canceled' THEN 'Cancelado'
+    ELSE 'Outro'
+  END AS status_display,
+  -- Dias até vencimento
+  CASE
+    WHEN pt.due_date IS NOT NULL AND pt.status = 'pending' THEN
+      pt.due_date - CURRENT_DATE
+    ELSE NULL
+  END AS days_until_due
+FROM payment_transactions pt
+INNER JOIN users u ON u.id = pt.user_id
+LEFT JOIN subscriptions s ON s.id = pt.subscription_id
+LEFT JOIN subscription_plans p ON p.id = s.plan_id
+ORDER BY pt.created_at DESC;
+
+COMMENT ON VIEW view_payment_history IS
+  'Histórico completo de pagamentos com detalhes do usuário e plano';
+
+-- =====================================================
+-- 5. VIEW: view_churned_subscriptions
+-- Assinaturas canceladas (churn analysis)
+-- =====================================================
+
+CREATE OR REPLACE VIEW view_churned_subscriptions AS
+SELECT
+  s.id AS subscription_id,
+  s.user_id,
+  u.email AS user_email,
+  u.display_name AS user_name,
+  p.name AS plan_name,
+  s.billing_cycle,
+  s.created_at AS subscription_started,
+  s.canceled_at,
+  s.updated_at AS subscription_ended,
+  -- Duração da assinatura
+  EXTRACT(EPOCH FROM (s.updated_at - s.created_at)) / 86400 AS days_subscribed,
+  -- Lifetime value
+  CASE
+    WHEN s.billing_cycle = 'monthly' THEN
+      p.price_monthly * (EXTRACT(EPOCH FROM (s.updated_at - s.created_at)) / 2592000) -- aprox meses
+    WHEN s.billing_cycle = 'yearly' THEN
+      p.price_yearly
+    ELSE 0
+  END AS estimated_ltv,
+  -- Razão do cancelamento (se tiver em metadata)
+  s.metadata->>'cancellation_reason' AS cancellation_reason,
+  s.metadata->>'cancellation_feedback' AS cancellation_feedback
+FROM subscriptions s
+INNER JOIN users u ON u.id = s.user_id
+INNER JOIN subscription_plans p ON p.id = s.plan_id
+WHERE s.status = 'canceled'
+ORDER BY s.canceled_at DESC;
+
+COMMENT ON VIEW view_churned_subscriptions IS
+  'Assinaturas canceladas para análise de churn';
+
+-- =====================================================
+-- 6. VIEW: view_trial_conversions
+-- Conversão de trials para assinaturas pagas
+-- =====================================================
+
+CREATE OR REPLACE VIEW view_trial_conversions AS
+SELECT
+  DATE_TRUNC('month', s.created_at) AS month,
+  COUNT(*) FILTER (WHERE s.trial_start IS NOT NULL) AS total_trials,
+  COUNT(*) FILTER (WHERE s.trial_start IS NOT NULL AND s.status = 'active') AS converted_trials,
+  COUNT(*) FILTER (WHERE s.trial_start IS NOT NULL AND s.status = 'canceled') AS canceled_trials,
+  ROUND(
+    100.0 * COUNT(*) FILTER (WHERE s.trial_start IS NOT NULL AND s.status = 'active') /
+    NULLIF(COUNT(*) FILTER (WHERE s.trial_start IS NOT NULL), 0),
+    2
+  ) AS conversion_rate
+FROM subscriptions s
+WHERE s.trial_start IS NOT NULL
+GROUP BY DATE_TRUNC('month', s.created_at)
+ORDER BY month DESC;
+
+COMMENT ON VIEW view_trial_conversions IS
+  'Taxa de conversão de trials por mês';
+
+-- =====================================================
+-- 7. MATERIALIZED VIEW: view_subscription_revenue_monthly
+-- Receita mensal (para dashboards - atualizar periodicamente)
+-- =====================================================
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS view_subscription_revenue_monthly AS
+SELECT
+  DATE_TRUNC('month', pt.payment_date) AS month,
+  COUNT(DISTINCT pt.user_id) AS paying_users,
+  COUNT(*) AS total_payments,
+  SUM(pt.amount) FILTER (WHERE pt.status IN ('received', 'confirmed')) AS total_revenue,
+  SUM(pt.amount) FILTER (WHERE pt.payment_method = 'pix') AS revenue_pix,
+  SUM(pt.amount) FILTER (WHERE pt.payment_method = 'boleto') AS revenue_boleto,
+  SUM(pt.amount) FILTER (WHERE pt.payment_method = 'credit_card') AS revenue_credit_card,
+  AVG(pt.amount) FILTER (WHERE pt.status IN ('received', 'confirmed')) AS avg_payment,
+  COUNT(*) FILTER (WHERE pt.status = 'overdue') AS overdue_payments,
+  SUM(pt.amount) FILTER (WHERE pt.status = 'overdue') AS overdue_amount
+FROM payment_transactions pt
+WHERE pt.payment_date IS NOT NULL
+GROUP BY DATE_TRUNC('month', pt.payment_date)
+ORDER BY month DESC;
+
+-- Índice para a materialized view
+CREATE UNIQUE INDEX IF NOT EXISTS idx_revenue_monthly_month
+  ON view_subscription_revenue_monthly(month);
+
+COMMENT ON MATERIALIZED VIEW view_subscription_revenue_monthly IS
+  'Receita mensal agregada (atualizar com REFRESH MATERIALIZED VIEW)';
+
+-- =====================================================
+-- 8. FUNCTION: Refresh materialized view automaticamente
+-- =====================================================
+
+CREATE OR REPLACE FUNCTION refresh_subscription_revenue()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW CONCURRENTLY view_subscription_revenue_monthly;
+END;
+$$;
+
+COMMENT ON FUNCTION refresh_subscription_revenue IS
+  'Atualiza a materialized view de receita mensal';
+
+-- =====================================================
+-- FIM DAS VIEWS
+-- =====================================================

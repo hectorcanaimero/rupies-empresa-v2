@@ -14,6 +14,21 @@ import 'flutter_flow/flutter_flow_util.dart';
 import 'flutter_flow/internationalization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import '/services/notification_service.dart';
+
+/// Handler para mensajes en background (debe ser función top-level)
+/// Esta función se ejecuta cuando llega una notificación y la app está cerrada o en background
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Inicializar Firebase si es necesario
+  await initFirebase();
+
+  print('📩 Mensaje en background recibido: ${message.messageId}');
+  print('  Título: ${message.notification?.title}');
+  print('  Cuerpo: ${message.notification?.body}');
+  print('  Data: ${message.data}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +36,11 @@ void main() async {
   usePathUrlStrategy();
 
   await initFirebase();
+
+  // Configurar handler de mensajes en background (solo para móviles)
+  if (!kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
 
   await SupaFlow.initialize();
 
@@ -30,6 +50,9 @@ void main() async {
   if (!kIsWeb) {
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   }
+
+  // Inicializar el servicio de notificaciones
+  await NotificationService.initialize();
 
   runApp(MultiProvider(
     providers: [

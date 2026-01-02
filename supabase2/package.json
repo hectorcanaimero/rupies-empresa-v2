@@ -1,0 +1,17 @@
+{
+  "name": "rupies-empresa-supabase-migrations",
+  "version": "1.0.0",
+  "description": "Scripts para ejecutar migrations del sistema Clube dos 100",
+  "private": true,
+  "scripts": {
+    "test": "node test-connection.js",
+    "verify": "node verify-schema.js",
+    "migrate": "node ejecutar-con-service-role.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

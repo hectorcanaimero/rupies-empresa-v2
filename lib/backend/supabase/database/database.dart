@@ -9,6 +9,7 @@ export 'tables/banners.dart';
 export 'tables/message_comment.dart';
 export 'tables/lead_attachment.dart';
 export 'tables/view_service_rating.dart';
+export 'tables/subscription_plans.dart';
 export 'tables/subscriptions.dart';
 export 'tables/leads.dart';
 export 'tables/view_providers.dart';

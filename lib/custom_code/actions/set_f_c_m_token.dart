@@ -16,23 +16,50 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future setFCMToken() async {
-  await Firebase.initializeApp();
+  try {
+    // Asegurar que Firebase está inicializado
+    await Firebase.initializeApp();
 
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  FFAppState().fcmToken = "About to check PN permissions";
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    FFAppState().fcmToken = "authorizing works";
-    try {
+    // Solicitar permisos de notificaciones
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    // Verificar si se otorgaron los permisos
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+
+      // Obtener el token FCM
       String? fcmToken = await messaging.getToken();
-      FFAppState().fcmToken = fcmToken ?? "";
-    } catch (e) {
-      FFAppState().fcmToken = e.toString();
+
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        // Guardar en FFAppState (se persiste automáticamente en secure storage)
+        FFAppState().fcmToken = fcmToken;
+
+        // TODO: Descomentar cuando la columna fcm_token exista en Supabase
+        // Guardar el token en Supabase para el usuario actual
+        // final userId = currentUserUid;
+        // if (userId != null && userId.isNotEmpty) {
+        //   await SupaFlow.client
+        //     .from('users') // o 'profiles' según tu schema
+        //     .update({'fcm_token': fcmToken})
+        //     .eq('id', userId);
+        // }
+
+        print('FCM Token obtenido y guardado exitosamente');
+      } else {
+        print('Error: No se pudo obtener el FCM token');
+      }
+    } else {
+      print('Permisos de notificaciones no otorgados');
     }
+  } catch (e) {
+    print('Error al configurar FCM token: $e');
+    // No guardamos el error en fcmToken para evitar sobrescribir un token válido
   }
 }

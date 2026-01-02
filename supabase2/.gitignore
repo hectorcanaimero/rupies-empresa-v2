@@ -1,0 +1,14 @@
+# Environment variables with sensitive keys
+.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+
+# Backups
+*_backup.sql
+*_OLD.sql
+
+# Logs
+*.log

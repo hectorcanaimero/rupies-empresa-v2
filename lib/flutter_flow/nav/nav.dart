@@ -245,6 +245,23 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) {
         builder: (context, params) => SacPageWidget(),
       ),
       FFRoute(
+        name: SubscriptionPlansPageWidget.routeName,
+        path: SubscriptionPlansPageWidget.routePath,
+        requireAuth: true,
+        builder: (context, params) => SubscriptionPlansPageWidget(),
+      ),
+      FFRoute(
+        name: SubscriptionCheckoutPageWidget.routeName,
+        path: SubscriptionCheckoutPageWidget.routePath,
+        requireAuth: true,
+        builder: (context, params) => SubscriptionCheckoutPageWidget(
+          subscriptionData: params.getParam(
+            'subscriptionData',
+            ParamType.JSON,
+          ),
+        ),
+      ),
+      FFRoute(
         name: $utility_functions_library_8g4bud.TestPageWidget.routeName,
         path: $utility_functions_library_8g4bud.TestPageWidget.routePath,
         builder: (context, params) =>

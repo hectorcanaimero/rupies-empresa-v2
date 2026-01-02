@@ -1,0 +1,1 @@
+ /Users/al3jandro/project/rupies/rupies-empresa/.dart_tool/flutter_build/90bcf5467f63ffcebcdc4c499b4ba1e2/native_assets.json: 

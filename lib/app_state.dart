@@ -43,6 +43,9 @@ class FFAppState extends ChangeNotifier {
       _typecompany =
           await secureStorage.getString('ff_typecompany') ?? _typecompany;
     });
+    await _safeInitAsync(() async {
+      _fcmToken = await secureStorage.getString('ff_fcmToken') ?? _fcmToken;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -94,6 +97,11 @@ class FFAppState extends ChangeNotifier {
   String get fcmToken => _fcmToken;
   set fcmToken(String value) {
     _fcmToken = value;
+    secureStorage.setString('ff_fcmToken', value);
+  }
+
+  void deleteFcmToken() {
+    secureStorage.delete(key: 'ff_fcmToken');
   }
 
   double _propPrice = 0.0;

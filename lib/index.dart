@@ -35,3 +35,7 @@ export '/services/minha_avaliacao_page/minha_avaliacao_page_widget.dart'
 export '/lead/lead_contato_page/lead_contato_page_widget.dart'
     show LeadContatoPageWidget;
 export '/pages/sac_page/sac_page_widget.dart' show SacPageWidget;
+export '/subscription/subscription_plans_page/subscription_plans_page_widget.dart'
+    show SubscriptionPlansPageWidget;
+export '/subscription/subscription_checkout_page/subscription_checkout_page_widget.dart'
+    show SubscriptionCheckoutPageWidget;
