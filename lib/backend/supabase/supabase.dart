@@ -3,9 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 export 'database/database.dart';
 export 'storage/storage.dart';
 
-String _kSupabaseUrl = 'https://supa.rupies.com.br';
+String _kSupabaseUrl = 'https://ejnzgjczritznohpdnxl.supabase.co';
 String _kSupabaseAnonKey =
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NzE2NTIwMCwiZXhwIjo0OTAyODM4ODAwLCJyb2xlIjoiYW5vbiJ9.PgTCx_EMA0DQrCWi84Mifi7HmWK8_DUFIsnQByq2cQY';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbnpnamN6cml0em5vaHBkbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NDMyMTAsImV4cCI6MjA4NDAxOTIxMH0.6ab40XH-1EGV4M2mUihRyZlo2p1kOi3Oi5arm0yFqEg';
 
 class SupaFlow {
   SupaFlow._();

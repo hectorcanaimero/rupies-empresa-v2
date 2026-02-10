@@ -15,7 +15,7 @@ class SacPageWidget extends StatefulWidget {
   const SacPageWidget({super.key});
 
   static String routeName = 'SacPage';
-  static String routePath = '/sacPage';
+  static String routePath = 'sacPage';
 
   @override
   State<SacPageWidget> createState() => _SacPageWidgetState();

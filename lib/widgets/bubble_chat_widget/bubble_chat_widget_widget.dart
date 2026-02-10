@@ -61,6 +61,10 @@ class _BubbleChatWidgetWidgetState extends State<BubbleChatWidgetWidget> {
             .eqOrNull(
               'userCandidate',
               widget.userCandidate,
+            )
+            .eqOrNull(
+              'userId',
+              currentUserUid,
             ),
       ),
       builder: (context, snapshot) {
@@ -95,10 +99,10 @@ class _BubbleChatWidgetWidgetState extends State<BubbleChatWidgetWidget> {
                   )
                   .eqOrNull(
                     'typeMessage',
-                    MessageSendType.Contractor.name,
+                    MessageSendType.Prestador.name,
                   )
                   .eqOrNull(
-                    'status',
+                    'readMessage',
                     false,
                   ),
             ),

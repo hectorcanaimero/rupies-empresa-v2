@@ -6,5 +6,11 @@
     <key>aps-environment</key>
     <string>production</string>
     <!-- End of APsEnvironment -->
+    <!-- Start of Deep Links -->
+    <key>com.apple.developer.associated-domains</key>
+    <array>
+      <string>applinks:rupies-empresas.web.app</string>
+    </array>
+    <!-- End of Deep Links -->
   </dict>
 </plist>

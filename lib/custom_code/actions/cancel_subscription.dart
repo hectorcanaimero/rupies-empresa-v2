@@ -37,7 +37,7 @@ Future<dynamic> cancelSubscription(
 
     // URL da Edge Function
     final url = Uri.parse(
-        'https://supa.rupies.com.br/functions/v1/cancel-subscription');
+        'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/cancel-subscription');
 
     // Preparar body da requisição
     final body = jsonEncode({

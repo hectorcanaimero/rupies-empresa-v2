@@ -19,7 +19,7 @@ class AppointmentPageWidget extends StatefulWidget {
   const AppointmentPageWidget({super.key});
 
   static String routeName = 'AppointmentPage';
-  static String routePath = '/appointmentPage';
+  static String routePath = 'appointmentPage';
 
   @override
   State<AppointmentPageWidget> createState() => _AppointmentPageWidgetState();
@@ -370,6 +370,7 @@ class _AppointmentPageWidgetState extends State<AppointmentPageWidget>
                                                     ),
                                                     data:
                                                         listViewViewServicesWithCategoriesRow,
+                                                    back: Color(0x4D9ABEBB),
                                                   ),
                                                 ),
                                               );
@@ -507,9 +508,8 @@ class _AppointmentPageWidgetState extends State<AppointmentPageWidget>
                                                                 double.infinity,
                                                             decoration:
                                                                 BoxDecoration(
-                                                              color: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .secondaryBackground,
+                                                              color: Color(
+                                                                  0xFFFDF4F4),
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(

@@ -95,4 +95,20 @@ class UsersRow extends SupabaseDataRow {
 
   String? get typeCompany => getField<String>('type_company');
   set typeCompany(String? value) => setField<String>('type_company', value);
+
+  String? get chavePix => getField<String>('chave_pix');
+  set chavePix(String? value) => setField<String>('chave_pix', value);
+
+  dynamic get trial => getField<dynamic>('trial');
+  set trial(dynamic value) => setField<dynamic>('trial', value);
+
+  List<String> get categoriesId => getListField<String>('categories_id');
+  set categoriesId(List<String>? value) =>
+      setListField<String>('categories_id', value);
+
+  bool? get termos => getField<bool>('termos');
+  set termos(bool? value) => setField<bool>('termos', value);
+
+  bool? get privacidade => getField<bool>('privacidade');
+  set privacidade(bool? value) => setField<bool>('privacidade', value);
 }

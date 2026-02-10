@@ -5,42 +5,34 @@ import 'package:flutter/material.dart';
 
 class SubscriptionPlansPageModel
     extends FlutterFlowModel<SubscriptionPlansPageWidget> {
+  ///  Local state fields for this page.
+
+  String? selectedPlanId;
+
+  String selectedBillingCycle = 'monthly';
+
+  bool isCreating = false;
+
   ///  State fields for stateful widgets in this page.
 
-  // State field(s) for selected plan
-  String? selectedPlanId;
-  String? selectedBillingCycle = 'monthly'; // 'monthly' or 'yearly'
-
-  // Store subscription plans from database
-  List<SubscriptionPlansRow>? subscriptionPlans;
-
-  // Store current subscription status
-  dynamic currentSubscriptionStatus;
-
-  // Loading state
-  bool isLoading = true;
-  bool isCreatingSubscription = false;
-
-  // Error message
-  String? errorMessage;
+  // Stores action output result for [Custom Action - getSubscriptionStatus] action in SubscriptionPlansPage widget.
+  dynamic getsub;
+  // Stores action output result for [Custom Action - createSubscription] action in Button widget.
+  dynamic createSubResult;
+  // Stores action output result for [Backend Call - Query Rows] action in Button widget.
+  List<SubscriptionsRow>? dtaSubs;
+  // Stores action output result for [Custom Action - createSubscription] action in Image widget.
+  dynamic createSubResult1;
+  // Stores action output result for [Backend Call - Query Rows] action in Image widget.
+  List<SubscriptionsRow>? dtaSubs1;
+  // Stores action output result for [Custom Action - createSubscription] action in Image2 widget.
+  dynamic createSubResult2;
+  // Stores action output result for [Backend Call - Query Rows] action in Image2 widget.
+  List<SubscriptionsRow>? dtaSubs2;
 
   @override
-  void initState(BuildContext context) {
-    // Initialization
-  }
+  void initState(BuildContext context) {}
 
   @override
-  void dispose() {
-    // Cleanup
-  }
-
-  /// Action to select a plan
-  void selectPlan(String planId) {
-    selectedPlanId = planId;
-  }
-
-  /// Action to select billing cycle
-  void selectBillingCycle(String cycle) {
-    selectedBillingCycle = cycle;
-  }
+  void dispose() {}
 }

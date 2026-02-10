@@ -23,7 +23,7 @@ class ProfilePageWidget extends StatefulWidget {
   const ProfilePageWidget({super.key});
 
   static String routeName = 'ProfilePage';
-  static String routePath = '/profilePage';
+  static String routePath = 'profilePage';
 
   @override
   State<ProfilePageWidget> createState() => _ProfilePageWidgetState();
@@ -1288,7 +1288,7 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                                     _model.addressFocusNode,
                                                 autofocus: false,
                                                 textCapitalization:
-                                                    TextCapitalization.none,
+                                                    TextCapitalization.words,
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1449,7 +1449,7 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                                         text: newValue.text
                                                             .toCapitalization(
                                                                 TextCapitalization
-                                                                    .none),
+                                                                    .words),
                                                       );
                                                     }),
                                                 ],
@@ -1724,6 +1724,12 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                               currentUserUid,
                                             ),
                                           );
+                                          logFirebaseEvent(
+                                              'Button_refresh_database_request');
+                                          safeSetState(() =>
+                                              _model.requestCompleter2 = null);
+                                          await _model
+                                              .waitForRequestCompleted2();
                                           logFirebaseEvent('Button_page_view');
                                           await _model.pageViewController
                                               ?.nextPage(
@@ -2156,13 +2162,12 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                                       });
                                                       logFirebaseEvent(
                                                           'Button_reset_form_fields');
-                                                      safeSetState(() {
-                                                        _model
-                                                            .dropDownValueController
-                                                            ?.reset();
-                                                        _model.dropDownValue =
-                                                            null;
-                                                      });
+                                                      _model
+                                                          .dropDownValueController
+                                                          ?.reset();
+                                                      _model.dropDownValue =
+                                                          null;
+
                                                       logFirebaseEvent(
                                                           'Button_refresh_database_request');
                                                       safeSetState(() => _model
@@ -2565,15 +2570,13 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                         nameContractor: _model.update
                                             ?.firstOrNull?.nameContractor,
                                       );
-                                      FFAppState().typecompany = _model
-                                          .update!.firstOrNull!.typeCompany!;
                                       safeSetState(() {});
                                       logFirebaseEvent('Button_navigate_to');
 
                                       context.goNamed(
                                         HomePageWidget.routeName,
                                         extra: <String, dynamic>{
-                                          kTransitionInfoKey: TransitionInfo(
+                                          '__transition_info__': TransitionInfo(
                                             hasTransition: true,
                                             transitionType:
                                                 PageTransitionType.fade,

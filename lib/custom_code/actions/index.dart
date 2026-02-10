@@ -8,3 +8,4 @@ export 'get_subscription_status.dart' show getSubscriptionStatus;
 export 'check_subscription.dart' show checkSubscription;
 export 'create_subscription.dart' show createSubscription;
 export 'cancel_subscription.dart' show cancelSubscription;
+export 'update_password.dart' show updatePassword;

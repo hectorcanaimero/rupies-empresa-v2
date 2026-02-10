@@ -1,6 +1,7 @@
 import '/auth/supabase_auth/auth_util.dart';
 import '/backend/schema/enums/enums.dart';
 import '/backend/supabase/supabase.dart';
+import '/components/services_external_widget_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/widgets/banner_widget/banner_widget_widget.dart';
 import '/widgets/card_accepted_widget/card_accepted_widget_widget.dart';
@@ -22,7 +23,7 @@ class HomePageWidget extends StatefulWidget {
   const HomePageWidget({super.key});
 
   static String routeName = 'HomePage';
-  static String routePath = '/homePage';
+  static String routePath = 'homePage';
 
   @override
   State<HomePageWidget> createState() => _HomePageWidgetState();
@@ -54,24 +55,54 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           if (_model.profile!.firstOrNull!.endRegister!) {
             logFirebaseEvent('HomePage_update_app_state');
             FFAppState().updateUserStruct(
-              (e) => e..rating = _model.profile?.firstOrNull?.rating,
+              (e) => e
+                ..rating = _model.profile?.firstOrNull?.rating
+                ..photoUrl = _model.profile?.firstOrNull?.photoUrl,
             );
+            FFAppState().trial = _model.profile!.firstOrNull!.trial!;
             safeSetState(() {});
+            return;
           } else {
             logFirebaseEvent('HomePage_navigate_to');
 
             context.goNamed(
               ProfilePageWidget.routeName,
               extra: <String, dynamic>{
-                kTransitionInfoKey: TransitionInfo(
+                '__transition_info__': TransitionInfo(
                   hasTransition: true,
                   transitionType: PageTransitionType.bottomToTop,
                 ),
               },
             );
+
+            return;
           }
         }),
         Future(() async {
+          logFirebaseEvent('HomePage_backend_call');
+          _model.subs = await SubscriptionsTable().queryRows(
+            queryFn: (q) => q.eqOrNull(
+              'user_id',
+              currentUserUid,
+            ),
+          );
+          logFirebaseEvent('HomePage_update_app_state');
+          FFAppState().updateSubscriptionStruct(
+            (e) => e..status = _model.subs?.firstOrNull?.status,
+          );
+          safeSetState(() {});
+        }),
+        Future(() async {
+          logFirebaseEvent('HomePage_backend_call');
+          await UsersTable().update(
+            data: {
+              'fcm_token': FFAppState().fcmToken,
+            },
+            matchingRows: (rows) => rows.eqOrNull(
+              'id',
+              currentUserUid,
+            ),
+          );
           logFirebaseEvent('HomePage_custom_action');
           await actions.appReview(
             context,
@@ -118,98 +149,120 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     width: double.infinity,
                     height: double.infinity,
                     decoration: BoxDecoration(),
-                    child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            wrapWithModel(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            child: wrapWithModel(
                               model: _model.userWidgetModel,
                               updateCallback: () => safeSetState(() {}),
                               child: UserWidgetWidget(),
                             ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 15.0),
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(9.0),
-                                ),
-                                child: wrapWithModel(
-                                  model: _model.bannerWidgetModel,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: BannerWidgetWidget(
-                                    position: 0,
-                                  ),
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 15.0),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(9.0),
+                              ),
+                              child: wrapWithModel(
+                                model: _model.bannerWidgetModel,
+                                updateCallback: () => safeSetState(() {}),
+                                child: BannerWidgetWidget(
+                                  position: 0,
                                 ),
                               ),
                             ),
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(),
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 12.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).primary,
+                              ),
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 12.0, 0.0, 18.0),
+                                    0.0, 12.0, 0.0, 12.0),
                                 child: wrapWithModel(
-                                  model: _model.menuVerticalWidgetModel,
+                                  model: _model.servicesExternalWidgetModel,
                                   updateCallback: () => safeSetState(() {}),
-                                  child: MenuVerticalWidgetWidget(),
+                                  child: ServicesExternalWidgetWidget(),
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 9.0, 0.0, 0.0),
-                              child: Container(
-                                decoration: BoxDecoration(),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Meus Serviços',
-                                          style: FlutterFlowTheme.of(context)
-                                              .headlineSmall
-                                              .override(
-                                                font: GoogleFonts.interTight(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .headlineSmall
-                                                          .fontStyle,
-                                                ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryText,
-                                                fontSize: 20.0,
-                                                letterSpacing: 0.0,
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 12.0),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(),
+                              child: wrapWithModel(
+                                model: _model.menuVerticalWidgetModel,
+                                updateCallback: () => safeSetState(() {}),
+                                child: MenuVerticalWidgetWidget(),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 9.0, 12.0, 0.0),
+                            child: Container(
+                              decoration: BoxDecoration(),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Meus Serviços',
+                                        style: FlutterFlowTheme.of(context)
+                                            .headlineSmall
+                                            .override(
+                                              font: GoogleFonts.interTight(
                                                 fontWeight: FontWeight.w600,
                                                 fontStyle:
                                                     FlutterFlowTheme.of(context)
                                                         .headlineSmall
                                                         .fontStyle,
                                               ),
-                                        ),
-                                      ],
-                                    ),
-                                    Divider(
-                                      thickness: 2.0,
-                                      color: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                    ),
-                                  ],
-                                ),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryText,
+                                              fontSize: 20.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .headlineSmall
+                                                      .fontStyle,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  Divider(
+                                    thickness: 2.0,
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                  ),
+                                ],
                               ),
                             ),
-                            FutureBuilder<List<ViewServicesWithCategoriesRow>>(
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            child: FutureBuilder<
+                                List<ViewServicesWithCategoriesRow>>(
                               future:
                                   ViewServicesWithCategoriesTable().queryRows(
                                 queryFn: (q) => q
@@ -279,7 +332,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 );
                               },
                             ),
-                            FutureBuilder<
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            child: FutureBuilder<
                                 List<ViewServicesWithCategoriesFilteredRow>>(
                               future: ViewServicesWithCategoriesFilteredTable()
                                   .queryRows(
@@ -348,8 +405,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 );
                               },
                             ),
-                          ].addToStart(SizedBox(height: 12.0)),
-                        ),
+                          ),
+                        ].addToStart(SizedBox(height: 12.0)),
                       ),
                     ),
                   ),

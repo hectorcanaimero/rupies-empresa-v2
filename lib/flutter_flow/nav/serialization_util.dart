@@ -238,18 +238,26 @@ dynamic deserializeParam<T>(
             return ViewUsersSkillWithCategoriesRow(data);
           case ChatsRow:
             return ChatsRow(data);
+          case TokenCategoriesRow:
+            return TokenCategoriesRow(data);
           case ViewServicesWithCategoriesRow:
             return ViewServicesWithCategoriesRow(data);
-          case ProfilesRow:
-            return ProfilesRow(data);
           case ChatsMessageRow:
             return ChatsMessageRow(data);
+          case ViewServicesWithCategoriesFilteredExcludeRow:
+            return ViewServicesWithCategoriesFilteredExcludeRow(data);
           case SettingsRow:
             return SettingsRow(data);
           case ServicesRow:
             return ServicesRow(data);
+          case SubscriptionUsageRow:
+            return SubscriptionUsageRow(data);
+          case ViewUserSubscriptionSummaryRow:
+            return ViewUserSubscriptionSummaryRow(data);
           case MenusRow:
             return MenusRow(data);
+          case SubscriptionPlansRow:
+            return SubscriptionPlansRow(data);
           case ViewChatsMessageWithDetailsRow:
             return ViewChatsMessageWithDetailsRow(data);
           case UsersPortfolioRow:
@@ -264,18 +272,28 @@ dynamic deserializeParam<T>(
             return UsersSkillRow(data);
           case ViewServicesWithCategoriesFilteredRow:
             return ViewServicesWithCategoriesFilteredRow(data);
+          case NotificationsNewServiceRow:
+            return NotificationsNewServiceRow(data);
           case ServicesSkillsRow:
             return ServicesSkillsRow(data);
+          case ViewSubscriptionMetricsRow:
+            return ViewSubscriptionMetricsRow(data);
           case SacsRow:
             return SacsRow(data);
+          case ViewChurnedSubscriptionsRow:
+            return ViewChurnedSubscriptionsRow(data);
           case UsersRow:
             return UsersRow(data);
           case ServicesImagesRow:
             return ServicesImagesRow(data);
+          case ViewActiveSubscriptionsRow:
+            return ViewActiveSubscriptionsRow(data);
           case ProvidersRow:
             return ProvidersRow(data);
           case CategoriesRow:
             return CategoriesRow(data);
+          case ExternalBannerRow:
+            return ExternalBannerRow(data);
           case UsersRrssRow:
             return UsersRrssRow(data);
           case NotificationsRow:

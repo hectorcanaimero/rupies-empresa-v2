@@ -38,17 +38,19 @@ class MoedaBRField extends StatefulWidget {
 class _PriceFieldState extends State<MoedaBRField> {
   late TextEditingController _priceEditingController;
   final currencyFormat = NumberFormat("#,##0.00", "pt_BR");
-
+  late FocusNode _focusNode;
   @override
   void initState() {
     super.initState();
     _priceEditingController = TextEditingController();
     _priceEditingController.text = widget.initialValue;
+    _focusNode = FocusNode(canRequestFocus: false);
   }
 
   @override
   void dispose() {
     _priceEditingController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 

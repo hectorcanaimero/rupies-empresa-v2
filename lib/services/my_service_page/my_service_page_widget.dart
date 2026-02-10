@@ -16,7 +16,7 @@ class MyServicePageWidget extends StatefulWidget {
   const MyServicePageWidget({super.key});
 
   static String routeName = 'MyServicePage';
-  static String routePath = '/myServicePage';
+  static String routePath = 'myServicePage';
 
   @override
   State<MyServicePageWidget> createState() => _MyServicePageWidgetState();

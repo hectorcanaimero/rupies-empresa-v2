@@ -25,4 +25,7 @@ class SettingsRow extends SupabaseDataRow {
 
   bool? get active => getField<bool>('active');
   set active(bool? value) => setField<bool>('active', value);
+
+  int? get device => getField<int>('device');
+  set device(int? value) => setField<int>('device', value);
 }

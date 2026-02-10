@@ -24,7 +24,7 @@ class ServiceIdPageWidget extends StatefulWidget {
   final String? uid;
 
   static String routeName = 'ServiceIdPage';
-  static String routePath = '/serviceIdPage';
+  static String routePath = 'serviceIdPage';
 
   @override
   State<ServiceIdPageWidget> createState() => _ServiceIdPageWidgetState();
@@ -1933,6 +1933,9 @@ class _ServiceIdPageWidgetState extends State<ServiceIdPageWidget> {
                                                   context),
                                               child: RatingWidgetWidget(
                                                 serviceId: widget.uid!,
+                                                aprovedUser:
+                                                    serviceIdPageViewServicesWithCategoriesRow
+                                                        .userAproved!,
                                               ),
                                             ),
                                           );

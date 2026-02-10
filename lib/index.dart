@@ -39,3 +39,6 @@ export '/subscription/subscription_plans_page/subscription_plans_page_widget.dar
     show SubscriptionPlansPageWidget;
 export '/subscription/subscription_checkout_page/subscription_checkout_page_widget.dart'
     show SubscriptionCheckoutPageWidget;
+export '/users/reset_senha_page/reset_senha_page_widget.dart'
+    show ResetSenhaPageWidget;
+export '/pages/termos_page/termos_page_widget.dart' show TermosPageWidget;

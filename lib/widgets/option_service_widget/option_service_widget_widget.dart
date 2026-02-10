@@ -4,6 +4,7 @@ import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'option_service_widget_model.dart';
 export 'option_service_widget_model.dart';
 
@@ -41,6 +42,8 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
       child: Container(
@@ -92,12 +95,64 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                       onPressed: () async {
                         logFirebaseEvent(
                             'OPTION_SERVICE_WIDGET_URGENTE_BTN_ON_TAP');
-                        logFirebaseEvent('Button_navigate_to');
+                        if (FFAppState().typecompany != '') {
+                          if (FFAppState().subscription.status != 'active') {
+                            logFirebaseEvent('Button_navigate_to');
 
-                        context.pushNamed(ServiceUrgentPageWidget.routeName);
+                            context.goNamed(
+                              SubscriptionPlansPageWidget.routeName,
+                              extra: <String, dynamic>{
+                                '__transition_info__': TransitionInfo(
+                                  hasTransition: true,
+                                  transitionType:
+                                      PageTransitionType.bottomToTop,
+                                ),
+                              },
+                            );
+                          } else {
+                            logFirebaseEvent('Button_navigate_to');
 
-                        logFirebaseEvent('Button_close_dialog_drawer_etc');
-                        Navigator.pop(context);
+                            context
+                                .pushNamed(ServiceUrgentPageWidget.routeName);
+
+                            logFirebaseEvent('Button_close_dialog_drawer_etc');
+                            Navigator.pop(context);
+                          }
+
+                          return;
+                        } else {
+                          if (getJsonField(
+                                FFAppState().trial,
+                                r'''$.limit''',
+                              ) ==
+                              getJsonField(
+                                FFAppState().trial,
+                                r'''$.total''',
+                              )) {
+                            logFirebaseEvent('Button_navigate_to');
+
+                            context.goNamed(
+                              SubscriptionPlansPageWidget.routeName,
+                              extra: <String, dynamic>{
+                                '__transition_info__': TransitionInfo(
+                                  hasTransition: true,
+                                  transitionType:
+                                      PageTransitionType.bottomToTop,
+                                ),
+                              },
+                            );
+                          } else {
+                            logFirebaseEvent('Button_navigate_to');
+
+                            context
+                                .pushNamed(ServiceUrgentPageWidget.routeName);
+
+                            logFirebaseEvent('Button_close_dialog_drawer_etc');
+                            Navigator.pop(context);
+                          }
+
+                          return;
+                        }
                       },
                       text: 'Urgente',
                       options: FFButtonOptions(
@@ -140,12 +195,64 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                       onPressed: () async {
                         logFirebaseEvent(
                             'OPTION_SERVICE_WIDGET_AGENDADO_BTN_ON_TA');
-                        logFirebaseEvent('Button_navigate_to');
+                        if (FFAppState().typecompany != '') {
+                          if (FFAppState().subscription.status != 'active') {
+                            logFirebaseEvent('Button_navigate_to');
 
-                        context.pushNamed(ServiceSchedulePageWidget.routeName);
+                            context.goNamed(
+                              SubscriptionPlansPageWidget.routeName,
+                              extra: <String, dynamic>{
+                                '__transition_info__': TransitionInfo(
+                                  hasTransition: true,
+                                  transitionType:
+                                      PageTransitionType.bottomToTop,
+                                ),
+                              },
+                            );
+                          } else {
+                            logFirebaseEvent('Button_navigate_to');
 
-                        logFirebaseEvent('Button_close_dialog_drawer_etc');
-                        Navigator.pop(context);
+                            context
+                                .pushNamed(ServiceSchedulePageWidget.routeName);
+
+                            logFirebaseEvent('Button_close_dialog_drawer_etc');
+                            Navigator.pop(context);
+                          }
+
+                          return;
+                        } else {
+                          if (getJsonField(
+                                FFAppState().trial,
+                                r'''$.limit''',
+                              ) ==
+                              getJsonField(
+                                FFAppState().trial,
+                                r'''$.total''',
+                              )) {
+                            logFirebaseEvent('Button_navigate_to');
+
+                            context.goNamed(
+                              SubscriptionPlansPageWidget.routeName,
+                              extra: <String, dynamic>{
+                                '__transition_info__': TransitionInfo(
+                                  hasTransition: true,
+                                  transitionType:
+                                      PageTransitionType.bottomToTop,
+                                ),
+                              },
+                            );
+                          } else {
+                            logFirebaseEvent('Button_navigate_to');
+
+                            context
+                                .pushNamed(ServiceSchedulePageWidget.routeName);
+
+                            logFirebaseEvent('Button_close_dialog_drawer_etc');
+                            Navigator.pop(context);
+                          }
+
+                          return;
+                        }
                       },
                       text: 'Agendado',
                       options: FFButtonOptions(

@@ -11,6 +11,10 @@ class ServiceCandidatePageModel
 
   // Models for BubbleChatWidget dynamic component.
   late FlutterFlowDynamicModels<BubbleChatWidgetModel> bubbleChatWidgetModels;
+  // Stores action output result for [Backend Call - Query Rows] action in BubbleChatWidget widget.
+  List<ChatsRow>? exist;
+  // Stores action output result for [Backend Call - Insert Row] action in BubbleChatWidget widget.
+  ChatsRow? newChat;
   // Stores action output result for [Backend Call - Update Row(s)] action in Button widget.
   List<ServicesCandidatedRow>? aproved;
 

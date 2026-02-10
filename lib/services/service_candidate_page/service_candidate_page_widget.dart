@@ -1,3 +1,4 @@
+import '/auth/supabase_auth/auth_util.dart';
 import '/backend/schema/enums/enums.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -20,7 +21,7 @@ class ServiceCandidatePageWidget extends StatefulWidget {
   final String? uid;
 
   static String routeName = 'ServiceCandidatePage';
-  static String routePath = '/serviceCandidatePage';
+  static String routePath = 'serviceCandidatePage';
 
   @override
   State<ServiceCandidatePageWidget> createState() =>
@@ -309,22 +310,112 @@ class _ServiceCandidatePageWidgetState
                                               ],
                                             ),
                                           ),
-                                          wrapWithModel(
-                                            model: _model.bubbleChatWidgetModels
-                                                .getModel(
-                                              listViewIndex.toString(),
-                                              listViewIndex,
-                                            ),
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: BubbleChatWidgetWidget(
-                                              key: Key(
-                                                'Keyzum_${listViewIndex.toString()}',
+                                          InkWell(
+                                            splashColor: Colors.transparent,
+                                            focusColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            onTap: () async {
+                                              logFirebaseEvent(
+                                                  'SERVICE_CANDIDATE_Container_zumea23e_ON_');
+                                              var _shouldSetState = false;
+                                              logFirebaseEvent(
+                                                  'BubbleChatWidget_backend_call');
+                                              _model.exist =
+                                                  await ChatsTable().queryRows(
+                                                queryFn: (q) => q
+                                                    .eqOrNull(
+                                                      'serviceId',
+                                                      widget.uid,
+                                                    )
+                                                    .eqOrNull(
+                                                      'userCandidate',
+                                                      listViewViewServicesCandidatedUsersRow
+                                                          .userId,
+                                                    ),
+                                              );
+                                              _shouldSetState = true;
+                                              if (_model.exist?.length == 1) {
+                                                logFirebaseEvent(
+                                                    'BubbleChatWidget_navigate_to');
+
+                                                context.pushNamed(
+                                                  ChatPageWidget.routeName,
+                                                  queryParameters: {
+                                                    'chatId': serializeParam(
+                                                      _model.exist?.firstOrNull
+                                                          ?.id,
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
+
+                                                if (_shouldSetState)
+                                                  safeSetState(() {});
+                                                return;
+                                              } else {
+                                                logFirebaseEvent(
+                                                    'BubbleChatWidget_backend_call');
+                                                _model.newChat =
+                                                    await ChatsTable().insert({
+                                                  'serviceId': widget.uid,
+                                                  'userId': currentUserUid,
+                                                  'userCandidate':
+                                                      listViewViewServicesCandidatedUsersRow
+                                                          .userId,
+                                                });
+                                                _shouldSetState = true;
+                                                logFirebaseEvent(
+                                                    'BubbleChatWidget_backend_call');
+                                                await NotificationsTable()
+                                                    .insert({
+                                                  'title':
+                                                      'Opa!.. temos uma novidade',
+                                                  'body':
+                                                      'O Chat foi habilitado no serviço que vc se canidatou.',
+                                                  'recipient_id':
+                                                      listViewViewServicesCandidatedUsersRow
+                                                          .userid,
+                                                });
+                                                logFirebaseEvent(
+                                                    'BubbleChatWidget_navigate_to');
+
+                                                context.pushNamed(
+                                                  ChatPageWidget.routeName,
+                                                  queryParameters: {
+                                                    'chatId': serializeParam(
+                                                      _model.newChat?.id,
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
+
+                                                if (_shouldSetState)
+                                                  safeSetState(() {});
+                                                return;
+                                              }
+
+                                              if (_shouldSetState)
+                                                safeSetState(() {});
+                                            },
+                                            child: wrapWithModel(
+                                              model: _model
+                                                  .bubbleChatWidgetModels
+                                                  .getModel(
+                                                listViewIndex.toString(),
+                                                listViewIndex,
                                               ),
-                                              serviceId: widget.uid!,
-                                              userCandidate:
-                                                  listViewViewServicesCandidatedUsersRow
-                                                      .id,
+                                              updateCallback: () =>
+                                                  safeSetState(() {}),
+                                              child: BubbleChatWidgetWidget(
+                                                key: Key(
+                                                  'Keyzum_${listViewIndex.toString()}',
+                                                ),
+                                                serviceId: widget.uid!,
+                                                userCandidate:
+                                                    listViewViewServicesCandidatedUsersRow
+                                                        .userid,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -596,6 +687,18 @@ class _ServiceCandidatePageWidgetState
                                                       widget.uid,
                                                     ),
                                                   );
+                                                  logFirebaseEvent(
+                                                      'Button_backend_call');
+                                                  await NotificationsTable()
+                                                      .insert({
+                                                    'title':
+                                                        'Você foi selecionado 🎉',
+                                                    'body':
+                                                        'Parabéns! Você foi o profissional escolhido para realizar este serviço. Prepare-se e avance com confiança. O trabalho é seu. 💪',
+                                                    'recipient_id':
+                                                        listViewViewServicesCandidatedUsersRow
+                                                            .userid,
+                                                  });
                                                   logFirebaseEvent(
                                                       'Button_navigate_to');
 

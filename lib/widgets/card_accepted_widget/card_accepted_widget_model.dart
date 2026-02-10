@@ -8,21 +8,15 @@ class CardAcceptedWidgetModel
   ///  State fields for stateful widgets in this component.
 
   // Model for BubbleChatWidget component.
-  late BubbleChatWidgetModel bubbleChatWidgetModel1;
-  // Model for BubbleChatWidget component.
-  late BubbleChatWidgetModel bubbleChatWidgetModel2;
+  late BubbleChatWidgetModel bubbleChatWidgetModel;
 
   @override
   void initState(BuildContext context) {
-    bubbleChatWidgetModel1 =
-        createModel(context, () => BubbleChatWidgetModel());
-    bubbleChatWidgetModel2 =
-        createModel(context, () => BubbleChatWidgetModel());
+    bubbleChatWidgetModel = createModel(context, () => BubbleChatWidgetModel());
   }
 
   @override
   void dispose() {
-    bubbleChatWidgetModel1.dispose();
-    bubbleChatWidgetModel2.dispose();
+    bubbleChatWidgetModel.dispose();
   }
 }

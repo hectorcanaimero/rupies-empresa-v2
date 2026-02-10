@@ -180,42 +180,160 @@ class _UserWidgetWidgetState extends State<UserWidgetWidget> {
                 ),
               ),
             ),
-            if (FFAppState().typecompany != '')
-              Builder(
-                builder: (context) {
-                  if (FFAppState().typecompany == 'bronze') {
-                    return Container(
-                      width: 36.0,
+            Builder(
+              builder: (context) {
+                if (FFAppState().typecompany == 'bronze') {
+                  return Container(
+                    width: 36.0,
+                    height: 36.0,
+                    decoration: BoxDecoration(),
+                  );
+                } else if (FFAppState().typecompany == 'prata') {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.asset(
+                      'assets/images/selo_prata.png',
                       height: 36.0,
-                      decoration: BoxDecoration(),
-                    );
-                  } else if (FFAppState().typecompany == 'silver') {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.asset(
-                        'assets/images/selo_prata.png',
-                        height: 36.0,
-                        fit: BoxFit.fitHeight,
-                      ),
-                    );
-                  } else if (FFAppState().typecompany == 'gold') {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.asset(
-                        'assets/images/selo_ouro.png',
-                        height: 36.0,
-                        fit: BoxFit.fitHeight,
-                      ),
-                    );
-                  } else {
-                    return Container(
-                      width: 36.0,
+                      fit: BoxFit.fitHeight,
+                    ),
+                  );
+                } else if (FFAppState().typecompany == 'ouro') {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.asset(
+                      'assets/images/selo_ouro.png',
                       height: 36.0,
-                      decoration: BoxDecoration(),
-                    );
-                  }
-                },
-              ),
+                      fit: BoxFit.fitHeight,
+                    ),
+                  );
+                } else {
+                  return Container(
+                    height: 36.0,
+                    decoration: BoxDecoration(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Créditos Gratuitos',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    fontSize: 11.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                        ),
+                        RichText(
+                          textScaler: MediaQuery.of(context).textScaler,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: valueOrDefault<String>(
+                                  getJsonField(
+                                    FFAppState().trial,
+                                    r'''$.limit''',
+                                  )?.toString(),
+                                  '0',
+                                ),
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      fontSize: 14.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              ),
+                              TextSpan(
+                                text: ' de ',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      fontSize: 14.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              ),
+                              TextSpan(
+                                text: valueOrDefault<String>(
+                                  getJsonField(
+                                    FFAppState().trial,
+                                    r'''$.total''',
+                                  )?.toString(),
+                                  '...',
+                                ),
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      fontSize: 14.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              )
+                            ],
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  letterSpacing: 0.0,
+                                  fontWeight: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontWeight,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontStyle,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+            ),
           ].divide(SizedBox(width: 12.0)),
         ),
       ),

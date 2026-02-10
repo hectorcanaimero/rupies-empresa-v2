@@ -1,4 +1,5 @@
 import '/backend/supabase/supabase.dart';
+import '/components/services_external_widget_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/widgets/banner_widget/banner_widget_widget.dart';
 import '/widgets/card_accepted_widget/card_accepted_widget_widget.dart';
@@ -15,10 +16,14 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
 
   // Stores action output result for [Backend Call - Query Rows] action in HomePage widget.
   List<UsersRow>? profile;
+  // Stores action output result for [Backend Call - Query Rows] action in HomePage widget.
+  List<SubscriptionsRow>? subs;
   // Model for UserWidget component.
   late UserWidgetModel userWidgetModel;
   // Model for BannerWidget component.
   late BannerWidgetModel bannerWidgetModel;
+  // Model for ServicesExternalWidget component.
+  late ServicesExternalWidgetModel servicesExternalWidgetModel;
   // Model for MenuVerticalWidget component.
   late MenuVerticalWidgetModel menuVerticalWidgetModel;
   // Models for CardAcceptedWidget dynamic component.
@@ -34,6 +39,8 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
   void initState(BuildContext context) {
     userWidgetModel = createModel(context, () => UserWidgetModel());
     bannerWidgetModel = createModel(context, () => BannerWidgetModel());
+    servicesExternalWidgetModel =
+        createModel(context, () => ServicesExternalWidgetModel());
     menuVerticalWidgetModel =
         createModel(context, () => MenuVerticalWidgetModel());
     cardAcceptedWidgetModels =
@@ -47,6 +54,7 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
   void dispose() {
     userWidgetModel.dispose();
     bannerWidgetModel.dispose();
+    servicesExternalWidgetModel.dispose();
     menuVerticalWidgetModel.dispose();
     cardAcceptedWidgetModels.dispose();
     cardOpennedInProcessWidgetModels.dispose();

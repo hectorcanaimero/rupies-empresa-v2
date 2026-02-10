@@ -85,6 +85,8 @@ class CreateLeadPageModel extends FlutterFlowModel<CreateLeadPageWidget> {
   List<LeadsRow>? update;
   // Stores action output result for [Backend Call - Insert Row] action in Button widget.
   LeadsRow? create;
+  // Stores action output result for [Backend Call - Update Row(s)] action in Button widget.
+  List<UsersRow>? upate;
   bool isDataUploading_uploadStand = false;
   FFUploadedFile uploadedLocalFile_uploadStand =
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');

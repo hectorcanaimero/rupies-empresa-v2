@@ -85,6 +85,7 @@ class _BannerWidgetWidgetState extends State<BannerWidgetWidget> {
 
                 return Container(
                   width: double.infinity,
+                  height: 120.0,
                   child: CarouselSlider.builder(
                     itemCount: banner.length,
                     itemBuilder: (context, bannerIndex, _) {

@@ -14,7 +14,7 @@ class MinhaAvaliacaoPageWidget extends StatefulWidget {
   const MinhaAvaliacaoPageWidget({super.key});
 
   static String routeName = 'MinhaAvaliacaoPage';
-  static String routePath = '/minhaAvaliacaoPage';
+  static String routePath = 'minhaAvaliacaoPage';
 
   @override
   State<MinhaAvaliacaoPageWidget> createState() =>

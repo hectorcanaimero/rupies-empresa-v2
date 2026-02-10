@@ -90,3 +90,20 @@ LatLng parseTextToLatLng(String location) {
   }
   throw FormatException('Invalid format');
 }
+
+bool validateTrial(dynamic trial) {
+  int limit = trial['limit'];
+  int total = trial['total'];
+  if (limit <= total) {
+    return true;
+  }
+  return false;
+}
+
+dynamic newValuetrial(
+  dynamic trial,
+  int newValue,
+) {
+  trial['limit'] = trial['limit'] + newValue;
+  return trial;
+}

@@ -21,7 +21,7 @@ class LeadContatoPageWidget extends StatefulWidget {
   final LeadsRow? data;
 
   static String routeName = 'LeadContatoPage';
-  static String routePath = '/leadContatoPage';
+  static String routePath = 'leadContatoPage';
 
   @override
   State<LeadContatoPageWidget> createState() => _LeadContatoPageWidgetState();

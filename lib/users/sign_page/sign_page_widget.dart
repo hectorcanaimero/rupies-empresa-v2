@@ -16,7 +16,7 @@ class SignPageWidget extends StatefulWidget {
   const SignPageWidget({super.key});
 
   static String routeName = 'SignPage';
-  static String routePath = '/signPage';
+  static String routePath = 'signPage';
 
   @override
   State<SignPageWidget> createState() => _SignPageWidgetState();
@@ -81,14 +81,36 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                       children: [
                         Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 24.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(0.0),
-                            child: Image.asset(
-                              'assets/images/rupies-empresas.png',
-                              width: 150.0,
-                              height: 150.0,
-                              fit: BoxFit.contain,
+                              0.0, 0.0, 0.0, 18.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).alternate,
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 4.0,
+                                  color: Color(0x33000000),
+                                  offset: Offset(
+                                    0.0,
+                                    2.0,
+                                  ),
+                                )
+                              ],
+                              borderRadius: BorderRadius.circular(15.0),
+                              border: Border.all(
+                                width: 2.0,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(2.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(0.0),
+                                child: Image.asset(
+                                  'assets/images/rupies-empresas.png',
+                                  width: 150.0,
+                                  height: 150.0,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -145,7 +167,6 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                               obscureText: false,
                               decoration: InputDecoration(
                                 isDense: true,
-                                labelText: 'E-mail',
                                 labelStyle: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
@@ -165,6 +186,7 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                                           .labelMedium
                                           .fontStyle,
                                     ),
+                                hintText: 'E-mail',
                                 hintStyle: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
@@ -256,7 +278,6 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                               obscureText: !_model.passVisibility,
                               decoration: InputDecoration(
                                 isDense: true,
-                                labelText: 'Senha',
                                 labelStyle: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
@@ -276,6 +297,7 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                                           .labelMedium
                                           .fontStyle,
                                     ),
+                                hintText: 'Senha',
                                 hintStyle: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
@@ -328,10 +350,10 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                                 fillColor: FlutterFlowTheme.of(context)
                                     .secondaryBackground,
                                 suffixIcon: InkWell(
-                                  onTap: () => safeSetState(
-                                    () => _model.passVisibility =
-                                        !_model.passVisibility,
-                                  ),
+                                  onTap: () async {
+                                    safeSetState(() => _model.passVisibility =
+                                        !_model.passVisibility);
+                                  },
                                   focusNode: FocusNode(skipTraversal: true),
                                   child: Icon(
                                     _model.passVisibility
@@ -444,7 +466,7 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                                       ProfilePageWidget.routeName,
                                       context.mounted,
                                       extra: <String, dynamic>{
-                                        kTransitionInfoKey: TransitionInfo(
+                                        '__transition_info__': TransitionInfo(
                                           hasTransition: true,
                                           transitionType:
                                               PageTransitionType.bottomToTop,

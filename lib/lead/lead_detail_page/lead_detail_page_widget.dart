@@ -25,7 +25,7 @@ class LeadDetailPageWidget extends StatefulWidget {
   final String? id;
 
   static String routeName = 'LeadDetailPage';
-  static String routePath = '/leadDetailPage';
+  static String routePath = 'leadDetailPage';
 
   @override
   State<LeadDetailPageWidget> createState() => _LeadDetailPageWidgetState();

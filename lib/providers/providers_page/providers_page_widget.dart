@@ -16,7 +16,7 @@ class ProvidersPageWidget extends StatefulWidget {
   const ProvidersPageWidget({super.key});
 
   static String routeName = 'ProvidersPage';
-  static String routePath = '/providersPage';
+  static String routePath = 'providersPage';
 
   @override
   State<ProvidersPageWidget> createState() => _ProvidersPageWidgetState();

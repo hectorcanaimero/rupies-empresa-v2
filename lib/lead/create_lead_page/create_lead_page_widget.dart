@@ -9,6 +9,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
+import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class CreateLeadPageWidget extends StatefulWidget {
   const CreateLeadPageWidget({super.key});
 
   static String routeName = 'CreateLeadPage';
-  static String routePath = '/createLeadPage';
+  static String routePath = 'createLeadPage';
 
   @override
   State<CreateLeadPageWidget> createState() => _CreateLeadPageWidgetState();
@@ -775,7 +776,6 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                         'IconButton_update_page_state');
                                                     _model.dateEvent =
                                                         _model.datePicked1;
-                                                    safeSetState(() {});
                                                   },
                                                 ),
                                               ],
@@ -1497,7 +1497,6 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                         'IconButton_update_page_state');
                                                     _model.dateRetorno =
                                                         _model.datePicked2;
-                                                    safeSetState(() {});
                                                   },
                                                 ),
                                               ],
@@ -1745,53 +1744,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                         safeSetState(() {});
                                         return;
                                       }
-                                      if (_model.datePicked1 == null) {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (alertDialogContext) {
-                                            return AlertDialog(
-                                              title: Text('Erro'),
-                                              content:
-                                                  Text('Campo Obrigatorio'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(
-                                                          alertDialogContext),
-                                                  child: Text('Ok'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                        _model.validate = false;
-                                        safeSetState(() {});
-                                        return;
-                                      }
                                       if (_model.faixaDinheiroValue == null) {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (alertDialogContext) {
-                                            return AlertDialog(
-                                              title: Text('Erro'),
-                                              content:
-                                                  Text('Campo Obrigatorio'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(
-                                                          alertDialogContext),
-                                                  child: Text('Ok'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                        _model.validate = false;
-                                        safeSetState(() {});
-                                        return;
-                                      }
-                                      if (_model.datePicked2 == null) {
                                         await showDialog(
                                           context: context,
                                           builder: (alertDialogContext) {
@@ -1851,6 +1804,13 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                             ),
                                           );
                                           _shouldSetState = true;
+                                          logFirebaseEvent('Button_page_view');
+                                          await _model.pageViewController
+                                              ?.nextPage(
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            curve: Curves.ease,
+                                          );
                                         } else {
                                           logFirebaseEvent(
                                               'Button_backend_call');
@@ -1884,14 +1844,61 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                           FFAppState().leadId =
                                               _model.create!.id;
                                           safeSetState(() {});
+                                          if (FFAppState().typecompany == '') {
+                                            if (functions.validateTrial(
+                                                FFAppState().trial)) {
+                                              logFirebaseEvent(
+                                                  'Button_update_app_state');
+                                              FFAppState().trial =
+                                                  functions.newValuetrial(
+                                                      FFAppState().trial, 1);
+                                              safeSetState(() {});
+                                              logFirebaseEvent(
+                                                  'Button_backend_call');
+                                              await UsersTable().update(
+                                                data: {
+                                                  'trial': FFAppState().trial,
+                                                },
+                                                matchingRows: (rows) =>
+                                                    rows.eqOrNull(
+                                                  'id',
+                                                  currentUserUid,
+                                                ),
+                                              );
+                                              _shouldSetState = true;
+                                            } else {
+                                              logFirebaseEvent(
+                                                  'Button_page_view');
+                                              await _model.pageViewController
+                                                  ?.nextPage(
+                                                duration:
+                                                    Duration(milliseconds: 300),
+                                                curve: Curves.ease,
+                                              );
+                                            }
+
+                                            if (_shouldSetState)
+                                              safeSetState(() {});
+                                            return;
+                                          } else {
+                                            logFirebaseEvent(
+                                                'Button_page_view');
+                                            await _model.pageViewController
+                                                ?.nextPage(
+                                              duration:
+                                                  Duration(milliseconds: 300),
+                                              curve: Curves.ease,
+                                            );
+                                          }
+
+                                          if (_shouldSetState)
+                                            safeSetState(() {});
+                                          return;
                                         }
 
-                                        logFirebaseEvent('Button_page_view');
-                                        await _model.pageViewController
-                                            ?.nextPage(
-                                          duration: Duration(milliseconds: 300),
-                                          curve: Curves.ease,
-                                        );
+                                        if (_shouldSetState)
+                                          safeSetState(() {});
+                                        return;
                                       } else {
                                         if (_shouldSetState)
                                           safeSetState(() {});
@@ -2844,9 +2851,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                   children: [
                                     Builder(builder: (context) {
                                       final _googleMapMarker =
-                                          (_model.placePickerValue != null
-                                              ? _model.placePickerValue.latLng
-                                              : currentUserLocationValue);
+                                          (_model.placePickerValue.latLng);
                                       return FlutterFlowGoogleMap(
                                         controller: _model.googleMapsController,
                                         onCameraIdle: (latLng) => safeSetState(
@@ -2856,11 +2861,10 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                             _model.googleMapsCenter ??=
                                                 currentUserLocationValue!,
                                         markers: [
-                                          if (_googleMapMarker != null)
-                                            FlutterFlowMarker(
-                                              _googleMapMarker.serialize(),
-                                              _googleMapMarker,
-                                            ),
+                                          FlutterFlowMarker(
+                                            _googleMapMarker.serialize(),
+                                            _googleMapMarker,
+                                          ),
                                         ],
                                         markerColor: GoogleMarkerColor.green,
                                         mapType: MapType.normal,

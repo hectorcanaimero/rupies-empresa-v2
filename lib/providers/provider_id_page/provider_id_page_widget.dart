@@ -20,7 +20,7 @@ class ProviderIdPageWidget extends StatefulWidget {
   final String? uid;
 
   static String routeName = 'ProviderIdPage';
-  static String routePath = '/providerIdPage';
+  static String routePath = 'providerIdPage';
 
   @override
   State<ProviderIdPageWidget> createState() => _ProviderIdPageWidgetState();

@@ -17,7 +17,7 @@ class CandidatePortfolioPageWidget extends StatefulWidget {
   final UsersRow? user;
 
   static String routeName = 'CandidatePortfolioPage';
-  static String routePath = '/candidatePortfolioPage';
+  static String routePath = 'candidatePortfolioPage';
 
   @override
   State<CandidatePortfolioPageWidget> createState() =>

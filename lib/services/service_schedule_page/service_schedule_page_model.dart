@@ -88,14 +88,23 @@ class ServiceSchedulePageModel
   bool? validateOne;
   // Stores action output result for [Backend Call - Insert Row] action in Button widget.
   ServicesRow? create;
+  // Stores action output result for [Backend Call - Update Row(s)] action in Button widget.
+  List<UsersRow>? upate;
+  // State field(s) for TabBar widget.
+  TabController? tabBarController;
+  int get tabBarCurrentIndex =>
+      tabBarController != null ? tabBarController!.index : 0;
+  int get tabBarPreviousIndex =>
+      tabBarController != null ? tabBarController!.previousIndex : 0;
+
   bool isDataUploading_uploadUrgenteEditar = false;
   FFUploadedFile uploadedLocalFile_uploadUrgenteEditar =
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
   String uploadedFileUrl_uploadUrgenteEditar = '';
 
-  // Stores action output result for [Backend Call - Insert Row] action in Icon widget.
+  // Stores action output result for [Backend Call - Insert Row] action in IconButton widget.
   ServicesImagesRow? createImage;
-  Completer<List<ServicesImagesRow>>? requestCompleter2;
+  Completer<List<ServicesImagesRow>>? requestCompleter1;
   // Stores action output result for [Backend Call - Delete Row(s)] action in Icon widget.
   List<ServicesImagesRow>? deleteImage;
   // State field(s) for skill widget.
@@ -104,7 +113,7 @@ class ServiceSchedulePageModel
   String? Function(BuildContext, String?)? skillTextControllerValidator;
   // Stores action output result for [Backend Call - Insert Row] action in skill widget.
   ServicesSkillsRow? createServiceSkill;
-  Completer<List<ServicesSkillsRow>>? requestCompleter1;
+  Completer<List<ServicesSkillsRow>>? requestCompleter2;
   // Stores action output result for [Backend Call - Insert Row] action in Button widget.
   ServicesSkillsRow? createSkill;
   // Stores action output result for [Backend Call - Delete Row(s)] action in Icon widget.
@@ -133,26 +142,12 @@ class ServiceSchedulePageModel
     descriptionFocusNode?.dispose();
     descriptionTextController?.dispose();
 
+    tabBarController?.dispose();
     skillFocusNode?.dispose();
     skillTextController?.dispose();
   }
 
   /// Additional helper methods.
-  Future waitForRequestCompleted2({
-    double minWait = 0,
-    double maxWait = double.infinity,
-  }) async {
-    final stopwatch = Stopwatch()..start();
-    while (true) {
-      await Future.delayed(Duration(milliseconds: 50));
-      final timeElapsed = stopwatch.elapsedMilliseconds;
-      final requestComplete = requestCompleter2?.isCompleted ?? false;
-      if (timeElapsed > maxWait || (requestComplete && timeElapsed > minWait)) {
-        break;
-      }
-    }
-  }
-
   Future waitForRequestCompleted1({
     double minWait = 0,
     double maxWait = double.infinity,
@@ -162,6 +157,21 @@ class ServiceSchedulePageModel
       await Future.delayed(Duration(milliseconds: 50));
       final timeElapsed = stopwatch.elapsedMilliseconds;
       final requestComplete = requestCompleter1?.isCompleted ?? false;
+      if (timeElapsed > maxWait || (requestComplete && timeElapsed > minWait)) {
+        break;
+      }
+    }
+  }
+
+  Future waitForRequestCompleted2({
+    double minWait = 0,
+    double maxWait = double.infinity,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    while (true) {
+      await Future.delayed(Duration(milliseconds: 50));
+      final timeElapsed = stopwatch.elapsedMilliseconds;
+      final requestComplete = requestCompleter2?.isCompleted ?? false;
       if (timeElapsed > maxWait || (requestComplete && timeElapsed > minWait)) {
         break;
       }

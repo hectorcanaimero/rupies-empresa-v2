@@ -77,7 +77,7 @@ class AppStateNotifier extends ChangeNotifier {
 GoRouter createRouter(AppStateNotifier appStateNotifier) {
   $utility_functions_library_8g4bud.initializeRoutes(
     testPageWidgetName: 'utility_functions_library_8g4bud.TestPage',
-    testPageWidgetPath: '/testUtilityPage',
+    testPageWidgetPath: 'testUtilityPage',
   );
 
   return GoRouter(
@@ -93,180 +93,190 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) {
         path: '/',
         builder: (context, _) =>
             appStateNotifier.loggedIn ? HomePageWidget() : SignPageWidget(),
-      ),
-      FFRoute(
-        name: HomePageWidget.routeName,
-        path: HomePageWidget.routePath,
-        builder: (context, params) => HomePageWidget(),
-      ),
-      FFRoute(
-        name: SignPageWidget.routeName,
-        path: SignPageWidget.routePath,
-        builder: (context, params) => SignPageWidget(),
-      ),
-      FFRoute(
-        name: ProfilePageWidget.routeName,
-        path: ProfilePageWidget.routePath,
-        builder: (context, params) => ProfilePageWidget(),
-      ),
-      FFRoute(
-        name: ServiceUrgentPageWidget.routeName,
-        path: ServiceUrgentPageWidget.routePath,
-        builder: (context, params) => ServiceUrgentPageWidget(),
-      ),
-      FFRoute(
-        name: AppointmentPageWidget.routeName,
-        path: AppointmentPageWidget.routePath,
-        builder: (context, params) => AppointmentPageWidget(),
-      ),
-      FFRoute(
-        name: ServiceIdPageWidget.routeName,
-        path: ServiceIdPageWidget.routePath,
-        builder: (context, params) => ServiceIdPageWidget(
-          uid: params.getParam(
-            'uid',
-            ParamType.String,
+        routes: [
+          FFRoute(
+            name: HomePageWidget.routeName,
+            path: HomePageWidget.routePath,
+            builder: (context, params) => HomePageWidget(),
           ),
-        ),
-      ),
-      FFRoute(
-        name: MenuPageWidget.routeName,
-        path: MenuPageWidget.routePath,
-        builder: (context, params) => MenuPageWidget(),
-      ),
-      FFRoute(
-        name: ProvidersPageWidget.routeName,
-        path: ProvidersPageWidget.routePath,
-        builder: (context, params) => ProvidersPageWidget(),
-      ),
-      FFRoute(
-        name: ProviderIdPageWidget.routeName,
-        path: ProviderIdPageWidget.routePath,
-        builder: (context, params) => ProviderIdPageWidget(
-          uid: params.getParam(
-            'uid',
-            ParamType.String,
+          FFRoute(
+            name: SignPageWidget.routeName,
+            path: SignPageWidget.routePath,
+            builder: (context, params) => SignPageWidget(),
           ),
-        ),
-      ),
-      FFRoute(
-        name: ServiceCandidatePageWidget.routeName,
-        path: ServiceCandidatePageWidget.routePath,
-        builder: (context, params) => ServiceCandidatePageWidget(
-          uid: params.getParam(
-            'uid',
-            ParamType.String,
+          FFRoute(
+            name: ProfilePageWidget.routeName,
+            path: ProfilePageWidget.routePath,
+            builder: (context, params) => ProfilePageWidget(),
           ),
-        ),
-      ),
-      FFRoute(
-        name: CandidateProfilePageWidget.routeName,
-        path: CandidateProfilePageWidget.routePath,
-        builder: (context, params) => CandidateProfilePageWidget(
-          userId: params.getParam(
-            'userId',
-            ParamType.String,
+          FFRoute(
+            name: ServiceUrgentPageWidget.routeName,
+            path: ServiceUrgentPageWidget.routePath,
+            builder: (context, params) => ServiceUrgentPageWidget(),
           ),
-        ),
-      ),
-      FFRoute(
-        name: CandidatePortfolioPageWidget.routeName,
-        path: CandidatePortfolioPageWidget.routePath,
-        builder: (context, params) => CandidatePortfolioPageWidget(
-          user: params.getParam<UsersRow>(
-            'user',
-            ParamType.SupabaseRow,
+          FFRoute(
+            name: AppointmentPageWidget.routeName,
+            path: AppointmentPageWidget.routePath,
+            builder: (context, params) => AppointmentPageWidget(),
           ),
-        ),
-      ),
-      FFRoute(
-        name: ChatPageWidget.routeName,
-        path: ChatPageWidget.routePath,
-        builder: (context, params) => ChatPageWidget(
-          chatId: params.getParam(
-            'chatId',
-            ParamType.String,
+          FFRoute(
+            name: ServiceIdPageWidget.routeName,
+            path: ServiceIdPageWidget.routePath,
+            builder: (context, params) => ServiceIdPageWidget(
+              uid: params.getParam(
+                'uid',
+                ParamType.String,
+              ),
+            ),
           ),
-        ),
-      ),
-      FFRoute(
-        name: CreateLeadPageWidget.routeName,
-        path: CreateLeadPageWidget.routePath,
-        builder: (context, params) => CreateLeadPageWidget(),
-      ),
-      FFRoute(
-        name: SignUpPageWidget.routeName,
-        path: SignUpPageWidget.routePath,
-        builder: (context, params) => SignUpPageWidget(),
-      ),
-      FFRoute(
-        name: MyServicePageWidget.routeName,
-        path: MyServicePageWidget.routePath,
-        builder: (context, params) => MyServicePageWidget(),
-      ),
-      FFRoute(
-        name: LeadPageWidget.routeName,
-        path: LeadPageWidget.routePath,
-        builder: (context, params) => LeadPageWidget(),
-      ),
-      FFRoute(
-        name: ServiceSchedulePageWidget.routeName,
-        path: ServiceSchedulePageWidget.routePath,
-        builder: (context, params) => ServiceSchedulePageWidget(),
-      ),
-      FFRoute(
-        name: LeadDetailPageWidget.routeName,
-        path: LeadDetailPageWidget.routePath,
-        builder: (context, params) => LeadDetailPageWidget(
-          id: params.getParam(
-            'id',
-            ParamType.String,
+          FFRoute(
+            name: MenuPageWidget.routeName,
+            path: MenuPageWidget.routePath,
+            builder: (context, params) => MenuPageWidget(),
           ),
-        ),
-      ),
-      FFRoute(
-        name: MinhaAvaliacaoPageWidget.routeName,
-        path: MinhaAvaliacaoPageWidget.routePath,
-        builder: (context, params) => MinhaAvaliacaoPageWidget(),
-      ),
-      FFRoute(
-        name: LeadContatoPageWidget.routeName,
-        path: LeadContatoPageWidget.routePath,
-        builder: (context, params) => LeadContatoPageWidget(
-          data: params.getParam<LeadsRow>(
-            'data',
-            ParamType.SupabaseRow,
+          FFRoute(
+            name: ProvidersPageWidget.routeName,
+            path: ProvidersPageWidget.routePath,
+            builder: (context, params) => ProvidersPageWidget(),
           ),
-        ),
-      ),
-      FFRoute(
-        name: SacPageWidget.routeName,
-        path: SacPageWidget.routePath,
-        builder: (context, params) => SacPageWidget(),
-      ),
-      FFRoute(
-        name: SubscriptionPlansPageWidget.routeName,
-        path: SubscriptionPlansPageWidget.routePath,
-        requireAuth: true,
-        builder: (context, params) => SubscriptionPlansPageWidget(),
-      ),
-      FFRoute(
-        name: SubscriptionCheckoutPageWidget.routeName,
-        path: SubscriptionCheckoutPageWidget.routePath,
-        requireAuth: true,
-        builder: (context, params) => SubscriptionCheckoutPageWidget(
-          subscriptionData: params.getParam(
-            'subscriptionData',
-            ParamType.JSON,
+          FFRoute(
+            name: ProviderIdPageWidget.routeName,
+            path: ProviderIdPageWidget.routePath,
+            builder: (context, params) => ProviderIdPageWidget(
+              uid: params.getParam(
+                'uid',
+                ParamType.String,
+              ),
+            ),
           ),
-        ),
+          FFRoute(
+            name: ServiceCandidatePageWidget.routeName,
+            path: ServiceCandidatePageWidget.routePath,
+            builder: (context, params) => ServiceCandidatePageWidget(
+              uid: params.getParam(
+                'uid',
+                ParamType.String,
+              ),
+            ),
+          ),
+          FFRoute(
+            name: CandidateProfilePageWidget.routeName,
+            path: CandidateProfilePageWidget.routePath,
+            builder: (context, params) => CandidateProfilePageWidget(
+              userId: params.getParam(
+                'userId',
+                ParamType.String,
+              ),
+            ),
+          ),
+          FFRoute(
+            name: CandidatePortfolioPageWidget.routeName,
+            path: CandidatePortfolioPageWidget.routePath,
+            builder: (context, params) => CandidatePortfolioPageWidget(
+              user: params.getParam<UsersRow>(
+                'user',
+                ParamType.SupabaseRow,
+              ),
+            ),
+          ),
+          FFRoute(
+            name: ChatPageWidget.routeName,
+            path: ChatPageWidget.routePath,
+            builder: (context, params) => ChatPageWidget(
+              chatId: params.getParam(
+                'chatId',
+                ParamType.String,
+              ),
+            ),
+          ),
+          FFRoute(
+            name: CreateLeadPageWidget.routeName,
+            path: CreateLeadPageWidget.routePath,
+            builder: (context, params) => CreateLeadPageWidget(),
+          ),
+          FFRoute(
+            name: SignUpPageWidget.routeName,
+            path: SignUpPageWidget.routePath,
+            builder: (context, params) => SignUpPageWidget(),
+          ),
+          FFRoute(
+            name: MyServicePageWidget.routeName,
+            path: MyServicePageWidget.routePath,
+            builder: (context, params) => MyServicePageWidget(),
+          ),
+          FFRoute(
+            name: LeadPageWidget.routeName,
+            path: LeadPageWidget.routePath,
+            builder: (context, params) => LeadPageWidget(),
+          ),
+          FFRoute(
+            name: ServiceSchedulePageWidget.routeName,
+            path: ServiceSchedulePageWidget.routePath,
+            builder: (context, params) => ServiceSchedulePageWidget(),
+          ),
+          FFRoute(
+            name: LeadDetailPageWidget.routeName,
+            path: LeadDetailPageWidget.routePath,
+            builder: (context, params) => LeadDetailPageWidget(
+              id: params.getParam(
+                'id',
+                ParamType.String,
+              ),
+            ),
+          ),
+          FFRoute(
+            name: MinhaAvaliacaoPageWidget.routeName,
+            path: MinhaAvaliacaoPageWidget.routePath,
+            builder: (context, params) => MinhaAvaliacaoPageWidget(),
+          ),
+          FFRoute(
+            name: LeadContatoPageWidget.routeName,
+            path: LeadContatoPageWidget.routePath,
+            builder: (context, params) => LeadContatoPageWidget(
+              data: params.getParam<LeadsRow>(
+                'data',
+                ParamType.SupabaseRow,
+              ),
+            ),
+          ),
+          FFRoute(
+            name: SacPageWidget.routeName,
+            path: SacPageWidget.routePath,
+            builder: (context, params) => SacPageWidget(),
+          ),
+          FFRoute(
+            name: SubscriptionPlansPageWidget.routeName,
+            path: SubscriptionPlansPageWidget.routePath,
+            builder: (context, params) => SubscriptionPlansPageWidget(),
+          ),
+          FFRoute(
+            name: SubscriptionCheckoutPageWidget.routeName,
+            path: SubscriptionCheckoutPageWidget.routePath,
+            builder: (context, params) => SubscriptionCheckoutPageWidget(
+              subscriptionData: params.getParam(
+                'subscriptionData',
+                ParamType.JSON,
+              ),
+            ),
+          ),
+          FFRoute(
+            name: ResetSenhaPageWidget.routeName,
+            path: ResetSenhaPageWidget.routePath,
+            builder: (context, params) => ResetSenhaPageWidget(),
+          ),
+          FFRoute(
+            name: TermosPageWidget.routeName,
+            path: TermosPageWidget.routePath,
+            builder: (context, params) => TermosPageWidget(),
+          ),
+          FFRoute(
+            name: $utility_functions_library_8g4bud.TestPageWidget.routeName,
+            path: $utility_functions_library_8g4bud.TestPageWidget.routePath,
+            builder: (context, params) =>
+                $utility_functions_library_8g4bud.TestPageWidget(),
+          )
+        ].map((r) => r.toRoute(appStateNotifier)).toList(),
       ),
-      FFRoute(
-        name: $utility_functions_library_8g4bud.TestPageWidget.routeName,
-        path: $utility_functions_library_8g4bud.TestPageWidget.routePath,
-        builder: (context, params) =>
-            $utility_functions_library_8g4bud.TestPageWidget(),
-      )
     ].map((r) => r.toRoute(appStateNotifier)).toList(),
   );
 }
@@ -345,9 +355,18 @@ extension _GoRouterStateExtensions on GoRouterState {
     ..addAll(pathParameters)
     ..addAll(uri.queryParameters)
     ..addAll(extraMap);
-  TransitionInfo get transitionInfo => extraMap.containsKey(kTransitionInfoKey)
-      ? extraMap[kTransitionInfoKey] as TransitionInfo
-      : TransitionInfo.appDefault();
+  TransitionInfo get transitionInfo {
+    final possibleKeys = [
+      '__transition_info__',
+      '__transition_info__utility_functions_library_8g4bud'
+    ];
+    for (final key in possibleKeys) {
+      if (extraMap.containsKey(key)) {
+        return extraMap[key] as TransitionInfo;
+      }
+    }
+    return TransitionInfo.appDefault();
+  }
 }
 
 class FFParameters {

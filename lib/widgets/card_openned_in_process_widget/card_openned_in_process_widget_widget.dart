@@ -766,7 +766,7 @@ class _CardOpennedInProcessWidgetWidgetState
                 Align(
                   alignment: AlignmentDirectional(1.0, -1.0),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 6.0, 0.0),
+                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 9.0, 9.0, 0.0),
                     child: InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
@@ -798,7 +798,7 @@ class _CardOpennedInProcessWidgetWidgetState
                         ),
                         child: Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              9.0, 3.0, 9.0, 3.0),
+                              9.0, 6.0, 9.0, 6.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [

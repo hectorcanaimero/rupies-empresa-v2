@@ -28,7 +28,7 @@ Future<dynamic> getSubscriptionStatus() async {
 
     // URL da Edge Function
     final url = Uri.parse(
-        'https://supa.rupies.com.br/functions/v1/get-subscription-status');
+        'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/get-subscription-history');
 
     // Fazer requisição
     final response = await http.get(

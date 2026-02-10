@@ -252,6 +252,7 @@ class _ForgotPwdWidgetWidgetState extends State<ForgotPwdWidgetWidget> {
                     await authManager.resetPassword(
                       email: _model.emailTextController.text,
                       context: context,
+                      redirectTo: "https://rupies-reset.web.app/?app=empresas",
                     );
                     logFirebaseEvent('Button_alert_dialog');
                     await showDialog(

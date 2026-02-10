@@ -87,12 +87,21 @@ class ServiceUrgentPageModel extends FlutterFlowModel<ServiceUrgentPageWidget> {
   bool? validateOne;
   // Stores action output result for [Backend Call - Insert Row] action in Button widget.
   ServicesRow? create;
-  bool isDataUploading_uploadAgendado = false;
-  FFUploadedFile uploadedLocalFile_uploadAgendado =
-      FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
-  String uploadedFileUrl_uploadAgendado = '';
+  // Stores action output result for [Backend Call - Update Row(s)] action in Button widget.
+  List<UsersRow>? upate;
+  // State field(s) for TabBar widget.
+  TabController? tabBarController;
+  int get tabBarCurrentIndex =>
+      tabBarController != null ? tabBarController!.index : 0;
+  int get tabBarPreviousIndex =>
+      tabBarController != null ? tabBarController!.previousIndex : 0;
 
-  // Stores action output result for [Backend Call - Insert Row] action in Icon widget.
+  bool isDataUploading_field0001 = false;
+  FFUploadedFile uploadedLocalFile_field0001 =
+      FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
+  String uploadedFileUrl_field0001 = '';
+
+  // Stores action output result for [Backend Call - Insert Row] action in IconButton widget.
   ServicesImagesRow? createImage;
   Completer<List<ServicesImagesRow>>? requestCompleter2;
   // Stores action output result for [Backend Call - Delete Row(s)] action in Icon widget.
@@ -117,6 +126,8 @@ class ServiceUrgentPageModel extends FlutterFlowModel<ServiceUrgentPageWidget> {
   FFPlace placePickerValue = FFPlace();
   // Stores action output result for [Backend Call - Update Row(s)] action in button widget.
   List<ServicesRow>? finaliza;
+  // Stores action output result for [Backend Call - Insert Row] action in button widget.
+  NotificationsNewServiceRow? notif;
 
   @override
   void initState(BuildContext context) {
@@ -132,6 +143,7 @@ class ServiceUrgentPageModel extends FlutterFlowModel<ServiceUrgentPageWidget> {
     descriptionFocusNode?.dispose();
     descriptionTextController?.dispose();
 
+    tabBarController?.dispose();
     skillFocusNode?.dispose();
     skillTextController?.dispose();
   }

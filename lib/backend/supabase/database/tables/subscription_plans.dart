@@ -33,7 +33,7 @@ class SubscriptionPlansRow extends SupabaseDataRow {
   String? get asaasPlanId => getField<String>('asaas_plan_id');
   set asaasPlanId(String? value) => setField<String>('asaas_plan_id', value);
 
-  dynamic get features => getField<dynamic>('features');
+  dynamic get features => getField<dynamic>('features')!;
   set features(dynamic value) => setField<dynamic>('features', value);
 
   int? get maxServicesPerMonth => getField<int>('max_services_per_month');
@@ -46,26 +46,30 @@ class SubscriptionPlansRow extends SupabaseDataRow {
       setField<int>('max_contractors_contacted', value);
 
   bool? get prioritySupport => getField<bool>('priority_support');
-  set prioritySupport(bool? value) =>
-      setField<bool>('priority_support', value);
+  set prioritySupport(bool? value) => setField<bool>('priority_support', value);
 
   bool? get featuredListing => getField<bool>('featured_listing');
-  set featuredListing(bool? value) =>
-      setField<bool>('featured_listing', value);
+  set featuredListing(bool? value) => setField<bool>('featured_listing', value);
 
   bool? get analyticsDashboard => getField<bool>('analytics_dashboard');
   set analyticsDashboard(bool? value) =>
       setField<bool>('analytics_dashboard', value);
 
-  bool get isActive => getField<bool>('is_active') ?? true;
-  set isActive(bool value) => setField<bool>('is_active', value);
+  bool? get isActive => getField<bool>('is_active');
+  set isActive(bool? value) => setField<bool>('is_active', value);
 
-  int get sortOrder => getField<int>('sort_order') ?? 0;
-  set sortOrder(int value) => setField<int>('sort_order', value);
+  int? get sortOrder => getField<int>('sort_order');
+  set sortOrder(int? value) => setField<int>('sort_order', value);
 
-  DateTime get createdAt => getField<DateTime>('created_at')!;
-  set createdAt(DateTime value) => setField<DateTime>('created_at', value);
+  DateTime? get createdAt => getField<DateTime>('created_at');
+  set createdAt(DateTime? value) => setField<DateTime>('created_at', value);
 
-  DateTime get updatedAt => getField<DateTime>('updated_at')!;
-  set updatedAt(DateTime value) => setField<DateTime>('updated_at', value);
+  DateTime? get updatedAt => getField<DateTime>('updated_at');
+  set updatedAt(DateTime? value) => setField<DateTime>('updated_at', value);
+
+  String? get type => getField<String>('type');
+  set type(String? value) => setField<String>('type', value);
+
+  String? get image => getField<String>('image');
+  set image(String? value) => setField<String>('image', value);
 }

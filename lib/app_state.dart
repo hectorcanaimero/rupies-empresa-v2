@@ -40,11 +40,32 @@ class FFAppState extends ChangeNotifier {
       _leadId = await secureStorage.getString('ff_leadId') ?? _leadId;
     });
     await _safeInitAsync(() async {
+      _fcmToken = await secureStorage.getString('ff_fcmToken') ?? _fcmToken;
+    });
+    await _safeInitAsync(() async {
       _typecompany =
           await secureStorage.getString('ff_typecompany') ?? _typecompany;
     });
     await _safeInitAsync(() async {
-      _fcmToken = await secureStorage.getString('ff_fcmToken') ?? _fcmToken;
+      if (await secureStorage.read(key: 'ff_trial') != null) {
+        try {
+          _trial = jsonDecode(await secureStorage.getString('ff_trial') ?? '');
+        } catch (e) {
+          print("Can't decode persisted json. Error: $e.");
+        }
+      }
+    });
+    await _safeInitAsync(() async {
+      if (await secureStorage.read(key: 'ff_subscription') != null) {
+        try {
+          final serializedData =
+              await secureStorage.getString('ff_subscription') ?? '{}';
+          _subscription = SubsDataTypeStruct.fromSerializableMap(
+              jsonDecode(serializedData));
+        } catch (e) {
+          print("Can't decode persisted data type. Error: $e.");
+        }
+      }
     });
   }
 
@@ -119,6 +140,45 @@ class FFAppState extends ChangeNotifier {
 
   void deleteTypecompany() {
     secureStorage.delete(key: 'ff_typecompany');
+  }
+
+  String _prefs = '';
+  String get prefs => _prefs;
+  set prefs(String value) {
+    _prefs = value;
+  }
+
+  String _initialRoute = '';
+  String get initialRoute => _initialRoute;
+  set initialRoute(String value) {
+    _initialRoute = value;
+  }
+
+  dynamic _trial;
+  dynamic get trial => _trial;
+  set trial(dynamic value) {
+    _trial = value;
+    secureStorage.setString('ff_trial', jsonEncode(value));
+  }
+
+  void deleteTrial() {
+    secureStorage.delete(key: 'ff_trial');
+  }
+
+  SubsDataTypeStruct _subscription = SubsDataTypeStruct();
+  SubsDataTypeStruct get subscription => _subscription;
+  set subscription(SubsDataTypeStruct value) {
+    _subscription = value;
+    secureStorage.setString('ff_subscription', value.serialize());
+  }
+
+  void deleteSubscription() {
+    secureStorage.delete(key: 'ff_subscription');
+  }
+
+  void updateSubscriptionStruct(Function(SubsDataTypeStruct) updateFn) {
+    updateFn(_subscription);
+    secureStorage.setString('ff_subscription', _subscription.serialize());
   }
 
   final _categoriesManager = FutureRequestManager<List<CategoriesRow>>();

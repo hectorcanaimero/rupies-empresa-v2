@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<dynamic> createSubscription(
@@ -25,69 +24,27 @@ Future<dynamic> createSubscription(
     print('   Plan ID: $planId');
     print('   Billing Cycle: $billingCycle');
     print('   Payment Method: $paymentMethod');
-
     // Obter token JWT do usuário atual
-    final session = await SupaFlow.client.auth.currentSession;
-    if (session == null) {
-      print('❌ No hay sesión activa');
-      return {'success': false, 'error': 'Usuário não autenticado'};
-    }
+    final supabase = await SupaFlow.client;
 
-    final token = session.accessToken;
-
-    // URL da Edge Function
-    final url = Uri.parse(
-        'https://supa.rupies.com.br/functions/v1/create-asaas-subscription');
-
-    // Preparar body da requisição
-    final body = jsonEncode({
-      'planId': planId,
-      'billingCycle': billingCycle,
-      'paymentMethod': paymentMethod,
-    });
-
-    print('📤 Enviando requisição...');
-
-    // Fazer requisição
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
+    // 🚀 Llamada correcta a Edge Function
+    final res = await supabase.functions.invoke(
+      'create-asaas-subscription',
+      body: {
+        'planId': planId,
+        'billingCycle': billingCycle,
+        'paymentMethod': paymentMethod,
       },
-      body: body,
     );
 
-    print('📊 Status code: ${response.statusCode}');
-    print('📊 Response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-
-      if (jsonResponse['success'] == true) {
-        print('✅ Assinatura criada com sucesso!');
-        return jsonResponse['data'];
-      } else {
-        print('❌ Error en respuesta: ${jsonResponse['error']}');
-        return {
-          'success': false,
-          'error': jsonResponse['error'] ?? 'Erro desconhecido'
-        };
-      }
-    } else {
-      print('❌ Error HTTP: ${response.statusCode}');
-      print('❌ Body: ${response.body}');
-
-      try {
-        final errorResponse = jsonDecode(response.body);
-        return {
-          'success': false,
-          'error': errorResponse['error'] ?? 'Erro ao criar assinatura'
-        };
-      } catch (e) {
-        return {'success': false, 'error': 'Erro ao criar assinatura'};
-      }
+    if (res.data == null) {
+      return {
+        'success': false,
+        'error': 'Resposta vazia da Edge Function',
+      };
     }
+
+    return res.data;
   } catch (e) {
     print('❌ Exception em createSubscription: $e');
     return {'success': false, 'error': 'Erro: $e'};
