@@ -48,11 +48,13 @@ Future<dynamic> cancelSubscription(
 
     print('📤 Enviando requisição de cancelamento...');
 
-    // Fazer requisição
+    // Fazer requisição com apikey e token do usuário
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer $token',
+        'apikey':
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbnpnamN6cml0em5vaHBkbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NDMyMTAsImV4cCI6MjA4NDAxOTIxMH0.6ab40XH-1EGV4M2mUihRyZlo2p1kOi3Oi5arm0yFqEg',
         'Content-Type': 'application/json',
       },
       body: body,
