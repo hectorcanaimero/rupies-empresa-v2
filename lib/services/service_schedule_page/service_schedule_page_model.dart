@@ -79,11 +79,14 @@ class ServiceSchedulePageModel
 
   DateTime? datePicked1;
   DateTime? datePicked2;
+  DateTime? datePicked3;
   // State field(s) for HourArrived widget.
   String? hourArrivedValue;
   FormFieldController<String>? hourArrivedValueController;
   // Stores action output result for [Backend Call - Update Row(s)] action in Button widget.
   List<ServicesRow>? update1;
+  // Stores action output result for [Backend Call - Insert Row] action in Button widget.
+  ServicesRow? create1;
   // Stores action output result for [Validate Form] action in Button widget.
   bool? validateOne;
   // Stores action output result for [Backend Call - Insert Row] action in Button widget.

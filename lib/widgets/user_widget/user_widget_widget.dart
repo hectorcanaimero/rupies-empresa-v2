@@ -1,4 +1,7 @@
+import '/auth/supabase_auth/auth_util.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
@@ -80,44 +83,108 @@ class _UserWidgetWidgetState extends State<UserWidgetWidget> {
               ),
             ),
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      FFAppState().user.displayName,
-                      style: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.interTight(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .fontStyle,
+              child: FutureBuilder<List<ViewServiceRatingRow>>(
+                future: ViewServiceRatingTable().queryRows(
+                  queryFn: (q) => q.eqOrNull(
+                    'sr_contractor',
+                    currentUserUid,
+                  ),
+                ),
+                builder: (context, snapshot) {
+                  // Customize what your widget looks like when it's loading.
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: SizedBox(
+                        width: 40.0,
+                        height: 40.0,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0x004B39EF),
                           ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Row(
+                        ),
+                      ),
+                    );
+                  }
+                  List<ViewServiceRatingRow> containerViewServiceRatingRowList =
+                      snapshot.data!;
+
+                  return Container(
+                    decoration: BoxDecoration(),
+                    child: Column(
                       mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          textScaler: MediaQuery.of(context).textScaler,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: FFAppState().user.rating.toString(),
+                        Text(
+                          FFAppState().user.displayName,
+                          style: FlutterFlowTheme.of(context)
+                              .titleSmall
+                              .override(
+                                font: GoogleFonts.interTight(
+                                  fontWeight: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .fontWeight,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .fontStyle,
+                                ),
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                letterSpacing: 0.0,
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .fontStyle,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            RichText(
+                              textScaler: MediaQuery.of(context).textScaler,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: valueOrDefault<String>(
+                                      formatNumber(
+                                        functions.calcularMediaPrestador(
+                                            containerViewServiceRatingRowList
+                                                .toList()),
+                                        formatType: FormatType.decimal,
+                                        decimalType: DecimalType.periodDecimal,
+                                      ),
+                                      '3',
+                                    ),
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          fontSize: 12.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                  )
+                                ],
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -129,9 +196,6 @@ class _UserWidgetWidgetState extends State<UserWidgetWidget> {
                                             .bodyMedium
                                             .fontStyle,
                                       ),
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      fontSize: 12.0,
                                       letterSpacing: 0.0,
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .bodyMedium
@@ -140,70 +204,42 @@ class _UserWidgetWidgetState extends State<UserWidgetWidget> {
                                           .bodyMedium
                                           .fontStyle,
                                     ),
-                              )
-                            ],
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                          ),
+                              ),
+                            ),
+                            RatingBarIndicator(
+                              itemBuilder: (context, index) => Icon(
+                                Icons.star_rounded,
+                                color: Color(0xFFFFC52B),
+                              ),
+                              direction: Axis.horizontal,
+                              rating: valueOrDefault<double>(
+                                functions.calcularMediaPrestador(
+                                    containerViewServiceRatingRowList.toList()),
+                                3.0,
+                              ),
+                              unratedColor:
+                                  FlutterFlowTheme.of(context).alternate,
+                              itemCount: 5,
+                              itemSize: 18.0,
+                            ),
+                          ].divide(SizedBox(width: 6.0)),
                         ),
-                        RatingBarIndicator(
-                          itemBuilder: (context, index) => Icon(
-                            Icons.star_rounded,
-                            color: Color(0xFFFFC52B),
-                          ),
-                          direction: Axis.horizontal,
-                          rating: FFAppState().user.rating,
-                          unratedColor: FlutterFlowTheme.of(context).alternate,
-                          itemCount: 5,
-                          itemSize: 18.0,
-                        ),
-                      ].divide(SizedBox(width: 6.0)),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
             Builder(
               builder: (context) {
-                if (FFAppState().typecompany == 'bronze') {
-                  return Container(
-                    width: 36.0,
-                    height: 36.0,
-                    decoration: BoxDecoration(),
-                  );
-                } else if (FFAppState().typecompany == 'prata') {
+                if (FFAppState().subscription.status == 'active') {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset(
-                      'assets/images/selo_prata.png',
-                      height: 36.0,
-                      fit: BoxFit.fitHeight,
-                    ),
-                  );
-                } else if (FFAppState().typecompany == 'ouro') {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset(
-                      'assets/images/selo_ouro.png',
-                      height: 36.0,
-                      fit: BoxFit.fitHeight,
+                    child: Image.network(
+                      FFAppState().subscription.typePlan,
+                      width: 60.0,
+                      height: 60.0,
+                      fit: BoxFit.cover,
                     ),
                   );
                 } else {

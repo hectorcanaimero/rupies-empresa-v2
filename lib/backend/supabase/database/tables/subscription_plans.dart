@@ -72,4 +72,10 @@ class SubscriptionPlansRow extends SupabaseDataRow {
 
   String? get image => getField<String>('image');
   set image(String? value) => setField<String>('image', value);
+
+  String? get image2 => getField<String>('image2');
+  set image2(String? value) => setField<String>('image2', value);
+
+  String? get image3 => getField<String>('image3');
+  set image3(String? value) => setField<String>('image3', value);
 }

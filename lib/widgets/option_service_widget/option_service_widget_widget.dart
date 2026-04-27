@@ -95,31 +95,13 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                       onPressed: () async {
                         logFirebaseEvent(
                             'OPTION_SERVICE_WIDGET_URGENTE_BTN_ON_TAP');
-                        if (FFAppState().typecompany != '') {
-                          if (FFAppState().subscription.status != 'active') {
-                            logFirebaseEvent('Button_navigate_to');
+                        if (FFAppState().subscription.status == 'active') {
+                          logFirebaseEvent('Button_navigate_to');
 
-                            context.goNamed(
-                              SubscriptionPlansPageWidget.routeName,
-                              extra: <String, dynamic>{
-                                '__transition_info__': TransitionInfo(
-                                  hasTransition: true,
-                                  transitionType:
-                                      PageTransitionType.bottomToTop,
-                                ),
-                              },
-                            );
-                          } else {
-                            logFirebaseEvent('Button_navigate_to');
+                          context.pushNamed(ServiceUrgentPageWidget.routeName);
 
-                            context
-                                .pushNamed(ServiceUrgentPageWidget.routeName);
-
-                            logFirebaseEvent('Button_close_dialog_drawer_etc');
-                            Navigator.pop(context);
-                          }
-
-                          return;
+                          logFirebaseEvent('Button_close_dialog_drawer_etc');
+                          Navigator.pop(context);
                         } else {
                           if (getJsonField(
                                 FFAppState().trial,
@@ -195,31 +177,14 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                       onPressed: () async {
                         logFirebaseEvent(
                             'OPTION_SERVICE_WIDGET_AGENDADO_BTN_ON_TA');
-                        if (FFAppState().typecompany != '') {
-                          if (FFAppState().subscription.status != 'active') {
-                            logFirebaseEvent('Button_navigate_to');
+                        if (FFAppState().subscription.status == 'active') {
+                          logFirebaseEvent('Button_navigate_to');
 
-                            context.goNamed(
-                              SubscriptionPlansPageWidget.routeName,
-                              extra: <String, dynamic>{
-                                '__transition_info__': TransitionInfo(
-                                  hasTransition: true,
-                                  transitionType:
-                                      PageTransitionType.bottomToTop,
-                                ),
-                              },
-                            );
-                          } else {
-                            logFirebaseEvent('Button_navigate_to');
+                          context
+                              .pushNamed(ServiceSchedulePageWidget.routeName);
 
-                            context
-                                .pushNamed(ServiceSchedulePageWidget.routeName);
-
-                            logFirebaseEvent('Button_close_dialog_drawer_etc');
-                            Navigator.pop(context);
-                          }
-
-                          return;
+                          logFirebaseEvent('Button_close_dialog_drawer_etc');
+                          Navigator.pop(context);
                         } else {
                           if (getJsonField(
                                 FFAppState().trial,

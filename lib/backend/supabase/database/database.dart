@@ -23,6 +23,7 @@ export 'tables/services.dart';
 export 'tables/subscription_usage.dart';
 export 'tables/view_user_subscription_summary.dart';
 export 'tables/menus.dart';
+export 'tables/view_subs.dart';
 export 'tables/subscription_plans.dart';
 export 'tables/view_chats_message_with_details.dart';
 export 'tables/users_portfolio.dart';

@@ -173,10 +173,6 @@ class _ServicesExternalWidgetWidgetState
                                             width: double.infinity,
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.only(
-                                                bottomLeft:
-                                                    Radius.circular(0.0),
-                                                bottomRight:
-                                                    Radius.circular(0.0),
                                                 topLeft: Radius.circular(12.0),
                                                 topRight: Radius.circular(12.0),
                                               ),

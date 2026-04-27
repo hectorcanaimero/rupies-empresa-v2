@@ -18,7 +18,7 @@ class SignPageModel extends FlutterFlowModel<SignPageWidget> {
   late bool passVisibility;
   String? Function(BuildContext, String?)? passTextControllerValidator;
   // Stores action output result for [Backend Call - Query Rows] action in Button widget.
-  List<UsersRow>? profile;
+  List<UsersRow>? user;
 
   @override
   void initState(BuildContext context) {

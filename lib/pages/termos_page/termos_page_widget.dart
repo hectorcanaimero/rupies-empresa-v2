@@ -365,7 +365,7 @@ class _TermosPageWidgetState extends State<TermosPageWidget> {
                                   logFirebaseEvent('Checkbox_backend_call');
                                   await UsersTable().update(
                                     data: {
-                                      'privacidade': false,
+                                      'privacidade': true,
                                     },
                                     matchingRows: (rows) => rows.eqOrNull(
                                       'id',

@@ -36,6 +36,7 @@ void main() async {
   await actions.setFCMToken();
   await actions.appTracking();
   await actions.inAppUpdate();
+  await actions.lockOrientation();
   // End final custom actions code
 
   runApp(MultiProvider(
@@ -78,7 +79,7 @@ class _MyAppState extends State<MyApp> {
     final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
         ? lastMatch.matches
         : _router.routerDelegate.currentConfiguration;
-    return matchList.uri.toString();
+    return matchList.uri.path;
   }
 
   List<String> getRouteStack() =>

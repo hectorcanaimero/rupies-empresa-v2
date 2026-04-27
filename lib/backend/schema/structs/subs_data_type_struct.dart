@@ -13,12 +13,16 @@ class SubsDataTypeStruct extends BaseStruct {
     DateTime? currentPeriodStart,
     String? billingCycle,
     DateTime? currentPeriodEnd,
+    String? typePlan,
+    String? planId,
   })  : _id = id,
         _asaasSubscriptionId = asaasSubscriptionId,
         _status = status,
         _currentPeriodStart = currentPeriodStart,
         _billingCycle = billingCycle,
-        _currentPeriodEnd = currentPeriodEnd;
+        _currentPeriodEnd = currentPeriodEnd,
+        _typePlan = typePlan,
+        _planId = planId;
 
   // "id" field.
   String? _id;
@@ -62,6 +66,20 @@ class SubsDataTypeStruct extends BaseStruct {
 
   bool hasCurrentPeriodEnd() => _currentPeriodEnd != null;
 
+  // "typePlan" field.
+  String? _typePlan;
+  String get typePlan => _typePlan ?? '';
+  set typePlan(String? val) => _typePlan = val;
+
+  bool hasTypePlan() => _typePlan != null;
+
+  // "planId" field.
+  String? _planId;
+  String get planId => _planId ?? '';
+  set planId(String? val) => _planId = val;
+
+  bool hasPlanId() => _planId != null;
+
   static SubsDataTypeStruct fromMap(Map<String, dynamic> data) =>
       SubsDataTypeStruct(
         id: data['id'] as String?,
@@ -70,6 +88,8 @@ class SubsDataTypeStruct extends BaseStruct {
         currentPeriodStart: data['currentPeriodStart'] as DateTime?,
         billingCycle: data['billingCycle'] as String?,
         currentPeriodEnd: data['currentPeriodEnd'] as DateTime?,
+        typePlan: data['typePlan'] as String?,
+        planId: data['planId'] as String?,
       );
 
   static SubsDataTypeStruct? maybeFromMap(dynamic data) => data is Map
@@ -83,6 +103,8 @@ class SubsDataTypeStruct extends BaseStruct {
         'currentPeriodStart': _currentPeriodStart,
         'billingCycle': _billingCycle,
         'currentPeriodEnd': _currentPeriodEnd,
+        'typePlan': _typePlan,
+        'planId': _planId,
       }.withoutNulls;
 
   @override
@@ -110,6 +132,14 @@ class SubsDataTypeStruct extends BaseStruct {
         'currentPeriodEnd': serializeParam(
           _currentPeriodEnd,
           ParamType.DateTime,
+        ),
+        'typePlan': serializeParam(
+          _typePlan,
+          ParamType.String,
+        ),
+        'planId': serializeParam(
+          _planId,
+          ParamType.String,
         ),
       }.withoutNulls;
 
@@ -145,6 +175,16 @@ class SubsDataTypeStruct extends BaseStruct {
           ParamType.DateTime,
           false,
         ),
+        typePlan: deserializeParam(
+          data['typePlan'],
+          ParamType.String,
+          false,
+        ),
+        planId: deserializeParam(
+          data['planId'],
+          ParamType.String,
+          false,
+        ),
       );
 
   @override
@@ -158,7 +198,9 @@ class SubsDataTypeStruct extends BaseStruct {
         status == other.status &&
         currentPeriodStart == other.currentPeriodStart &&
         billingCycle == other.billingCycle &&
-        currentPeriodEnd == other.currentPeriodEnd;
+        currentPeriodEnd == other.currentPeriodEnd &&
+        typePlan == other.typePlan &&
+        planId == other.planId;
   }
 
   @override
@@ -168,7 +210,9 @@ class SubsDataTypeStruct extends BaseStruct {
         status,
         currentPeriodStart,
         billingCycle,
-        currentPeriodEnd
+        currentPeriodEnd,
+        typePlan,
+        planId
       ]);
 }
 
@@ -179,6 +223,8 @@ SubsDataTypeStruct createSubsDataTypeStruct({
   DateTime? currentPeriodStart,
   String? billingCycle,
   DateTime? currentPeriodEnd,
+  String? typePlan,
+  String? planId,
 }) =>
     SubsDataTypeStruct(
       id: id,
@@ -187,4 +233,6 @@ SubsDataTypeStruct createSubsDataTypeStruct({
       currentPeriodStart: currentPeriodStart,
       billingCycle: billingCycle,
       currentPeriodEnd: currentPeriodEnd,
+      typePlan: typePlan,
+      planId: planId,
     );

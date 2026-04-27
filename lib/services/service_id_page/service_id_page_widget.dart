@@ -1761,7 +1761,8 @@ class _ServiceIdPageWidgetState extends State<ServiceIdPageWidget> {
                                         await ServicesTable().delete(
                                           matchingRows: (rows) => rows.eqOrNull(
                                             'id',
-                                            widget.uid,
+                                            serviceIdPageViewServicesWithCategoriesRow
+                                                .id,
                                           ),
                                         );
                                         logFirebaseEvent('Apagar_navigate_to');
@@ -1769,6 +1770,8 @@ class _ServiceIdPageWidgetState extends State<ServiceIdPageWidget> {
                                         context.pushNamed(
                                             HomePageWidget.routeName);
                                       }
+
+                                      safeSetState(() {});
                                     },
                                     text: 'Apagar',
                                     options: FFButtonOptions(

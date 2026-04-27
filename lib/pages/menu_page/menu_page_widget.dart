@@ -1,5 +1,6 @@
 import '/auth/supabase_auth/auth_util.dart';
 import '/backend/schema/structs/index.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/widgets/nav_bar_widget/nav_bar_widget_widget.dart';
 import '/widgets/user_widget/user_widget_widget.dart';
@@ -492,85 +493,136 @@ class _MenuPageWidgetState extends State<MenuPageWidget> {
                                       ),
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 12.0),
-                                    child: Container(
-                                      width: 100.0,
-                                      height: 50.0,
-                                      decoration: BoxDecoration(),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              logFirebaseEvent(
-                                                  'MENU_PAGE_PAGE_Row_5kybd4qj_ON_TAP');
-                                              logFirebaseEvent(
-                                                  'Row_navigate_to');
-
-                                              context.pushNamed(
-                                                  SubscriptionPlansPageWidget
-                                                      .routeName);
-                                            },
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: [
-                                                Icon(
-                                                  Icons.nature,
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .primaryText,
-                                                  size: 24.0,
-                                                ),
-                                                Text(
-                                                  'Clube dos 100',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
-                                                ),
-                                              ].divide(SizedBox(width: 9.0)),
-                                            ),
-                                          ),
-                                          Divider(
-                                            thickness: 2.0,
-                                            color: FlutterFlowTheme.of(context)
-                                                .alternate,
-                                          ),
-                                        ],
+                                  FutureBuilder<List<SettingsRow>>(
+                                    future: SettingsTable().querySingleRow(
+                                      queryFn: (q) => q.eqOrNull(
+                                        'type',
+                                        'subscription',
                                       ),
                                     ),
+                                    builder: (context, snapshot) {
+                                      // Customize what your widget looks like when it's loading.
+                                      if (!snapshot.hasData) {
+                                        return Center(
+                                          child: SizedBox(
+                                            width: 50.0,
+                                            height: 50.0,
+                                            child: CircularProgressIndicator(
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                FlutterFlowTheme.of(context)
+                                                    .primary,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      List<SettingsRow>
+                                          containerSettingsRowList =
+                                          snapshot.data!;
+
+                                      final containerSettingsRow =
+                                          containerSettingsRowList.isNotEmpty
+                                              ? containerSettingsRowList.first
+                                              : null;
+
+                                      return Container(
+                                        decoration: BoxDecoration(),
+                                        child: Visibility(
+                                          visible:
+                                              containerSettingsRow?.active ??
+                                                  true,
+                                          child: Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    0.0, 0.0, 0.0, 12.0),
+                                            child: Container(
+                                              width: 100.0,
+                                              height: 50.0,
+                                              decoration: BoxDecoration(),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.max,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  InkWell(
+                                                    splashColor:
+                                                        Colors.transparent,
+                                                    focusColor:
+                                                        Colors.transparent,
+                                                    hoverColor:
+                                                        Colors.transparent,
+                                                    highlightColor:
+                                                        Colors.transparent,
+                                                    onTap: () async {
+                                                      logFirebaseEvent(
+                                                          'MENU_PAGE_PAGE_Row_5kybd4qj_ON_TAP');
+                                                      logFirebaseEvent(
+                                                          'Row_navigate_to');
+
+                                                      context.pushNamed(
+                                                          SubscriptionPlansPageWidget
+                                                              .routeName);
+                                                    },
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.nature,
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
+                                                          size: 24.0,
+                                                        ),
+                                                        Text(
+                                                          'Clube dos 100',
+                                                          style: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .bodyMedium
+                                                              .override(
+                                                                font:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontStyle,
+                                                                ),
+                                                                letterSpacing:
+                                                                    0.0,
+                                                                fontWeight: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontWeight,
+                                                                fontStyle: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontStyle,
+                                                              ),
+                                                        ),
+                                                      ].divide(
+                                                          SizedBox(width: 9.0)),
+                                                    ),
+                                                  ),
+                                                  Divider(
+                                                    thickness: 2.0,
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .alternate,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                   Padding(
                                     padding: EdgeInsetsDirectional.fromSTEB(
@@ -593,10 +645,9 @@ class _MenuPageWidgetState extends State<MenuPageWidget> {
                                               logFirebaseEvent(
                                                   'MENU_PAGE_PAGE_Row_rsda88p1_ON_TAP');
                                               logFirebaseEvent(
-                                                  'Row_navigate_to');
-
-                                              context.pushNamed(
-                                                  SacPageWidget.routeName);
+                                                  'Row_launch_u_r_l');
+                                              await launchURL(
+                                                  'https://api.whatsapp.com/send/?phone=%2B5511965939170&text&type=phone_number&app_absent=0');
                                             },
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,

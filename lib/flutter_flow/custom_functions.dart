@@ -92,8 +92,8 @@ LatLng parseTextToLatLng(String location) {
 }
 
 bool validateTrial(dynamic trial) {
-  int limit = trial['limit'];
-  int total = trial['total'];
+  int limit = int.parse(trial['limit']);
+  int total = int.parse(trial['total']);
   if (limit <= total) {
     return true;
   }
@@ -106,4 +106,26 @@ dynamic newValuetrial(
 ) {
   trial['limit'] = trial['limit'] + newValue;
   return trial;
+}
+
+double calcularMediaPrestador(List<ViewServiceRatingRow> ratings) {
+  double suma = 0;
+  int contador = 0;
+
+  for (final row in ratings) {
+    final rating = row.srContractorRating;
+    ;
+
+    if (rating != null) {
+      final value = (rating as num).toDouble();
+      if (value.isFinite) {
+        suma += value;
+        contador++;
+      }
+    }
+  }
+
+  if (contador == 0) return 0.0;
+  final media = suma / contador;
+  return double.parse(media.toStringAsFixed(1));
 }

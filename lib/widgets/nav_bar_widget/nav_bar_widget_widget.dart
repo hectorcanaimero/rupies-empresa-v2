@@ -63,12 +63,7 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
         color: Colors.transparent,
         elevation: 0.0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(0.0),
-            bottomRight: Radius.circular(0.0),
-            topLeft: Radius.circular(0.0),
-            topRight: Radius.circular(0.0),
-          ),
+          borderRadius: BorderRadius.only(),
         ),
         child: Container(
           width: double.infinity,
@@ -86,12 +81,7 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                 spreadRadius: 0.1,
               )
             ],
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(0.0),
-              bottomRight: Radius.circular(0.0),
-              topLeft: Radius.circular(0.0),
-              topRight: Radius.circular(0.0),
-            ),
+            borderRadius: BorderRadius.only(),
           ),
           child: Align(
             alignment: AlignmentDirectional(0.0, -1.0),
@@ -226,7 +216,7 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                   size: 26.0,
                                 ),
                                 Text(
-                                  'Cotação',
+                                  'Cotações',
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -460,7 +450,7 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                   size: 26.0,
                                 ),
                                 Text(
-                                  'Menú',
+                                  'Menu',
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(

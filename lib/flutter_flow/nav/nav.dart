@@ -471,12 +471,12 @@ class FFRoute {
               : builder(context, ffParams);
           final child = appStateNotifier.loading
               ? Container(
-                  color: Color(0x00EBEBEB),
+                  color: Color(0xFF5D73F2),
                   child: Center(
                     child: Image.asset(
-                      'assets/images/rupies-empresas.png',
-                      width: MediaQuery.sizeOf(context).width * 0.6,
-                      fit: BoxFit.cover,
+                      'assets/images/Avatar_Empresas_Loja_APP.jpg',
+                      width: MediaQuery.sizeOf(context).width * 0.7,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 )
@@ -486,6 +486,7 @@ class FFRoute {
           return transitionInfo.hasTransition
               ? CustomTransitionPage(
                   key: state.pageKey,
+                  name: state.name,
                   child: child,
                   transitionDuration: transitionInfo.duration,
                   transitionsBuilder:
@@ -503,7 +504,8 @@ class FFRoute {
                     child,
                   ),
                 )
-              : MaterialPage(key: state.pageKey, child: child);
+              : MaterialPage(
+                  key: state.pageKey, name: state.name, child: child);
         },
         routes: routes,
       );

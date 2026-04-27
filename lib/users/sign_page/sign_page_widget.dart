@@ -408,74 +408,88 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                                 return;
                               }
 
-                              await Future.wait([
-                                Future(() async {
-                                  logFirebaseEvent('Button_backend_call');
-                                  await UsersTable().update(
-                                    data: {
-                                      'push': 'push',
+                              logFirebaseEvent('Button_backend_call');
+                              _model.user = await UsersTable().queryRows(
+                                queryFn: (q) => q.eqOrNull(
+                                  'id',
+                                  currentUserUid,
+                                ),
+                              );
+                              if (_model.user!.firstOrNull!.isContractor!) {
+                                logFirebaseEvent('Button_backend_call');
+                                await UsersTable().update(
+                                  data: {
+                                    'push': 'push',
+                                  },
+                                  matchingRows: (rows) => rows.eqOrNull(
+                                    'id',
+                                    currentUserUid,
+                                  ),
+                                );
+                                if (_model.user!.firstOrNull!.endRegister!) {
+                                  logFirebaseEvent('Button_update_app_state');
+                                  FFAppState().user = UserStruct(
+                                    displayName:
+                                        _model.user?.firstOrNull?.displayName,
+                                    phone: _model.user?.firstOrNull?.phone,
+                                    isContractor:
+                                        _model.user?.firstOrNull?.isContractor,
+                                    addres: _model.user?.firstOrNull?.address,
+                                    cep: _model.user?.firstOrNull?.cep,
+                                    cpfcnpj: _model.user?.firstOrNull?.cpfcnpj,
+                                    photoUrl:
+                                        _model.user?.firstOrNull?.photoUrl,
+                                    endRegister:
+                                        _model.user?.firstOrNull?.endRegister,
+                                    rating: _model.user?.firstOrNull?.rating,
+                                    nameContractor: _model
+                                        .user?.firstOrNull?.nameContractor,
+                                    push: _model.user?.firstOrNull?.push,
+                                  );
+                                  safeSetState(() {});
+                                  logFirebaseEvent('Button_navigate_to');
+
+                                  context.goNamedAuth(HomePageWidget.routeName,
+                                      context.mounted);
+                                } else {
+                                  logFirebaseEvent('Button_navigate_to');
+
+                                  context.goNamedAuth(
+                                    ProfilePageWidget.routeName,
+                                    context.mounted,
+                                    extra: <String, dynamic>{
+                                      '__transition_info__': TransitionInfo(
+                                        hasTransition: true,
+                                        transitionType:
+                                            PageTransitionType.bottomToTop,
+                                      ),
                                     },
-                                    matchingRows: (rows) => rows.eqOrNull(
-                                      'id',
-                                      currentUserUid,
-                                    ),
                                   );
-                                }),
-                                Future(() async {
-                                  logFirebaseEvent('Button_backend_call');
-                                  _model.profile = await UsersTable().queryRows(
-                                    queryFn: (q) => q.eqOrNull(
-                                      'id',
-                                      currentUserUid,
-                                    ),
-                                  );
-                                  if (_model
-                                      .profile!.firstOrNull!.endRegister!) {
-                                    logFirebaseEvent('Button_update_app_state');
-                                    FFAppState().user = UserStruct(
-                                      displayName: _model
-                                          .profile?.firstOrNull?.displayName,
-                                      phone: _model.profile?.firstOrNull?.phone,
-                                      isContractor: _model
-                                          .profile?.firstOrNull?.isContractor,
-                                      addres:
-                                          _model.profile?.firstOrNull?.address,
-                                      cep: _model.profile?.firstOrNull?.cep,
-                                      cpfcnpj:
-                                          _model.profile?.firstOrNull?.cpfcnpj,
-                                      push: _model.profile?.firstOrNull?.push,
-                                      photoUrl:
-                                          _model.profile?.firstOrNull?.photoUrl,
-                                      endRegister: _model
-                                          .profile?.firstOrNull?.endRegister,
-                                      rating:
-                                          _model.profile?.firstOrNull?.rating,
-                                      nameContractor: _model
-                                          .profile?.firstOrNull?.nameContractor,
-                                    );
-                                    safeSetState(() {});
-                                    logFirebaseEvent('Button_navigate_to');
-
-                                    context.goNamedAuth(
-                                        HomePageWidget.routeName,
-                                        context.mounted);
-                                  } else {
-                                    logFirebaseEvent('Button_navigate_to');
-
-                                    context.goNamedAuth(
-                                      ProfilePageWidget.routeName,
-                                      context.mounted,
-                                      extra: <String, dynamic>{
-                                        '__transition_info__': TransitionInfo(
-                                          hasTransition: true,
-                                          transitionType:
-                                              PageTransitionType.bottomToTop,
+                                }
+                              } else {
+                                logFirebaseEvent('Button_alert_dialog');
+                                await showDialog(
+                                  context: context,
+                                  builder: (alertDialogContext) {
+                                    return AlertDialog(
+                                      title: Text('Opa!'),
+                                      content: Text(
+                                          'Você está cadastrado como Prestador. '),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(alertDialogContext),
+                                          child: Text('Ok'),
                                         ),
-                                      },
+                                      ],
                                     );
-                                  }
-                                }),
-                              ]);
+                                  },
+                                );
+                                logFirebaseEvent('Button_auth');
+                                GoRouter.of(context).prepareAuthEvent();
+                                await authManager.signOut();
+                                GoRouter.of(context).clearRedirectLocation();
+                              }
 
                               safeSetState(() {});
                             },

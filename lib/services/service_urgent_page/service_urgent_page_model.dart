@@ -83,6 +83,8 @@ class ServiceUrgentPageModel extends FlutterFlowModel<ServiceUrgentPageWidget> {
   FormFieldController<String>? hourArrivedValueController;
   // Stores action output result for [Backend Call - Update Row(s)] action in Button widget.
   List<ServicesRow>? update1;
+  // Stores action output result for [Backend Call - Insert Row] action in Button widget.
+  ServicesRow? create1;
   // Stores action output result for [Validate Form] action in Button widget.
   bool? validateOne;
   // Stores action output result for [Backend Call - Insert Row] action in Button widget.
@@ -126,8 +128,6 @@ class ServiceUrgentPageModel extends FlutterFlowModel<ServiceUrgentPageWidget> {
   FFPlace placePickerValue = FFPlace();
   // Stores action output result for [Backend Call - Update Row(s)] action in button widget.
   List<ServicesRow>? finaliza;
-  // Stores action output result for [Backend Call - Insert Row] action in button widget.
-  NotificationsNewServiceRow? notif;
 
   @override
   void initState(BuildContext context) {

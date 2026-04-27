@@ -15,19 +15,20 @@ class SubscriptionPlansPageModel
 
   ///  State fields for stateful widgets in this page.
 
-  // Stores action output result for [Custom Action - getSubscriptionStatus] action in SubscriptionPlansPage widget.
-  dynamic getsub;
+  Stream<List<ViewSubsRow>>? subscriptionPlansPageSupabaseStream;
+  // Stores action output result for [Backend Call - Query Rows] action in SubscriptionPlansPage widget.
+  List<SubscriptionPlansRow>? planos;
   // Stores action output result for [Custom Action - createSubscription] action in Button widget.
   dynamic createSubResult;
   // Stores action output result for [Backend Call - Query Rows] action in Button widget.
   List<SubscriptionsRow>? dtaSubs;
-  // Stores action output result for [Custom Action - createSubscription] action in Image widget.
+  // Stores action output result for [Custom Action - createSubscription] action in Button widget.
   dynamic createSubResult1;
-  // Stores action output result for [Backend Call - Query Rows] action in Image widget.
+  // Stores action output result for [Backend Call - Query Rows] action in Button widget.
   List<SubscriptionsRow>? dtaSubs1;
-  // Stores action output result for [Custom Action - createSubscription] action in Image2 widget.
+  // Stores action output result for [Custom Action - createSubscription] action in Button widget.
   dynamic createSubResult2;
-  // Stores action output result for [Backend Call - Query Rows] action in Image2 widget.
+  // Stores action output result for [Backend Call - Query Rows] action in Button widget.
   List<SubscriptionsRow>? dtaSubs2;
 
   @override

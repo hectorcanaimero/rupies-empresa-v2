@@ -933,222 +933,196 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                               width: 2.0,
                                                             ),
                                                           ),
-                                                          child: InkWell(
-                                                            splashColor: Colors
-                                                                .transparent,
-                                                            focusColor: Colors
-                                                                .transparent,
-                                                            hoverColor: Colors
-                                                                .transparent,
-                                                            highlightColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            onTap: () async {
-                                                              logFirebaseEvent(
-                                                                  'SERVICE_URGENT_Row_bofl7pkn_ON_TAP');
-                                                              // Data Entrada
-                                                              logFirebaseEvent(
-                                                                  'Row_DataEntrada');
-                                                              final _datePicked1Date =
-                                                                  await showDatePicker(
-                                                                context:
-                                                                    context,
-                                                                initialDate:
-                                                                    getCurrentTimestamp,
-                                                                firstDate:
-                                                                    getCurrentTimestamp,
-                                                                lastDate:
-                                                                    DateTime(
-                                                                        2050),
-                                                                builder:
-                                                                    (context,
-                                                                        child) {
-                                                                  return wrapInMaterialDatePickerTheme(
-                                                                    context,
-                                                                    child!,
-                                                                    headerBackgroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primary,
-                                                                    headerForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .info,
-                                                                    headerTextStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .headlineLarge
-                                                                        .override(
-                                                                          font:
-                                                                              GoogleFonts.interTight(
-                                                                            fontWeight:
-                                                                                FontWeight.w600,
-                                                                            fontStyle:
-                                                                                FlutterFlowTheme.of(context).headlineLarge.fontStyle,
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Expanded(
+                                                                child: Builder(
+                                                                  builder:
+                                                                      (context) {
+                                                                    if (_model
+                                                                            .dateStart !=
+                                                                        null) {
+                                                                      return Padding(
+                                                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                                                            12.0,
+                                                                            0.0,
+                                                                            0.0,
+                                                                            0.0),
+                                                                        child:
+                                                                            Text(
+                                                                          dateTimeFormat(
+                                                                            "dd/MM/yy",
+                                                                            _model.dateStart,
+                                                                            locale:
+                                                                                FFLocalizations.of(context).languageCode,
                                                                           ),
-                                                                          fontSize:
-                                                                              32.0,
-                                                                          letterSpacing:
-                                                                              0.0,
-                                                                          fontWeight:
-                                                                              FontWeight.w600,
-                                                                          fontStyle: FlutterFlowTheme.of(context)
-                                                                              .headlineLarge
-                                                                              .fontStyle,
+                                                                          style: FlutterFlowTheme.of(context)
+                                                                              .bodyMedium
+                                                                              .override(
+                                                                                font: GoogleFonts.inter(
+                                                                                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                ),
+                                                                                fontSize: 14.0,
+                                                                                letterSpacing: 0.0,
+                                                                                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                              ),
                                                                         ),
-                                                                    pickerBackgroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .secondaryBackground,
-                                                                    pickerForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primaryText,
-                                                                    selectedDateTimeBackgroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primary,
-                                                                    selectedDateTimeForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .info,
-                                                                    actionButtonForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primaryText,
-                                                                    iconSize:
-                                                                        24.0,
-                                                                  );
-                                                                },
-                                                              );
-
-                                                              if (_datePicked1Date !=
-                                                                  null) {
-                                                                safeSetState(
-                                                                    () {
-                                                                  _model.datePicked1 =
-                                                                      DateTime(
-                                                                    _datePicked1Date
-                                                                        .year,
-                                                                    _datePicked1Date
-                                                                        .month,
-                                                                    _datePicked1Date
-                                                                        .day,
-                                                                  );
-                                                                });
-                                                              } else if (_model
-                                                                      .datePicked1 !=
-                                                                  null) {
-                                                                safeSetState(
-                                                                    () {
-                                                                  _model.datePicked1 =
-                                                                      getCurrentTimestamp;
-                                                                });
-                                                              }
-                                                              logFirebaseEvent(
-                                                                  'Row_update_page_state');
-                                                              _model.dateStart =
-                                                                  _model
-                                                                      .datePicked1;
-                                                              safeSetState(
-                                                                  () {});
-                                                            },
-                                                            child: Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .max,
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Expanded(
-                                                                  child:
-                                                                      Builder(
-                                                                    builder:
-                                                                        (context) {
-                                                                      if (_model
-                                                                              .dateStart !=
-                                                                          null) {
-                                                                        return Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              12.0,
-                                                                              0.0,
-                                                                              0.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            dateTimeFormat(
-                                                                              "dd/MM/yy",
-                                                                              _model.dateStart,
-                                                                              locale: FFLocalizations.of(context).languageCode,
-                                                                            ),
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                  ),
-                                                                                  fontSize: 14.0,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                ),
-                                                                          ),
-                                                                        );
-                                                                      } else {
-                                                                        return Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              12.0,
-                                                                              0.0,
-                                                                              0.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            valueOrDefault<String>(
-                                                                              _model.dateStart != null
-                                                                                  ? _model.dateStart?.toString()
-                                                                                  : valueOrDefault<String>(
-                                                                                      dateTimeFormat(
-                                                                                        "d/M/y",
-                                                                                        stackServicesRow?.dateStart,
-                                                                                        locale: FFLocalizations.of(context).languageCode,
-                                                                                      ),
-                                                                                      '...',
+                                                                      );
+                                                                    } else {
+                                                                      return Padding(
+                                                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                                                            12.0,
+                                                                            0.0,
+                                                                            0.0,
+                                                                            0.0),
+                                                                        child:
+                                                                            Text(
+                                                                          valueOrDefault<
+                                                                              String>(
+                                                                            _model.dateStart != null
+                                                                                ? _model.dateStart?.toString()
+                                                                                : valueOrDefault<String>(
+                                                                                    dateTimeFormat(
+                                                                                      "d/M/y",
+                                                                                      stackServicesRow?.dateStart,
+                                                                                      locale: FFLocalizations.of(context).languageCode,
                                                                                     ),
-                                                                              '...',
-                                                                            ),
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                    '...',
                                                                                   ),
-                                                                                  fontSize: 14.0,
-                                                                                  letterSpacing: 0.0,
+                                                                            '...',
+                                                                          ),
+                                                                          style: FlutterFlowTheme.of(context)
+                                                                              .bodyMedium
+                                                                              .override(
+                                                                                font: GoogleFonts.inter(
                                                                                   fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                                   fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                 ),
-                                                                          ),
-                                                                        );
-                                                                      }
-                                                                    },
-                                                                  ),
-                                                                ),
-                                                                FlutterFlowIconButton(
-                                                                  borderRadius:
-                                                                      8.0,
-                                                                  buttonSize:
-                                                                      44.0,
-                                                                  fillColor: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .calendar_month,
-                                                                    color: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .info,
-                                                                    size: 24.0,
-                                                                  ),
-                                                                  onPressed:
-                                                                      () {
-                                                                    print(
-                                                                        'IconButton pressed ...');
+                                                                                fontSize: 14.0,
+                                                                                letterSpacing: 0.0,
+                                                                                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                              ),
+                                                                        ),
+                                                                      );
+                                                                    }
                                                                   },
                                                                 ),
-                                                              ].divide(SizedBox(
-                                                                  width: 9.0)),
-                                                            ),
+                                                              ),
+                                                              FlutterFlowIconButton(
+                                                                borderRadius:
+                                                                    8.0,
+                                                                buttonSize:
+                                                                    44.0,
+                                                                fillColor: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primaryText,
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .calendar_month,
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .info,
+                                                                  size: 24.0,
+                                                                ),
+                                                                onPressed:
+                                                                    () async {
+                                                                  logFirebaseEvent(
+                                                                      'SERVICE_URGENT_calendar_month_ICN_ON_TAP');
+                                                                  // Data Entrada
+                                                                  logFirebaseEvent(
+                                                                      'IconButton_DataEntrada');
+                                                                  final _datePicked1Date =
+                                                                      await showDatePicker(
+                                                                    context:
+                                                                        context,
+                                                                    initialDate:
+                                                                        getCurrentTimestamp,
+                                                                    firstDate:
+                                                                        getCurrentTimestamp,
+                                                                    lastDate:
+                                                                        DateTime(
+                                                                            2050),
+                                                                    builder:
+                                                                        (context,
+                                                                            child) {
+                                                                      return wrapInMaterialDatePickerTheme(
+                                                                        context,
+                                                                        child!,
+                                                                        headerBackgroundColor:
+                                                                            FlutterFlowTheme.of(context).primary,
+                                                                        headerForegroundColor:
+                                                                            FlutterFlowTheme.of(context).info,
+                                                                        headerTextStyle: FlutterFlowTheme.of(context)
+                                                                            .headlineLarge
+                                                                            .override(
+                                                                              font: GoogleFonts.interTight(
+                                                                                fontWeight: FontWeight.w600,
+                                                                                fontStyle: FlutterFlowTheme.of(context).headlineLarge.fontStyle,
+                                                                              ),
+                                                                              fontSize: 32.0,
+                                                                              letterSpacing: 0.0,
+                                                                              fontWeight: FontWeight.w600,
+                                                                              fontStyle: FlutterFlowTheme.of(context).headlineLarge.fontStyle,
+                                                                            ),
+                                                                        pickerBackgroundColor:
+                                                                            FlutterFlowTheme.of(context).secondaryBackground,
+                                                                        pickerForegroundColor:
+                                                                            FlutterFlowTheme.of(context).primaryText,
+                                                                        selectedDateTimeBackgroundColor:
+                                                                            FlutterFlowTheme.of(context).primary,
+                                                                        selectedDateTimeForegroundColor:
+                                                                            FlutterFlowTheme.of(context).info,
+                                                                        actionButtonForegroundColor:
+                                                                            FlutterFlowTheme.of(context).primaryText,
+                                                                        iconSize:
+                                                                            24.0,
+                                                                      );
+                                                                    },
+                                                                  );
+
+                                                                  if (_datePicked1Date !=
+                                                                      null) {
+                                                                    safeSetState(
+                                                                        () {
+                                                                      _model.datePicked1 =
+                                                                          DateTime(
+                                                                        _datePicked1Date
+                                                                            .year,
+                                                                        _datePicked1Date
+                                                                            .month,
+                                                                        _datePicked1Date
+                                                                            .day,
+                                                                      );
+                                                                    });
+                                                                  } else if (_model
+                                                                          .datePicked1 !=
+                                                                      null) {
+                                                                    safeSetState(
+                                                                        () {
+                                                                      _model.datePicked1 =
+                                                                          getCurrentTimestamp;
+                                                                    });
+                                                                  }
+                                                                  logFirebaseEvent(
+                                                                      'IconButton_update_page_state');
+                                                                  _model.dateStart =
+                                                                      _model
+                                                                          .datePicked1;
+                                                                  safeSetState(
+                                                                      () {});
+                                                                },
+                                                              ),
+                                                            ].divide(SizedBox(
+                                                                width: 9.0)),
                                                           ),
                                                         ),
                                                       ],
@@ -1222,222 +1196,224 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                               width: 2.0,
                                                             ),
                                                           ),
-                                                          child: InkWell(
-                                                            splashColor: Colors
-                                                                .transparent,
-                                                            focusColor: Colors
-                                                                .transparent,
-                                                            hoverColor: Colors
-                                                                .transparent,
-                                                            highlightColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            onTap: () async {
-                                                              logFirebaseEvent(
-                                                                  'SERVICE_URGENT_Row_y4ulqpry_ON_TAP');
-                                                              // Data Entrada
-                                                              logFirebaseEvent(
-                                                                  'Row_DataEntrada');
-                                                              final _datePicked2Date =
-                                                                  await showDatePicker(
-                                                                context:
-                                                                    context,
-                                                                initialDate:
-                                                                    getCurrentTimestamp,
-                                                                firstDate:
-                                                                    getCurrentTimestamp,
-                                                                lastDate:
-                                                                    DateTime(
-                                                                        2050),
-                                                                builder:
-                                                                    (context,
-                                                                        child) {
-                                                                  return wrapInMaterialDatePickerTheme(
-                                                                    context,
-                                                                    child!,
-                                                                    headerBackgroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primary,
-                                                                    headerForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .info,
-                                                                    headerTextStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .headlineLarge
-                                                                        .override(
-                                                                          font:
-                                                                              GoogleFonts.interTight(
-                                                                            fontWeight:
-                                                                                FontWeight.w600,
-                                                                            fontStyle:
-                                                                                FlutterFlowTheme.of(context).headlineLarge.fontStyle,
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Expanded(
+                                                                child: Builder(
+                                                                  builder:
+                                                                      (context) {
+                                                                    if (_model
+                                                                            .dateEnd !=
+                                                                        null) {
+                                                                      return Padding(
+                                                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                                                            12.0,
+                                                                            0.0,
+                                                                            0.0,
+                                                                            0.0),
+                                                                        child:
+                                                                            Text(
+                                                                          dateTimeFormat(
+                                                                            "dd/MM/yy",
+                                                                            _model.dateEnd,
+                                                                            locale:
+                                                                                FFLocalizations.of(context).languageCode,
                                                                           ),
-                                                                          fontSize:
-                                                                              32.0,
-                                                                          letterSpacing:
-                                                                              0.0,
-                                                                          fontWeight:
-                                                                              FontWeight.w600,
-                                                                          fontStyle: FlutterFlowTheme.of(context)
-                                                                              .headlineLarge
-                                                                              .fontStyle,
+                                                                          style: FlutterFlowTheme.of(context)
+                                                                              .bodyMedium
+                                                                              .override(
+                                                                                font: GoogleFonts.inter(
+                                                                                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                ),
+                                                                                fontSize: 14.0,
+                                                                                letterSpacing: 0.0,
+                                                                                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                              ),
                                                                         ),
-                                                                    pickerBackgroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .secondaryBackground,
-                                                                    pickerForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primaryText,
-                                                                    selectedDateTimeBackgroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primary,
-                                                                    selectedDateTimeForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .info,
-                                                                    actionButtonForegroundColor:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .primaryText,
-                                                                    iconSize:
-                                                                        24.0,
-                                                                  );
-                                                                },
-                                                              );
-
-                                                              if (_datePicked2Date !=
-                                                                  null) {
-                                                                safeSetState(
-                                                                    () {
-                                                                  _model.datePicked2 =
-                                                                      DateTime(
-                                                                    _datePicked2Date
-                                                                        .year,
-                                                                    _datePicked2Date
-                                                                        .month,
-                                                                    _datePicked2Date
-                                                                        .day,
-                                                                  );
-                                                                });
-                                                              } else if (_model
-                                                                      .datePicked2 !=
-                                                                  null) {
-                                                                safeSetState(
-                                                                    () {
-                                                                  _model.datePicked2 =
-                                                                      getCurrentTimestamp;
-                                                                });
-                                                              }
-                                                              logFirebaseEvent(
-                                                                  'Row_update_page_state');
-                                                              _model.dateEnd =
-                                                                  _model
-                                                                      .datePicked2;
-                                                              safeSetState(
-                                                                  () {});
-                                                            },
-                                                            child: Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .max,
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Expanded(
-                                                                  child:
-                                                                      Builder(
-                                                                    builder:
-                                                                        (context) {
-                                                                      if (_model
-                                                                              .dateEnd !=
-                                                                          null) {
-                                                                        return Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              12.0,
-                                                                              0.0,
-                                                                              0.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            dateTimeFormat(
-                                                                              "dd/MM/yy",
-                                                                              _model.dateEnd,
-                                                                              locale: FFLocalizations.of(context).languageCode,
-                                                                            ),
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                  ),
-                                                                                  fontSize: 14.0,
-                                                                                  letterSpacing: 0.0,
-                                                                                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                ),
-                                                                          ),
-                                                                        );
-                                                                      } else {
-                                                                        return Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              12.0,
-                                                                              0.0,
-                                                                              0.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            valueOrDefault<String>(
-                                                                              _model.dateEnd != null
-                                                                                  ? _model.dateEnd?.toString()
-                                                                                  : valueOrDefault<String>(
-                                                                                      dateTimeFormat(
-                                                                                        "d/M/y",
-                                                                                        stackServicesRow?.dateEnd,
-                                                                                        locale: FFLocalizations.of(context).languageCode,
-                                                                                      ),
-                                                                                      '...',
+                                                                      );
+                                                                    } else {
+                                                                      return Padding(
+                                                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                                                            12.0,
+                                                                            0.0,
+                                                                            0.0,
+                                                                            0.0),
+                                                                        child:
+                                                                            Text(
+                                                                          valueOrDefault<
+                                                                              String>(
+                                                                            _model.dateEnd != null
+                                                                                ? _model.dateEnd?.toString()
+                                                                                : valueOrDefault<String>(
+                                                                                    dateTimeFormat(
+                                                                                      "d/M/y",
+                                                                                      stackServicesRow?.dateEnd,
+                                                                                      locale: FFLocalizations.of(context).languageCode,
                                                                                     ),
-                                                                              '...',
-                                                                            ),
-                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                  font: GoogleFonts.inter(
-                                                                                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                    '...',
                                                                                   ),
-                                                                                  fontSize: 14.0,
-                                                                                  letterSpacing: 0.0,
+                                                                            '...',
+                                                                          ),
+                                                                          style: FlutterFlowTheme.of(context)
+                                                                              .bodyMedium
+                                                                              .override(
+                                                                                font: GoogleFonts.inter(
                                                                                   fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                                   fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                 ),
-                                                                          ),
-                                                                        );
-                                                                      }
-                                                                    },
-                                                                  ),
-                                                                ),
-                                                                FlutterFlowIconButton(
-                                                                  borderRadius:
-                                                                      8.0,
-                                                                  buttonSize:
-                                                                      44.0,
-                                                                  fillColor: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .calendar_month_sharp,
-                                                                    color: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .info,
-                                                                    size: 24.0,
-                                                                  ),
-                                                                  onPressed:
-                                                                      () {
-                                                                    print(
-                                                                        'IconButton pressed ...');
+                                                                                fontSize: 14.0,
+                                                                                letterSpacing: 0.0,
+                                                                                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                              ),
+                                                                        ),
+                                                                      );
+                                                                    }
                                                                   },
                                                                 ),
-                                                              ].divide(SizedBox(
-                                                                  width: 9.0)),
-                                                            ),
+                                                              ),
+                                                              FlutterFlowIconButton(
+                                                                borderRadius:
+                                                                    8.0,
+                                                                buttonSize:
+                                                                    44.0,
+                                                                fillColor: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primaryText,
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .calendar_month_sharp,
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .info,
+                                                                  size: 24.0,
+                                                                ),
+                                                                onPressed:
+                                                                    () async {
+                                                                  logFirebaseEvent(
+                                                                      'SERVICE_URGENT_calendar_month_sharp_ICN_');
+                                                                  if (_model
+                                                                          .dateStart !=
+                                                                      null) {
+                                                                    // Data Entrada
+                                                                    logFirebaseEvent(
+                                                                        'IconButton_DataEntrada');
+                                                                    final _datePicked2Date =
+                                                                        await showDatePicker(
+                                                                      context:
+                                                                          context,
+                                                                      initialDate:
+                                                                          getCurrentTimestamp,
+                                                                      firstDate: (_model
+                                                                              .dateStart ??
+                                                                          DateTime(
+                                                                              1900)),
+                                                                      lastDate:
+                                                                          DateTime(
+                                                                              2050),
+                                                                      builder:
+                                                                          (context,
+                                                                              child) {
+                                                                        return wrapInMaterialDatePickerTheme(
+                                                                          context,
+                                                                          child!,
+                                                                          headerBackgroundColor:
+                                                                              FlutterFlowTheme.of(context).primary,
+                                                                          headerForegroundColor:
+                                                                              FlutterFlowTheme.of(context).info,
+                                                                          headerTextStyle: FlutterFlowTheme.of(context)
+                                                                              .headlineLarge
+                                                                              .override(
+                                                                                font: GoogleFonts.interTight(
+                                                                                  fontWeight: FontWeight.w600,
+                                                                                  fontStyle: FlutterFlowTheme.of(context).headlineLarge.fontStyle,
+                                                                                ),
+                                                                                fontSize: 32.0,
+                                                                                letterSpacing: 0.0,
+                                                                                fontWeight: FontWeight.w600,
+                                                                                fontStyle: FlutterFlowTheme.of(context).headlineLarge.fontStyle,
+                                                                              ),
+                                                                          pickerBackgroundColor:
+                                                                              FlutterFlowTheme.of(context).secondaryBackground,
+                                                                          pickerForegroundColor:
+                                                                              FlutterFlowTheme.of(context).primaryText,
+                                                                          selectedDateTimeBackgroundColor:
+                                                                              FlutterFlowTheme.of(context).primary,
+                                                                          selectedDateTimeForegroundColor:
+                                                                              FlutterFlowTheme.of(context).info,
+                                                                          actionButtonForegroundColor:
+                                                                              FlutterFlowTheme.of(context).primaryText,
+                                                                          iconSize:
+                                                                              24.0,
+                                                                        );
+                                                                      },
+                                                                    );
+
+                                                                    if (_datePicked2Date !=
+                                                                        null) {
+                                                                      safeSetState(
+                                                                          () {
+                                                                        _model.datePicked2 =
+                                                                            DateTime(
+                                                                          _datePicked2Date
+                                                                              .year,
+                                                                          _datePicked2Date
+                                                                              .month,
+                                                                          _datePicked2Date
+                                                                              .day,
+                                                                        );
+                                                                      });
+                                                                    } else if (_model
+                                                                            .datePicked2 !=
+                                                                        null) {
+                                                                      safeSetState(
+                                                                          () {
+                                                                        _model.datePicked2 =
+                                                                            getCurrentTimestamp;
+                                                                      });
+                                                                    }
+                                                                    logFirebaseEvent(
+                                                                        'IconButton_update_page_state');
+                                                                    _model.dateEnd =
+                                                                        _model
+                                                                            .datePicked2;
+                                                                    safeSetState(
+                                                                        () {});
+                                                                  } else {
+                                                                    logFirebaseEvent(
+                                                                        'IconButton_alert_dialog');
+                                                                    await showDialog(
+                                                                      context:
+                                                                          context,
+                                                                      builder:
+                                                                          (alertDialogContext) {
+                                                                        return AlertDialog(
+                                                                          title:
+                                                                              Text('Opa!'),
+                                                                          content:
+                                                                              Text('Escolha a data de inicio!'),
+                                                                          actions: [
+                                                                            TextButton(
+                                                                              onPressed: () => Navigator.pop(alertDialogContext),
+                                                                              child: Text('Ok'),
+                                                                            ),
+                                                                          ],
+                                                                        );
+                                                                      },
+                                                                    );
+                                                                  }
+                                                                },
+                                                              ),
+                                                            ].divide(SizedBox(
+                                                                width: 9.0)),
                                                           ),
                                                         ),
                                                       ],
@@ -1704,104 +1680,147 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                             safeSetState(() {});
                                           return;
                                         } else {
-                                          logFirebaseEvent(
-                                              'Button_validate_form');
-                                          _model.validateOne = true;
-                                          if (_model.formKey.currentState ==
-                                                  null ||
-                                              !_model.formKey.currentState!
-                                                  .validate()) {
-                                            safeSetState(() =>
-                                                _model.validateOne = false);
-                                            return;
-                                          }
-                                          if (_model.categoryValue == null) {
-                                            await showDialog(
-                                              context: context,
-                                              builder: (alertDialogContext) {
-                                                return AlertDialog(
-                                                  title: Text('Erro'),
-                                                  content: Text(
-                                                      'A categoria é obrigatoria'),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext),
-                                                      child: Text('Ok'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                            _model.validateOne = false;
+                                          if (FFAppState().typecompany != '') {
+                                            logFirebaseEvent(
+                                                'Button_backend_call');
+                                            _model.create1 =
+                                                await ServicesTable().insert({
+                                              'userId': currentUserUid,
+                                              'name': _model
+                                                  .titleTextController.text,
+                                              'description': _model
+                                                  .descriptionTextController
+                                                  .text,
+                                              'dateStart':
+                                                  supaSerialize<DateTime>(
+                                                      _model.dateStart),
+                                              'dateEnd':
+                                                  supaSerialize<DateTime>(
+                                                      _model.dateEnd),
+                                              'price': FFAppState().propPrice,
+                                              'categoryId':
+                                                  _model.categoryValue,
+                                              'time': _model.hourArrivedValue,
+                                              'condition':
+                                                  Conditions.Openned.name,
+                                              'jobType': JobTypes.Urgente.name,
+                                            });
+                                            _shouldSetState = true;
+                                            logFirebaseEvent(
+                                                'Button_update_app_state');
+                                            FFAppState().serviceId =
+                                                _model.create1!.id;
                                             safeSetState(() {});
-                                            return;
-                                          }
-                                          if (_model.hourArrivedValue == null) {
-                                            await showDialog(
-                                              context: context,
-                                              builder: (alertDialogContext) {
-                                                return AlertDialog(
-                                                  title: Text('Erro'),
-                                                  content: Text(
-                                                      'A Hora de chegada  é obrigatoria'),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext),
-                                                      child: Text('Ok'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
+                                            logFirebaseEvent(
+                                                'Button_page_view');
+                                            await _model.pageViewController
+                                                ?.nextPage(
+                                              duration:
+                                                  Duration(milliseconds: 300),
+                                              curve: Curves.ease,
                                             );
-                                            _model.validateOne = false;
-                                            safeSetState(() {});
-                                            return;
-                                          }
-                                          _shouldSetState = true;
-                                          if (_model.validateOne!) {
-                                            if ((_model.dateStart != null) &&
-                                                (_model.dateEnd != null)) {
-                                              logFirebaseEvent(
-                                                  'Button_backend_call');
-                                              _model.create =
-                                                  await ServicesTable().insert({
-                                                'userId': currentUserUid,
-                                                'name': _model
-                                                    .titleTextController.text,
-                                                'description': _model
-                                                    .descriptionTextController
-                                                    .text,
-                                                'dateStart':
-                                                    supaSerialize<DateTime>(
-                                                        _model.dateStart),
-                                                'dateEnd':
-                                                    supaSerialize<DateTime>(
-                                                        _model.datePicked2),
-                                                'price': FFAppState().propPrice,
-                                                'categoryId':
-                                                    _model.categoryValue,
-                                                'time': _model.hourArrivedValue,
-                                                'condition':
-                                                    Conditions.Openned.name,
-                                                'jobType':
-                                                    JobTypes.Urgente.name,
-                                              });
-                                              _shouldSetState = true;
-                                              logFirebaseEvent(
-                                                  'Button_update_app_state');
-                                              FFAppState().serviceId =
-                                                  _model.create!.id;
+                                            if (_shouldSetState)
                                               safeSetState(() {});
-                                              if (FFAppState().typecompany ==
-                                                      '') {
+                                            return;
+                                          } else {
+                                            logFirebaseEvent(
+                                                'Button_validate_form');
+                                            _model.validateOne = true;
+                                            if (_model.formKey.currentState ==
+                                                    null ||
+                                                !_model.formKey.currentState!
+                                                    .validate()) {
+                                              safeSetState(() =>
+                                                  _model.validateOne = false);
+                                              return;
+                                            }
+                                            if (_model.categoryValue == null) {
+                                              await showDialog(
+                                                context: context,
+                                                builder: (alertDialogContext) {
+                                                  return AlertDialog(
+                                                    title: Text('Erro'),
+                                                    content: Text(
+                                                        'A categoria é obrigatoria'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                                alertDialogContext),
+                                                        child: Text('Ok'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                              _model.validateOne = false;
+                                              safeSetState(() {});
+                                              return;
+                                            }
+                                            if (_model.hourArrivedValue ==
+                                                null) {
+                                              await showDialog(
+                                                context: context,
+                                                builder: (alertDialogContext) {
+                                                  return AlertDialog(
+                                                    title: Text('Erro'),
+                                                    content: Text(
+                                                        'A Hora de chegada  é obrigatoria'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                                alertDialogContext),
+                                                        child: Text('Ok'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                              _model.validateOne = false;
+                                              safeSetState(() {});
+                                              return;
+                                            }
+                                            _shouldSetState = true;
+                                            if (_model.validateOne!) {
+                                              if ((_model.dateStart != null) &&
+                                                  (_model.dateEnd != null)) {
                                                 if (functions.validateTrial(
                                                     FFAppState().trial)) {
                                                   logFirebaseEvent(
+                                                      'Button_backend_call');
+                                                  _model.create =
+                                                      await ServicesTable()
+                                                          .insert({
+                                                    'userId': currentUserUid,
+                                                    'name': _model
+                                                        .titleTextController
+                                                        .text,
+                                                    'description': _model
+                                                        .descriptionTextController
+                                                        .text,
+                                                    'dateStart':
+                                                        supaSerialize<DateTime>(
+                                                            _model.dateStart),
+                                                    'dateEnd':
+                                                        supaSerialize<DateTime>(
+                                                            _model.dateEnd),
+                                                    'price':
+                                                        FFAppState().propPrice,
+                                                    'categoryId':
+                                                        _model.categoryValue,
+                                                    'time':
+                                                        _model.hourArrivedValue,
+                                                    'condition':
+                                                        Conditions.Openned.name,
+                                                    'jobType':
+                                                        JobTypes.Urgente.name,
+                                                  });
+                                                  _shouldSetState = true;
+                                                  logFirebaseEvent(
                                                       'Button_update_app_state');
+                                                  FFAppState().serviceId =
+                                                      _model.create!.id;
                                                   FFAppState().trial =
                                                       functions.newValuetrial(
                                                           FFAppState().trial,
@@ -1835,60 +1854,67 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                   return;
                                                 } else {
                                                   logFirebaseEvent(
-                                                      'Button_page_view');
-                                                  await _model
-                                                      .pageViewController
-                                                      ?.nextPage(
-                                                    duration: Duration(
-                                                        milliseconds: 300),
-                                                    curve: Curves.ease,
+                                                      'Button_alert_dialog');
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (alertDialogContext) {
+                                                      return AlertDialog(
+                                                        title: Text('Opa!'),
+                                                        content: Text(
+                                                            'Você não tem créditos disponivel.'),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    alertDialogContext),
+                                                            child: Text('Ok'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
                                                   );
+                                                  logFirebaseEvent(
+                                                      'Button_navigate_to');
+
+                                                  context.pushNamed(
+                                                      HomePageWidget.routeName);
+
                                                   if (_shouldSetState)
                                                     safeSetState(() {});
                                                   return;
                                                 }
                                               } else {
                                                 logFirebaseEvent(
-                                                    'Button_page_view');
-                                                await _model.pageViewController
-                                                    ?.nextPage(
-                                                  duration: Duration(
-                                                      milliseconds: 300),
-                                                  curve: Curves.ease,
+                                                    'Button_alert_dialog');
+                                                await showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (alertDialogContext) {
+                                                    return AlertDialog(
+                                                      title: Text('Opa!'),
+                                                      content: Text(
+                                                          'Verifique os campos de datas. Campos Obrigatorio'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                  alertDialogContext),
+                                                          child: Text('Ok'),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
                                                 );
                                                 if (_shouldSetState)
                                                   safeSetState(() {});
                                                 return;
                                               }
                                             } else {
-                                              logFirebaseEvent(
-                                                  'Button_alert_dialog');
-                                              await showDialog(
-                                                context: context,
-                                                builder: (alertDialogContext) {
-                                                  return AlertDialog(
-                                                    title: Text('Opa!'),
-                                                    content: Text(
-                                                        'Verifique os campos de datas. Campos Obrigatorio'),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                                alertDialogContext),
-                                                        child: Text('Ok'),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
                                               if (_shouldSetState)
                                                 safeSetState(() {});
                                               return;
                                             }
-                                          } else {
-                                            if (_shouldSetState)
-                                              safeSetState(() {});
-                                            return;
                                           }
                                         }
 
@@ -2590,14 +2616,10 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                       borderRadius:
                                                                           BorderRadius
                                                                               .only(
-                                                                        bottomLeft:
-                                                                            Radius.circular(8.0),
-                                                                        bottomRight:
-                                                                            Radius.circular(0.0),
                                                                         topLeft:
                                                                             Radius.circular(8.0),
-                                                                        topRight:
-                                                                            Radius.circular(0.0),
+                                                                        bottomLeft:
+                                                                            Radius.circular(8.0),
                                                                       ),
                                                                     ),
                                                                     focusedBorder:
@@ -2612,14 +2634,10 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                       borderRadius:
                                                                           BorderRadius
                                                                               .only(
-                                                                        bottomLeft:
-                                                                            Radius.circular(8.0),
-                                                                        bottomRight:
-                                                                            Radius.circular(0.0),
                                                                         topLeft:
                                                                             Radius.circular(8.0),
-                                                                        topRight:
-                                                                            Radius.circular(0.0),
+                                                                        bottomLeft:
+                                                                            Radius.circular(8.0),
                                                                       ),
                                                                     ),
                                                                     errorBorder:
@@ -2634,14 +2652,10 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                       borderRadius:
                                                                           BorderRadius
                                                                               .only(
-                                                                        bottomLeft:
-                                                                            Radius.circular(8.0),
-                                                                        bottomRight:
-                                                                            Radius.circular(0.0),
                                                                         topLeft:
                                                                             Radius.circular(8.0),
-                                                                        topRight:
-                                                                            Radius.circular(0.0),
+                                                                        bottomLeft:
+                                                                            Radius.circular(8.0),
                                                                       ),
                                                                     ),
                                                                     focusedErrorBorder:
@@ -2656,14 +2670,10 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                       borderRadius:
                                                                           BorderRadius
                                                                               .only(
-                                                                        bottomLeft:
-                                                                            Radius.circular(8.0),
-                                                                        bottomRight:
-                                                                            Radius.circular(0.0),
                                                                         topLeft:
                                                                             Radius.circular(8.0),
-                                                                        topRight:
-                                                                            Radius.circular(0.0),
+                                                                        bottomLeft:
+                                                                            Radius.circular(8.0),
                                                                       ),
                                                                     ),
                                                                     filled:
@@ -2798,16 +2808,10 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                 borderRadius:
                                                                     BorderRadius
                                                                         .only(
-                                                                  bottomLeft: Radius
-                                                                      .circular(
-                                                                          0.0),
-                                                                  bottomRight: Radius
+                                                                  topRight: Radius
                                                                       .circular(
                                                                           8.0),
-                                                                  topLeft: Radius
-                                                                      .circular(
-                                                                          0.0),
-                                                                  topRight: Radius
+                                                                  bottomRight: Radius
                                                                       .circular(
                                                                           8.0),
                                                                 ),
@@ -3399,19 +3403,6 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                           FFAppState().serviceId = '';
 
                                           safeSetState(() {});
-                                          logFirebaseEvent(
-                                              'button_backend_call');
-                                          _model.notif =
-                                              await NotificationsNewServiceTable()
-                                                  .insert({
-                                            'categories_id':
-                                                stackServicesRow?.categoryId,
-                                            'service_id': stackServicesRow?.id,
-                                            'title':
-                                                'Novo serviço disponível para você',
-                                            'body':
-                                                'Temos uma novidade para você.                   Um novo serviço relacionado a sua categoria já está disponível no app.                   Confira agora e aproveite esta nova oportunidade.',
-                                          });
                                           logFirebaseEvent(
                                               'button_alert_dialog');
                                           await showDialog(

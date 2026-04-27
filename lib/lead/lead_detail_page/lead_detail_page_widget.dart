@@ -186,6 +186,9 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                       snapshot.data!;
 
                                   return Container(
+                                    constraints: BoxConstraints(
+                                      minHeight: 300.0,
+                                    ),
                                     decoration: BoxDecoration(),
                                     child: Visibility(
                                       visible: containerServicesImagesRowList
@@ -278,7 +281,7 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                                               double.infinity,
                                                           height:
                                                               double.infinity,
-                                                          fit: BoxFit.cover,
+                                                          fit: BoxFit.contain,
                                                         ),
                                                       ),
                                                     ),
@@ -338,85 +341,135 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                       Padding(
                                         padding: EdgeInsetsDirectional.fromSTEB(
                                             0.0, 0.0, 0.0, 6.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      12.0, 0.0, 12.0, 0.0),
-                                              child: RichText(
-                                                textScaler:
-                                                    MediaQuery.of(context)
-                                                        .textScaler,
-                                                text: TextSpan(
-                                                  children: [
-                                                    TextSpan(
-                                                      text: valueOrDefault<
-                                                          String>(
-                                                        leadDetailPageLeadsRow
-                                                            ?.typeFornecedor,
-                                                        'fornecedor',
-                                                      ),
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            font: GoogleFonts
-                                                                .inter(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
+                                        child: FutureBuilder<
+                                            List<TypeProviderRow>>(
+                                          future: TypeProviderTable()
+                                              .querySingleRow(
+                                            queryFn: (q) => q.eqOrNull(
+                                              'id',
+                                              '',
+                                            ),
+                                          ),
+                                          builder: (context, snapshot) {
+                                            // Customize what your widget looks like when it's loading.
+                                            if (!snapshot.hasData) {
+                                              return Center(
+                                                child: SizedBox(
+                                                  width: 50.0,
+                                                  height: 50.0,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                            Color>(
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                            List<TypeProviderRow>
+                                                containerTypeProviderRowList =
+                                                snapshot.data!;
+
+                                            // Return an empty Container when the item does not exist.
+                                            if (snapshot.data!.isEmpty) {
+                                              return Container();
+                                            }
+                                            final containerTypeProviderRow =
+                                                containerTypeProviderRowList
+                                                        .isNotEmpty
+                                                    ? containerTypeProviderRowList
+                                                        .first
+                                                    : null;
+
+                                            return Container(
+                                              height: 20.0,
+                                              decoration: BoxDecoration(),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(12.0, 0.0,
+                                                                12.0, 0.0),
+                                                    child: RichText(
+                                                      textScaler:
+                                                          MediaQuery.of(context)
+                                                              .textScaler,
+                                                      text: TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text:
+                                                                containerTypeProviderRow!
+                                                                    .name!,
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  font:
+                                                                      GoogleFonts
+                                                                          .inter(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  fontSize:
+                                                                      14.0,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontStyle: FlutterFlowTheme.of(
                                                                           context)
                                                                       .bodyMedium
                                                                       .fontStyle,
-                                                            ),
-                                                            fontSize: 14.0,
-                                                            letterSpacing: 0.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                    )
-                                                  ],
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
+                                                                ),
+                                                          )
+                                                        ],
+                                                        style:
                                                             FlutterFlowTheme.of(
                                                                     context)
                                                                 .bodyMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
+                                                                .override(
+                                                                  font:
+                                                                      GoogleFonts
+                                                                          .inter(
+                                                                    fontWeight: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyMedium
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontStyle,
+                                                                ),
                                                       ),
-                                                ),
+                                                    ),
+                                                  ),
+                                                ].divide(SizedBox(width: 6.0)),
                                               ),
-                                            ),
-                                          ].divide(SizedBox(width: 6.0)),
+                                            );
+                                          },
                                         ),
                                       ),
                                       Padding(
@@ -1327,188 +1380,251 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                         decoration: BoxDecoration(),
                         child: Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              12.0, 7.0, 12.0, 0.0),
+                              12.0, 7.0, 12.0, 7.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              FFButtonWidget(
-                                onPressed: () async {
-                                  logFirebaseEvent(
-                                      'LEAD_DETAIL_PAGE_PAGE_Apagar_ON_TAP');
-                                  logFirebaseEvent('Apagar_alert_dialog');
-                                  var confirmDialogResponse =
-                                      await showDialog<bool>(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                title: Text('Opa!'),
-                                                content: Text(
-                                                    'Deseja  apagar o serviço.'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext,
-                                                            false),
-                                                    child: Text('Não'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext,
-                                                            true),
-                                                    child: Text('Sim'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          ) ??
-                                          false;
-                                  if (confirmDialogResponse) {
-                                    logFirebaseEvent('Apagar_backend_call');
-                                    await LeadsTable().delete(
-                                      matchingRows: (rows) => rows.eqOrNull(
-                                        'id',
-                                        widget.id,
-                                      ),
-                                    );
-                                    logFirebaseEvent('Apagar_navigate_to');
-
-                                    context.pushNamed(LeadPageWidget.routeName);
-                                  }
-                                },
-                                text: 'Apagar',
-                                options: FFButtonOptions(
-                                  width: 100.0,
-                                  height: 40.0,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).error,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.interTight(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: Colors.white,
-                                        fontSize: 14.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                showLoadingIndicator: false,
-                              ),
-                              if (leadDetailPageLeadsRow.endRegister ?? true)
-                                FFButtonWidget(
+                              if (leadDetailPageLeadsRow.userId !=
+                                  currentUserUid)
+                                FlutterFlowIconButton(
+                                  borderRadius: 25.0,
+                                  buttonSize: 40.0,
+                                  fillColor: Color(0xFF25D366),
+                                  icon: FaIcon(
+                                    FontAwesomeIcons.whatsapp,
+                                    color: FlutterFlowTheme.of(context).info,
+                                    size: 24.0,
+                                  ),
                                   onPressed: () async {
                                     logFirebaseEvent(
-                                        'LEAD_DETAIL_PAGE_PAGE_Finalizar_ON_TAP');
-                                    logFirebaseEvent('Finalizar_alert_dialog');
-                                    var confirmDialogResponse =
-                                        await showDialog<bool>(
-                                              context: context,
-                                              builder: (alertDialogContext) {
-                                                return AlertDialog(
-                                                  title: Text('Opa!'),
-                                                  content: Text(
-                                                      'Deseja Finalizar o Serviço?'),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext,
-                                                              false),
-                                                      child: Text('Não'),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext,
-                                                              true),
-                                                      child: Text('Sim'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            ) ??
-                                            false;
-                                    if (confirmDialogResponse) {
-                                      logFirebaseEvent(
-                                          'Finalizar_backend_call');
-                                      await LeadsTable().update(
-                                        data: {
-                                          'finished': true,
-                                        },
-                                        matchingRows: (rows) => rows.eqOrNull(
-                                          'id',
-                                          widget.id,
-                                        ),
-                                      );
-                                      logFirebaseEvent('Finalizar_navigate_to');
-
-                                      context.goNamed(LeadPageWidget.routeName);
-                                    }
-
-                                    safeSetState(() {});
+                                        'LEAD_DETAIL_whatsapp_ICN_ON_TAP');
+                                    logFirebaseEvent('IconButton_launch_u_r_l');
+                                    await launchURL(
+                                        'https://wa.me/55${valueOrDefault<String>(
+                                      leadDetailPageLeadsRow.contatoDuvida,
+                                      'Contato',
+                                    )}?text=Tenho%20interesse');
                                   },
-                                  text: 'Finalizar',
-                                  options: FFButtonOptions(
-                                    width: 140.0,
-                                    height: 40.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          font: GoogleFonts.interTight(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: Colors.white,
-                                          fontSize: 14.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  showLoadingIndicator: false,
                                 ),
-                            ].divide(SizedBox(width: 15.0)),
+                              if (leadDetailPageLeadsRow.userId ==
+                                  currentUserUid)
+                                Expanded(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      FFButtonWidget(
+                                        onPressed: () async {
+                                          logFirebaseEvent(
+                                              'LEAD_DETAIL_PAGE_PAGE_Apagar_ON_TAP');
+                                          logFirebaseEvent(
+                                              'Apagar_alert_dialog');
+                                          var confirmDialogResponse =
+                                              await showDialog<bool>(
+                                                    context: context,
+                                                    builder:
+                                                        (alertDialogContext) {
+                                                      return AlertDialog(
+                                                        title: Text('Opa!'),
+                                                        content: Text(
+                                                            'Deseja  apagar o serviço.'),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    alertDialogContext,
+                                                                    false),
+                                                            child: Text('Não'),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    alertDialogContext,
+                                                                    true),
+                                                            child: Text('Sim'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  ) ??
+                                                  false;
+                                          if (confirmDialogResponse) {
+                                            logFirebaseEvent(
+                                                'Apagar_backend_call');
+                                            await LeadsTable().delete(
+                                              matchingRows: (rows) =>
+                                                  rows.eqOrNull(
+                                                'id',
+                                                widget.id,
+                                              ),
+                                            );
+                                            logFirebaseEvent(
+                                                'Apagar_navigate_to');
+
+                                            context.pushNamed(
+                                                LeadPageWidget.routeName);
+                                          }
+                                        },
+                                        text: 'Apagar',
+                                        options: FFButtonOptions(
+                                          width: 100.0,
+                                          height: 40.0,
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  16.0, 0.0, 16.0, 0.0),
+                                          iconPadding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  0.0, 0.0, 0.0, 0.0),
+                                          color: FlutterFlowTheme.of(context)
+                                              .error,
+                                          textStyle: FlutterFlowTheme.of(
+                                                  context)
+                                              .titleSmall
+                                              .override(
+                                                font: GoogleFonts.interTight(
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleSmall
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleSmall
+                                                          .fontStyle,
+                                                ),
+                                                color: Colors.white,
+                                                fontSize: 14.0,
+                                                letterSpacing: 0.0,
+                                                fontWeight:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .fontWeight,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .fontStyle,
+                                              ),
+                                          elevation: 0.0,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        showLoadingIndicator: false,
+                                      ),
+                                      if (leadDetailPageLeadsRow.endRegister ??
+                                          true)
+                                        FFButtonWidget(
+                                          onPressed: () async {
+                                            logFirebaseEvent(
+                                                'LEAD_DETAIL_PAGE_PAGE_Finalizar_ON_TAP');
+                                            logFirebaseEvent(
+                                                'Finalizar_alert_dialog');
+                                            var confirmDialogResponse =
+                                                await showDialog<bool>(
+                                                      context: context,
+                                                      builder:
+                                                          (alertDialogContext) {
+                                                        return AlertDialog(
+                                                          title: Text('Opa!'),
+                                                          content: Text(
+                                                              'Deseja Finalizar o Serviço?'),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.pop(
+                                                                      alertDialogContext,
+                                                                      false),
+                                                              child:
+                                                                  Text('Não'),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.pop(
+                                                                      alertDialogContext,
+                                                                      true),
+                                                              child:
+                                                                  Text('Sim'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    ) ??
+                                                    false;
+                                            if (confirmDialogResponse) {
+                                              logFirebaseEvent(
+                                                  'Finalizar_backend_call');
+                                              await LeadsTable().update(
+                                                data: {
+                                                  'finished': true,
+                                                },
+                                                matchingRows: (rows) =>
+                                                    rows.eqOrNull(
+                                                  'id',
+                                                  widget.id,
+                                                ),
+                                              );
+                                              logFirebaseEvent(
+                                                  'Finalizar_navigate_to');
+
+                                              context.goNamed(
+                                                  LeadPageWidget.routeName);
+                                            }
+
+                                            safeSetState(() {});
+                                          },
+                                          text: 'Finalizar',
+                                          options: FFButtonOptions(
+                                            width: 140.0,
+                                            height: 40.0,
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    16.0, 0.0, 16.0, 0.0),
+                                            iconPadding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    0.0, 0.0, 0.0, 0.0),
+                                            color: FlutterFlowTheme.of(context)
+                                                .primaryText,
+                                            textStyle: FlutterFlowTheme.of(
+                                                    context)
+                                                .titleSmall
+                                                .override(
+                                                  font: GoogleFonts.interTight(
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .titleSmall
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .titleSmall
+                                                            .fontStyle,
+                                                  ),
+                                                  color: Colors.white,
+                                                  fontSize: 14.0,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleSmall
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleSmall
+                                                          .fontStyle,
+                                                ),
+                                            elevation: 0.0,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                          showLoadingIndicator: false,
+                                        ),
+                                    ].divide(SizedBox(width: 15.0)),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),

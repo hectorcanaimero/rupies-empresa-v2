@@ -17,7 +17,7 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
   // Stores action output result for [Backend Call - Query Rows] action in HomePage widget.
   List<UsersRow>? profile;
   // Stores action output result for [Backend Call - Query Rows] action in HomePage widget.
-  List<SubscriptionsRow>? subs;
+  List<ViewSubsRow>? subs;
   // Model for UserWidget component.
   late UserWidgetModel userWidgetModel;
   // Model for BannerWidget component.

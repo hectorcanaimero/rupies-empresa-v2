@@ -54,6 +54,10 @@ class _BannerWidgetWidgetState extends State<BannerWidgetWidget> {
             .eqOrNull(
               'status',
               true,
+            )
+            .containsOrNull(
+              'device',
+              '{${'empresa'}}',
             ),
       ),
       builder: (context, snapshot) {

@@ -671,6 +671,13 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                         MessageSendType.Contractor.name,
                                     'sendType': TypeMessage.text.name,
                                   });
+                                  logFirebaseEvent('content_backend_call');
+                                  await NotificationsTable().insert({
+                                    'body': 'A empresa entrou em contato',
+                                    'recipient_id':
+                                        containerChatsRow?.userCandidate,
+                                    'title': 'Opa! Tem um mensagem',
+                                  });
                                   logFirebaseEvent('content_reset_form_fields');
                                   safeSetState(() {
                                     _model.contentTextController?.clear();
@@ -849,7 +856,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                               await NotificationsTable()
                                                   .insert({
                                                 'body':
-                                                    'A emprsa entrou em contato',
+                                                    'A empresa entrou em contato',
                                                 'recipient_id':
                                                     containerChatsRow
                                                         ?.userCandidate,

@@ -1,3 +1,4 @@
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -13,6 +14,8 @@ class ServiceIdPageModel extends FlutterFlowModel<ServiceIdPageWidget> {
 
   // State field(s) for RatingBar widget.
   double? ratingBarValue;
+  // Stores action output result for [Backend Call - Delete Row(s)] action in Apagar widget.
+  List<ServicesRow>? delete;
 
   @override
   void initState(BuildContext context) {}

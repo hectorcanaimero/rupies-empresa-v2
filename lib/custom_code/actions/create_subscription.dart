@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
+import 'index.dart'; // Imports other custom actions
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -53,6 +55,8 @@ Future<dynamic> createSubscription(
       url,
       headers: {
         'Authorization': 'Bearer $token',
+        'apiKey':
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbnpnamN6cml0em5vaHBkbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NDMyMTAsImV4cCI6MjA4NDAxOTIxMH0.6ab40XH-1EGV4M2mUihRyZlo2p1kOi3Oi5arm0yFqEg',
         'Content-Type': 'application/json',
       },
       body: body,

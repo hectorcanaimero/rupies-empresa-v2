@@ -127,68 +127,13 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                       onPressed: () async {
                                         logFirebaseEvent(
                                             'LEAD_PAGE_PAGE_ADICIONAR_BTN_ON_TAP');
-                                        if ((getJsonField(
-                                                  FFAppState().trial,
-                                                  r'''$.limit''',
-                                                ) ==
-                                                getJsonField(
-                                                  FFAppState().trial,
-                                                  r'''$.total''',
-                                                )) ||
-                                            (FFAppState().subscription.status !=
-                                                'active')) {
+                                        if (FFAppState().subscription.status ==
+                                            'active') {
                                           logFirebaseEvent(
                                               'Button_navigate_to');
 
-                                          context.goNamed(
-                                            SubscriptionPlansPageWidget
-                                                .routeName,
-                                            extra: <String, dynamic>{
-                                              '__transition_info__':
-                                                  TransitionInfo(
-                                                hasTransition: true,
-                                                transitionType:
-                                                    PageTransitionType
-                                                        .bottomToTop,
-                                              ),
-                                            },
-                                          );
-                                        }
-                                        logFirebaseEvent('Button_navigate_to');
-
-                                        context.pushNamed(
-                                            CreateLeadPageWidget.routeName);
-
-                                        if (FFAppState().typecompany != '') {
-                                          if (FFAppState()
-                                                  .subscription
-                                                  .status !=
-                                              'active') {
-                                            logFirebaseEvent(
-                                                'Button_navigate_to');
-
-                                            context.goNamed(
-                                              SubscriptionPlansPageWidget
-                                                  .routeName,
-                                              extra: <String, dynamic>{
-                                                '__transition_info__':
-                                                    TransitionInfo(
-                                                  hasTransition: true,
-                                                  transitionType:
-                                                      PageTransitionType
-                                                          .bottomToTop,
-                                                ),
-                                              },
-                                            );
-                                          } else {
-                                            logFirebaseEvent(
-                                                'Button_navigate_to');
-
-                                            context.pushNamed(
-                                                CreateLeadPageWidget.routeName);
-                                          }
-
-                                          return;
+                                          context.pushNamed(
+                                              CreateLeadPageWidget.routeName);
                                         } else {
                                           if (getJsonField(
                                                 FFAppState().trial,
@@ -221,8 +166,6 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                             context.pushNamed(
                                                 CreateLeadPageWidget.routeName);
                                           }
-
-                                          return;
                                         }
                                       },
                                       text: 'Adicionar',
@@ -514,52 +457,81 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                                       children: [
                                                                         Expanded(
                                                                           child:
-                                                                              RichText(
-                                                                            textScaler:
-                                                                                MediaQuery.of(context).textScaler,
-                                                                            text:
-                                                                                TextSpan(
-                                                                              children: [
-                                                                                TextSpan(
-                                                                                  text: 'Tipo fornecedor: ',
+                                                                              FutureBuilder<List<TypeProviderRow>>(
+                                                                            future:
+                                                                                TypeProviderTable().querySingleRow(
+                                                                              queryFn: (q) => q.eqOrNull(
+                                                                                'id',
+                                                                                listViewLeadsRow.typeFornecedor,
+                                                                              ),
+                                                                            ),
+                                                                            builder:
+                                                                                (context, snapshot) {
+                                                                              // Customize what your widget looks like when it's loading.
+                                                                              if (!snapshot.hasData) {
+                                                                                return Center(
+                                                                                  child: SizedBox(
+                                                                                    width: 16.0,
+                                                                                    height: 16.0,
+                                                                                    child: CircularProgressIndicator(
+                                                                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                                                                        Color(0x004B39EF),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              }
+                                                                              List<TypeProviderRow> richTextTypeProviderRowList = snapshot.data!;
+
+                                                                              // Return an empty Container when the item does not exist.
+                                                                              if (snapshot.data!.isEmpty) {
+                                                                                return Container();
+                                                                              }
+                                                                              final richTextTypeProviderRow = richTextTypeProviderRowList.isNotEmpty ? richTextTypeProviderRowList.first : null;
+
+                                                                              return RichText(
+                                                                                textScaler: MediaQuery.of(context).textScaler,
+                                                                                text: TextSpan(
+                                                                                  children: [
+                                                                                    TextSpan(
+                                                                                      text: 'Tipo fornecedor: ',
+                                                                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                            font: GoogleFonts.inter(
+                                                                                              fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                            ),
+                                                                                            fontSize: 13.0,
+                                                                                            letterSpacing: 0.0,
+                                                                                            fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                          ),
+                                                                                    ),
+                                                                                    TextSpan(
+                                                                                      text: richTextTypeProviderRow!.name!,
+                                                                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                            font: GoogleFonts.inter(
+                                                                                              fontWeight: FontWeight.w300,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                            ),
+                                                                                            fontSize: 13.0,
+                                                                                            letterSpacing: 0.0,
+                                                                                            fontWeight: FontWeight.w300,
+                                                                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                          ),
+                                                                                    )
+                                                                                  ],
                                                                                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                         font: GoogleFonts.inter(
                                                                                           fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                                           fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                         ),
-                                                                                        fontSize: 13.0,
                                                                                         letterSpacing: 0.0,
                                                                                         fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                                                                                         fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                                                                                       ),
                                                                                 ),
-                                                                                TextSpan(
-                                                                                  text: valueOrDefault<String>(
-                                                                                    listViewLeadsRow.typeFornecedor,
-                                                                                    'Forncedor',
-                                                                                  ),
-                                                                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                        font: GoogleFonts.inter(
-                                                                                          fontWeight: FontWeight.w300,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                        ),
-                                                                                        fontSize: 13.0,
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FontWeight.w300,
-                                                                                        fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                      ),
-                                                                                )
-                                                                              ],
-                                                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                    font: GoogleFonts.inter(
-                                                                                      fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                    ),
-                                                                                    letterSpacing: 0.0,
-                                                                                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                                                                  ),
-                                                                            ),
+                                                                              );
+                                                                            },
                                                                           ),
                                                                         ),
                                                                       ],
@@ -1152,11 +1124,13 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                                                             ),
                                                                                       ),
                                                                                       TextSpan(
-                                                                                        text: dateTimeFormat(
-                                                                                          "d/M/y",
-                                                                                          listViewLeadsRow.dataField!,
-                                                                                          locale: FFLocalizations.of(context).languageCode,
-                                                                                        ),
+                                                                                        text: listViewLeadsRow.dataField != null
+                                                                                            ? dateTimeFormat(
+                                                                                                "dd/MM/yy",
+                                                                                                listViewLeadsRow.dataField!,
+                                                                                                locale: FFLocalizations.of(context).languageCode,
+                                                                                              )
+                                                                                            : 'Por definir...',
                                                                                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                               font: GoogleFonts.inter(
                                                                                                 fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,

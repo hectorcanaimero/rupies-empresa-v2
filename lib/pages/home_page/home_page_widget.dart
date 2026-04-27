@@ -80,7 +80,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         }),
         Future(() async {
           logFirebaseEvent('HomePage_backend_call');
-          _model.subs = await SubscriptionsTable().queryRows(
+          _model.subs = await ViewSubsTable().queryRows(
             queryFn: (q) => q.eqOrNull(
               'user_id',
               currentUserUid,
@@ -88,7 +88,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           );
           logFirebaseEvent('HomePage_update_app_state');
           FFAppState().updateSubscriptionStruct(
-            (e) => e..status = _model.subs?.firstOrNull?.status,
+            (e) => e
+              ..status = _model.subs?.firstOrNull?.status
+              ..typePlan = _model.subs?.firstOrNull?.spImage3
+              ..id = _model.subs?.firstOrNull?.id
+              ..planId = _model.subs?.firstOrNull?.planId,
           );
           safeSetState(() {});
         }),

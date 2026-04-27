@@ -1866,6 +1866,14 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                 ),
                                               );
                                               _shouldSetState = true;
+                                              logFirebaseEvent(
+                                                  'Button_page_view');
+                                              await _model.pageViewController
+                                                  ?.nextPage(
+                                                duration:
+                                                    Duration(milliseconds: 300),
+                                                curve: Curves.ease,
+                                              );
                                             } else {
                                               logFirebaseEvent(
                                                   'Button_page_view');
