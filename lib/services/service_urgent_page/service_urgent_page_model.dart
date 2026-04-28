@@ -57,7 +57,7 @@ class ServiceUrgentPageModel extends FlutterFlowModel<ServiceUrgentPageWidget> {
   String? Function(BuildContext, String?)? titleTextControllerValidator;
   String? _titleTextControllerValidator(BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo Obrigatorio';
+      return 'Campo obrigatório';
     }
 
     return null;
@@ -70,7 +70,7 @@ class ServiceUrgentPageModel extends FlutterFlowModel<ServiceUrgentPageWidget> {
   String? _descriptionTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo Origatorio';
+      return 'Campo obrigatório';
     }
 
     return null;

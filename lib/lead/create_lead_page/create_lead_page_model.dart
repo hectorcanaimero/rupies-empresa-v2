@@ -35,7 +35,7 @@ class CreateLeadPageModel extends FlutterFlowModel<CreateLeadPageWidget> {
   String? _nameEventoTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo Obrigatorio';
+      return 'Campo obrigatório';
     }
 
     return null;
@@ -57,7 +57,7 @@ class CreateLeadPageModel extends FlutterFlowModel<CreateLeadPageWidget> {
   String? _esperaFornecedorTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo Obrigatorio';
+      return 'Campo obrigatório';
     }
 
     return null;
@@ -73,7 +73,7 @@ class CreateLeadPageModel extends FlutterFlowModel<CreateLeadPageWidget> {
   String? Function(BuildContext, String?)? contactTextControllerValidator;
   String? _contactTextControllerValidator(BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo Obrigatorio';
+      return 'Campo obrigatório';
     }
 
     return null;

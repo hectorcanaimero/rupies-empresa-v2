@@ -227,7 +227,8 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                   decoration: BoxDecoration(),
                                   child: Form(
                                     key: _model.formKey,
-                                    autovalidateMode: AutovalidateMode.disabled,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
                                     child: Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           12.0, 0.0, 12.0, 0.0),
@@ -1741,7 +1742,7 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                   return AlertDialog(
                                                     title: Text('Erro'),
                                                     content: Text(
-                                                        'A categoria é obrigatoria'),
+                                                        'A categoria é obrigatória.'),
                                                     actions: [
                                                       TextButton(
                                                         onPressed: () =>
@@ -1765,7 +1766,7 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                   return AlertDialog(
                                                     title: Text('Erro'),
                                                     content: Text(
-                                                        'A Hora de chegada  é obrigatoria'),
+                                                        'A hora de chegada é obrigatória.'),
                                                     actions: [
                                                       TextButton(
                                                         onPressed: () =>
@@ -1862,7 +1863,7 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                       return AlertDialog(
                                                         title: Text('Opa!'),
                                                         content: Text(
-                                                            'Você não tem créditos disponivel.'),
+                                                            'Você não tem créditos disponíveis.'),
                                                         actions: [
                                                           TextButton(
                                                             onPressed: () =>
@@ -1894,7 +1895,7 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                     return AlertDialog(
                                                       title: Text('Opa!'),
                                                       content: Text(
-                                                          'Verifique os campos de datas. Campos Obrigatorio'),
+                                                          'Selecione a data de início e a data de fim para continuar.'),
                                                       actions: [
                                                         TextButton(
                                                           onPressed: () =>

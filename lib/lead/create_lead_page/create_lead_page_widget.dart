@@ -1728,7 +1728,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                             return AlertDialog(
                                               title: Text('Erro'),
                                               content:
-                                                  Text('Campo Obrigatorio'),
+                                                  Text('Campo obrigatório'),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () =>
@@ -1751,7 +1751,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                             return AlertDialog(
                                               title: Text('Erro'),
                                               content:
-                                                  Text('Campo Obrigatorio'),
+                                                  Text('Campo obrigatório'),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () =>
