@@ -58,7 +58,7 @@ class ServiceSchedulePageModel
   String? Function(BuildContext, String?)? titleTextControllerValidator;
   String? _titleTextControllerValidator(BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo obrigatório';
+      return 'Campo Obrigatorio';
     }
 
     return null;
@@ -71,7 +71,7 @@ class ServiceSchedulePageModel
   String? _descriptionTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo obrigatório';
+      return 'Campo Origatorio';
     }
 
     return null;

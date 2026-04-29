@@ -15,7 +15,7 @@ class LeadContatoPageModel extends FlutterFlowModel<LeadContatoPageWidget> {
   String? _nameEventoTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo obrigatório';
+      return 'Campo Obrigatorio';
     }
 
     return null;
@@ -27,11 +27,11 @@ class LeadContatoPageModel extends FlutterFlowModel<LeadContatoPageWidget> {
   String? Function(BuildContext, String?)? emailTextControllerValidator;
   String? _emailTextControllerValidator(BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo obrigatório';
+      return 'Campo Obrigatorio';
     }
 
     if (!RegExp(kTextValidatorEmailRegex).hasMatch(val)) {
-      return 'E-mail inválido.';
+      return 'Email não valido.';
     }
     return null;
   }
@@ -42,7 +42,7 @@ class LeadContatoPageModel extends FlutterFlowModel<LeadContatoPageWidget> {
   String? Function(BuildContext, String?)? messageTextControllerValidator;
   String? _messageTextControllerValidator(BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo obrigatório';
+      return 'Campo Obrigatorio';
     }
 
     return null;

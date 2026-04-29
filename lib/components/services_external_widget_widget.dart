@@ -119,7 +119,7 @@ class _ServicesExternalWidgetWidgetState
                           fontStyle:
                               FlutterFlowTheme.of(context).titleSmall.fontStyle,
                         ),
-                        color: FlutterFlowTheme.of(context).primaryBackground,
+                        color: FlutterFlowTheme.of(context).secondaryText,
                         fontSize: 18.0,
                         letterSpacing: 0.0,
                         fontWeight: FontWeight.w600,

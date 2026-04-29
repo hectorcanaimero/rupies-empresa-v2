@@ -92,8 +92,8 @@ LatLng parseTextToLatLng(String location) {
 }
 
 bool validateTrial(dynamic trial) {
-  final limit = int.tryParse('${trial['limit']}') ?? 0;
-  final total = int.tryParse('${trial['total']}') ?? 0;
+  int limit = int.parse(trial['limit']);
+  int total = int.parse(trial['total']);
   if (limit <= total) {
     return true;
   }
