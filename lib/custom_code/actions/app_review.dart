@@ -43,13 +43,13 @@ Future appReview(BuildContext context) async {
         listener: (button) {
           switch (button) {
             case RateMyAppDialogButton.rate:
-              print('O usuário escolheu avaliar o app.');
+              debugPrint('O usuário escolheu avaliar o app.');
               break;
             case RateMyAppDialogButton.later:
-              print('O usuário escolheu lembrar mais tarde.');
+              debugPrint('O usuário escolheu lembrar mais tarde.');
               break;
             case RateMyAppDialogButton.no:
-              print('O usuário não quer avaliar o app.');
+              debugPrint('O usuário não quer avaliar o app.');
               break;
           }
           return true; // Fechar a caixa de diálogo
@@ -57,6 +57,6 @@ Future appReview(BuildContext context) async {
       );
     }
   } else {
-    print('Função de avaliação não suportada nesta plataforma.');
+    debugPrint('Função de avaliação não suportada nesta plataforma.');
   }
 }

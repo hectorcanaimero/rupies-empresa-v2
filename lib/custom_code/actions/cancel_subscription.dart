@@ -21,80 +21,51 @@ Future<dynamic> cancelSubscription(
   String? reason,
 ) async {
   try {
-    print('🚫 Cancelando assinatura...');
-    print('   Subscription ID: $subscriptionId');
-    print('   Immediate: $immediate');
-    print('   Reason: ${reason ?? "Não informado"}');
-
-    // Obter token JWT do usuário atual
-    final session = await SupaFlow.client.auth.currentSession;
+    final session = SupaFlow.client.auth.currentSession;
     if (session == null) {
-      print('❌ No hay sesión activa');
       return {'success': false, 'error': 'Usuário não autenticado'};
     }
 
     final token = session.accessToken;
-
-    // URL da Edge Function
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/cancel-subscription');
 
-    // Preparar body da requisição
-    final body = jsonEncode({
-      'subscriptionId': subscriptionId,
-      'immediate': immediate,
-      'reason': reason,
-    });
-
-    print('📤 Enviando requisição de cancelamento...');
-
-    // Fazer requisição
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
-      body: body,
+      body: jsonEncode({
+        'subscriptionId': subscriptionId,
+        'immediate': immediate,
+        'reason': reason,
+      }),
     );
-
-    print('📊 Status code: ${response.statusCode}');
-    print('📊 Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-
       if (jsonResponse['success'] == true) {
-        print('✅ Assinatura cancelada com sucesso!');
-        if (immediate) {
-          print('   Cancelamento imediato - acesso removido agora');
-        } else {
-          print('   Cancelamento agendado - acesso até o fim do período');
-        }
         return jsonResponse['data'];
       } else {
-        print('❌ Error en respuesta: ${jsonResponse['error']}');
         return {
           'success': false,
-          'error': jsonResponse['error'] ?? 'Erro desconhecido'
+          'error': jsonResponse['error'] ?? 'Erro desconhecido',
         };
       }
     } else {
-      print('❌ Error HTTP: ${response.statusCode}');
-      print('❌ Body: ${response.body}');
-
       try {
         final errorResponse = jsonDecode(response.body);
         return {
           'success': false,
-          'error': errorResponse['error'] ?? 'Erro ao cancelar assinatura'
+          'error': errorResponse['error'] ?? 'Erro ao cancelar assinatura',
         };
       } catch (e) {
         return {'success': false, 'error': 'Erro ao cancelar assinatura'};
       }
     }
   } catch (e) {
-    print('❌ Exception em cancelSubscription: $e');
+    debugPrint('cancelSubscription error: $e');
     return {'success': false, 'error': 'Erro: $e'};
   }
 }

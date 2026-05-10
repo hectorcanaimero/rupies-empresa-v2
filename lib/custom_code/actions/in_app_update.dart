@@ -17,11 +17,13 @@ import 'package:in_app_update/in_app_update.dart';
 
 Future inAppUpdate() async {
   if (Platform.isAndroid) {
-    InAppUpdate.checkForUpdate().then((updateInfo) {
+    try {
+      final updateInfo = await InAppUpdate.checkForUpdate();
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
-        // Update is available, prompt user to update
-        InAppUpdate.performImmediateUpdate().catchError((e) => print(e));
+        await InAppUpdate.performImmediateUpdate();
       }
-    }).catchError((e) => print(e));
+    } catch (e) {
+      debugPrint('inAppUpdate error: $e');
+    }
   }
 }

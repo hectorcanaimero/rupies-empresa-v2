@@ -83,9 +83,6 @@ class _PriceFieldState extends State<MoedaBRField> {
             } else {
               final price = double.parse(text.replaceAll('.', '')) / 100;
               final newText = currencyFormat.format(price);
-              FFAppState().update(() {
-                FFAppState().propPrice = price;
-              });
               final newSelectionIndex =
                   newText.length - (text.length - selection.end);
               return TextEditingValue(
@@ -95,7 +92,16 @@ class _PriceFieldState extends State<MoedaBRField> {
             }
           })
         ],
-        onChanged: (value) {},
+        onChanged: (value) {
+          if (value.isNotEmpty) {
+            // Parse BR format: remove thousands separator (.), replace decimal separator (, → .)
+            final normalized = value.replaceAll('.', '').replaceAll(',', '.');
+            final price = double.tryParse(normalized) ?? 0.0;
+            FFAppState().update(() {
+              FFAppState().propPrice = price;
+            });
+          }
+        },
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,

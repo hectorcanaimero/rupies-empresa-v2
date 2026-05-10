@@ -12,8 +12,6 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import 'index.dart'; // Imports other custom actions
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -23,51 +21,30 @@ Future<dynamic> createSubscription(
   String paymentMethod,
 ) async {
   try {
-    print('🚀 Criando assinatura...');
-    print('   Plan ID: $planId');
-    print('   Billing Cycle: $billingCycle');
-    print('   Payment Method: $paymentMethod');
-
-    // Obter token JWT do usuário atual
     final session = SupaFlow.client.auth.currentSession;
     if (session == null) {
-      print('❌ No hay sesión activa');
       return {'success': false, 'error': 'Usuário não autenticado'};
     }
 
     final token = session.accessToken;
-
-    // URL da Edge Function
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/create-asaas-subscription');
 
-    // Preparar body da requisição
-    final body = jsonEncode({
-      'planId': planId,
-      'billingCycle': billingCycle,
-      'paymentMethod': paymentMethod,
-    });
-
-    print('📤 Enviando requisição...');
-
-    // Fazer requisição com token do usuário
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer $token',
-        'apiKey':
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbnpnamN6cml0em5vaHBkbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NDMyMTAsImV4cCI6MjA4NDAxOTIxMH0.6ab40XH-1EGV4M2mUihRyZlo2p1kOi3Oi5arm0yFqEg',
         'Content-Type': 'application/json',
       },
-      body: body,
+      body: jsonEncode({
+        'planId': planId,
+        'billingCycle': billingCycle,
+        'paymentMethod': paymentMethod,
+      }),
     );
-
-    print('📊 Status code: ${response.statusCode}');
-    print('📊 Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-
       if (jsonResponse['success'] == true) {
         return jsonResponse['data'];
       } else {
@@ -88,7 +65,7 @@ Future<dynamic> createSubscription(
       }
     }
   } catch (e) {
-    print('❌ Exception em createSubscription: $e');
+    debugPrint('createSubscription error: $e');
     return {'success': false, 'error': 'Erro: $e'};
   }
 }

@@ -25,7 +25,7 @@ Future appTracking() async {
     try {
       await AppTrackingTransparency.getAdvertisingIdentifier();
     } catch (e) {
-      print("Error retrieving UUID: $e");
+      debugPrint("Error retrieving UUID: $e");
     }
   }
 }

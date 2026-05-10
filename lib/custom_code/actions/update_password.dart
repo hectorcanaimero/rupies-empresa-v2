@@ -32,7 +32,7 @@ Future<bool> updatePassword(String newPassword) async {
     return true;
   } catch (e) {
     // Log opcional si usás Crashlytics o similar
-    print('Error updating password: $e');
+    debugPrint('Error updating password: $e');
     return false;
   }
 }

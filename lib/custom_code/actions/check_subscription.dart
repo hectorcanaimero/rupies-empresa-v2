@@ -18,7 +18,7 @@ Future<bool> checkSubscription(String? featureKey) async {
     final status = await getSubscriptionStatus();
 
     if (status == null) {
-      print('❌ Status é null');
+      debugPrint('❌ Status é null');
       return false;
     }
 
@@ -26,7 +26,7 @@ Future<bool> checkSubscription(String? featureKey) async {
     final hasActiveSubscription = status['hasActiveSubscription'] ?? false;
 
     if (!hasActiveSubscription) {
-      print('ℹ️  Não tem assinatura ativa');
+      debugPrint('ℹ️  Não tem assinatura ativa');
       return false;
     }
 
@@ -39,13 +39,13 @@ Future<bool> checkSubscription(String? featureKey) async {
     final features = status['features'] as List<dynamic>? ?? [];
     final hasFeature = features.contains(featureKey);
 
-    print(hasFeature
+    debugPrint(hasFeature
         ? '✅ Tem feature: $featureKey'
         : '❌ Não tem feature: $featureKey');
 
     return hasFeature;
   } catch (e) {
-    print('❌ Exception em checkSubscription: $e');
+    debugPrint('❌ Exception em checkSubscription: $e');
     return false;
   }
 }

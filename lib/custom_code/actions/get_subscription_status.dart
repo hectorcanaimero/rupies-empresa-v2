@@ -17,20 +17,15 @@ import 'package:http/http.dart' as http;
 
 Future<dynamic> getSubscriptionStatus() async {
   try {
-    // Obter token JWT do usuário atual
-    final session = await SupaFlow.client.auth.currentSession;
+    final session = SupaFlow.client.auth.currentSession;
     if (session == null) {
-      print('❌ No hay sesión activa');
       return null;
     }
 
     final token = session.accessToken;
-
-    // URL da Edge Function
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/get-subscription-history');
 
-    // Fazer requisição
     final response = await http.get(
       url,
       headers: {
@@ -39,25 +34,20 @@ Future<dynamic> getSubscriptionStatus() async {
       },
     );
 
-    print('📊 Status code: ${response.statusCode}');
-    print('📊 Response body: ${response.body}');
-
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-
       if (jsonResponse['success'] == true) {
         return jsonResponse['data'];
       } else {
-        print('❌ Error en respuesta: ${jsonResponse['error']}');
+        debugPrint('getSubscriptionStatus error: ${jsonResponse['error']}');
         return null;
       }
     } else {
-      print('❌ Error HTTP: ${response.statusCode}');
-      print('❌ Body: ${response.body}');
+      debugPrint('getSubscriptionStatus HTTP ${response.statusCode}');
       return null;
     }
   } catch (e) {
-    print('❌ Exception en getSubscriptionStatus: $e');
+    debugPrint('getSubscriptionStatus error: $e');
     return null;
   }
 }
