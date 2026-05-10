@@ -15,10 +15,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.6+22
+version: 1.0.7+23
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -41,7 +41,7 @@ dependencies:
   cross_file: 0.3.5+1
   csslib: 1.0.2
   csv: 6.0.0
-  dropdown_button2: 
+  dropdown_button2:
     git:
       url: https://github.com/FlutterFlow/dropdown_button2.git
       ref: 514178337dfbea442f617daed39c704b57593fc9
@@ -68,7 +68,7 @@ dependencies:
   flutter_animate: 4.5.0
   flutter_blurhash: 0.9.1
   flutter_cache_manager: 3.4.1
-  flutter_google_places: 
+  flutter_google_places:
     git:
       url: https://github.com/ShehanYjoz/flutter_google_places.git
       ref: 52ddef33b785fac671a04dd387c5ba7d921709bf
@@ -204,7 +204,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
 flutter_launcher_icons:
   android: 'launcher_icon'
   ios: true
@@ -214,13 +213,11 @@ flutter_launcher_icons:
   adaptive_icon_background: '#24094d'
   adaptive_icon_foreground: 'assets/images/adaptive_foreground_icon.jpg'
 
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -235,8 +232,6 @@ flutter:
     - assets/rive_animations/
     - assets/pdfs/
     - assets/jsons/
-
-
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -263,4 +258,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-
