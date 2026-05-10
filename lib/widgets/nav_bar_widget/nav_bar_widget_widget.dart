@@ -130,10 +130,10 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                   color: valueOrDefault<Color>(
                                     widget.home
                                         ? FlutterFlowTheme.of(context)
-                                            .secondaryText
+                                            .primary
                                         : FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                    FlutterFlowTheme.of(context).primaryText,
+                                            .secondaryText,
+                                    FlutterFlowTheme.of(context).secondaryText,
                                   ),
                                   size: 26.0,
                                 ),
@@ -152,11 +152,11 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                         color: valueOrDefault<Color>(
                                           widget.home
                                               ? FlutterFlowTheme.of(context)
-                                                  .secondaryText
+                                                  .primary
                                               : FlutterFlowTheme.of(context)
-                                                  .primaryText,
+                                                  .secondaryText,
                                           FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                              .secondaryText,
                                         ),
                                         fontSize: 11.0,
                                         letterSpacing: 0.0,
@@ -208,10 +208,10 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                   color: valueOrDefault<Color>(
                                     widget.marketplace
                                         ? FlutterFlowTheme.of(context)
-                                            .secondaryText
+                                            .primary
                                         : FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                    FlutterFlowTheme.of(context).primaryText,
+                                            .secondaryText,
+                                    FlutterFlowTheme.of(context).secondaryText,
                                   ),
                                   size: 26.0,
                                 ),
@@ -230,11 +230,11 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                         color: valueOrDefault<Color>(
                                           widget.marketplace
                                               ? FlutterFlowTheme.of(context)
-                                                  .secondaryText
+                                                  .primary
                                               : FlutterFlowTheme.of(context)
-                                                  .primaryText,
+                                                  .secondaryText,
                                           FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                              .secondaryText,
                                         ),
                                         fontSize: 11.0,
                                         letterSpacing: 0.0,
@@ -286,10 +286,10 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                   color: valueOrDefault<Color>(
                                     widget.jobs
                                         ? FlutterFlowTheme.of(context)
-                                            .secondaryText
+                                            .primary
                                         : FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                    FlutterFlowTheme.of(context).primaryText,
+                                            .secondaryText,
+                                    FlutterFlowTheme.of(context).secondaryText,
                                   ),
                                   size: 26.0,
                                 ),
@@ -308,11 +308,11 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                         color: valueOrDefault<Color>(
                                           widget.jobs
                                               ? FlutterFlowTheme.of(context)
-                                                  .secondaryText
+                                                  .primary
                                               : FlutterFlowTheme.of(context)
-                                                  .primaryText,
+                                                  .secondaryText,
                                           FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                              .secondaryText,
                                         ),
                                         fontSize: 11.0,
                                         letterSpacing: 0.0,
@@ -364,10 +364,10 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                   color: valueOrDefault<Color>(
                                     widget.lead
                                         ? FlutterFlowTheme.of(context)
-                                            .secondaryText
+                                            .primary
                                         : FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                    FlutterFlowTheme.of(context).primaryText,
+                                            .secondaryText,
+                                    FlutterFlowTheme.of(context).secondaryText,
                                   ),
                                   size: 26.0,
                                 ),
@@ -386,11 +386,11 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                         color: valueOrDefault<Color>(
                                           widget.lead
                                               ? FlutterFlowTheme.of(context)
-                                                  .secondaryText
+                                                  .primary
                                               : FlutterFlowTheme.of(context)
-                                                  .primaryText,
+                                                  .secondaryText,
                                           FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                              .secondaryText,
                                         ),
                                         fontSize: 11.0,
                                         letterSpacing: 0.0,
@@ -442,10 +442,10 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                   color: valueOrDefault<Color>(
                                     widget.menu
                                         ? FlutterFlowTheme.of(context)
-                                            .secondaryText
+                                            .primary
                                         : FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                    FlutterFlowTheme.of(context).primaryText,
+                                            .secondaryText,
+                                    FlutterFlowTheme.of(context).secondaryText,
                                   ),
                                   size: 26.0,
                                 ),
@@ -464,11 +464,11 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                         color: valueOrDefault<Color>(
                                           widget.menu
                                               ? FlutterFlowTheme.of(context)
-                                                  .secondaryText
+                                                  .primary
                                               : FlutterFlowTheme.of(context)
-                                                  .primaryText,
+                                                  .secondaryText,
                                           FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                              .secondaryText,
                                         ),
                                         fontSize: 11.0,
                                         letterSpacing: 0.0,
