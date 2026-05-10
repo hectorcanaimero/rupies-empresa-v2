@@ -15,6 +15,7 @@ import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
 import 'dart:async';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -49,60 +50,58 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
     super.initState();
     _model = createModel(context, () => ServiceSchedulePageModel());
 
+    if (FFAppState().serviceId != '') {
+      _model.serviceFuture = ServicesTable().querySingleRow(
+        queryFn: (q) => q.eqOrNull('id', FFAppState().serviceId),
+      );
+    }
+
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'ServiceSchedulePage'});
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       logFirebaseEvent('SERVICE_SCHEDULE_ServiceSchedulePage_ON_');
-      await Future.wait([
-        Future(() async {
-          if (FFAppState().serviceId != '') {
-            logFirebaseEvent('ServiceSchedulePage_alert_dialog');
-            var confirmDialogResponse = await showDialog<bool>(
-                  context: context,
-                  builder: (alertDialogContext) {
-                    return AlertDialog(
-                      title: Text('Opa!'),
-                      content: Text('Ainda não finalizou o serviço. '),
-                      actions: [
-                        TextButton(
-                          onPressed: () =>
-                              Navigator.pop(alertDialogContext, false),
-                          child: Text('Quero finalizar o atual'),
-                        ),
-                        TextButton(
-                          onPressed: () =>
-                              Navigator.pop(alertDialogContext, true),
-                          child: Text('Iniciar um Serviço novo'),
-                        ),
-                      ],
-                    );
-                  },
-                ) ??
-                false;
-            if (confirmDialogResponse) {
-              logFirebaseEvent('ServiceSchedulePage_update_app_state');
-              FFAppState().deleteServiceId();
-              FFAppState().serviceId = '';
+      if (FFAppState().serviceId != '') {
+          logFirebaseEvent('ServiceSchedulePage_alert_dialog');
+          var confirmDialogResponse = await showDialog<bool>(
+                context: context,
+                builder: (alertDialogContext) {
+                  return AlertDialog(
+                    title: Text('Opa!'),
+                    content: Text('Ainda não finalizou o serviço. '),
+                    actions: [
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(alertDialogContext, false),
+                        child: Text('Quero finalizar o atual'),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(alertDialogContext, true),
+                        child: Text('Iniciar um Serviço novo'),
+                      ),
+                    ],
+                  );
+                },
+              ) ??
+              false;
+          if (confirmDialogResponse) {
+            logFirebaseEvent('ServiceSchedulePage_update_app_state');
+            FFAppState().deleteServiceId();
+            FFAppState().serviceId = '';
 
-              safeSetState(() {});
-              logFirebaseEvent('ServiceSchedulePage_update_page_state');
-              _model.dateStart = null;
-              _model.uid = null;
-              _model.images = [];
-              _model.show = false;
-              _model.list = [];
-              safeSetState(() {});
-            } else {
-              return;
-            }
-
-            return;
+            safeSetState(() {});
+            logFirebaseEvent('ServiceSchedulePage_update_page_state');
+            _model.dateStart = null;
+            _model.uid = null;
+            _model.images = [];
+            _model.show = false;
+            _model.list = [];
+            safeSetState(() {});
           } else {
             return;
           }
-        }),
-      ]);
+        }
     });
 
     getCurrentUserLocation(defaultLocation: LatLng(0.0, 0.0), cached: true)
@@ -126,19 +125,6 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
 
   @override
   void dispose() {
-    // On page dispose action.
-    () async {
-      logFirebaseEvent('SERVICE_SCHEDULE_ServiceSchedulePage_ON_');
-      logFirebaseEvent('ServiceSchedulePage_update_page_state');
-      _model.list = [];
-      _model.show = false;
-      _model.images = [];
-      _model.uid = null;
-      _model.dateStart = null;
-      _model.dateEnd = null;
-      safeSetState(() {});
-    }();
-
     _model.dispose();
 
     super.dispose();
@@ -171,17 +157,12 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
       },
       child: Scaffold(
         key: scaffoldKey,
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
           child: FutureBuilder<List<ServicesRow>>(
-            future: ServicesTable().querySingleRow(
-              queryFn: (q) => q.eqOrNull(
-                'id',
-                FFAppState().serviceId,
-              ),
-            ),
+            future: _model.serviceFuture,
             builder: (context, snapshot) {
               // Customize what your widget looks like when it's loading.
               if (!snapshot.hasData) {
@@ -1508,7 +1489,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                           'IconButton_update_page_state');
                                                                       _model.dateEnd =
                                                                           _model
-                                                                              .datePicked2;
+                                                                              .datePicked3;
                                                                       safeSetState(
                                                                           () {});
                                                                     } else {
@@ -1809,27 +1790,18 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                             logFirebaseEvent(
                                                 'Button_backend_call');
                                             _model.create1 =
-                                                await ServicesTable().insert({
-                                              'userId': currentUserUid,
-                                              'name': _model
-                                                  .titleTextController.text,
-                                              'description': _model
-                                                  .descriptionTextController
-                                                  .text,
-                                              'dateStart':
-                                                  supaSerialize<DateTime>(
-                                                      _model.dateStart),
-                                              'dateEnd':
-                                                  supaSerialize<DateTime>(
-                                                      _model.dateEnd),
-                                              'price': FFAppState().propPrice,
-                                              'categoryId':
-                                                  _model.categoryValue,
-                                              'time': _model.hourArrivedValue,
-                                              'condition':
-                                                  Conditions.Openned.name,
-                                              'jobType': JobTypes.Agendado.name,
-                                            });
+                                                await ServicesTable().insert(
+                                              _model.buildServiceData(
+                                                userId: currentUserUid,
+                                                title: _model.titleTextController.text,
+                                                description: _model.descriptionTextController.text,
+                                                dateStart: _model.dateStart,
+                                                dateEnd: _model.dateEnd,
+                                                price: FFAppState().propPrice,
+                                                categoryId: _model.categoryValue,
+                                                time: _model.hourArrivedValue,
+                                              ),
+                                            );
                                             _shouldSetState = true;
                                             logFirebaseEvent(
                                                 'Button_update_app_state');
@@ -1916,31 +1888,18 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                       'Button_backend_call');
                                                   _model.create =
                                                       await ServicesTable()
-                                                          .insert({
-                                                    'userId': currentUserUid,
-                                                    'name': _model
-                                                        .titleTextController
-                                                        .text,
-                                                    'description': _model
-                                                        .descriptionTextController
-                                                        .text,
-                                                    'dateStart':
-                                                        supaSerialize<DateTime>(
-                                                            _model.dateStart),
-                                                    'dateEnd':
-                                                        supaSerialize<DateTime>(
-                                                            _model.dateEnd),
-                                                    'price':
-                                                        FFAppState().propPrice,
-                                                    'categoryId':
-                                                        _model.categoryValue,
-                                                    'time':
-                                                        _model.hourArrivedValue,
-                                                    'condition':
-                                                        Conditions.Openned.name,
-                                                    'jobType':
-                                                        JobTypes.Agendado.name,
-                                                  });
+                                                          .insert(
+                                                    _model.buildServiceData(
+                                                      userId: currentUserUid,
+                                                      title: _model.titleTextController.text,
+                                                      description: _model.descriptionTextController.text,
+                                                      dateStart: _model.dateStart,
+                                                      dateEnd: _model.dateEnd,
+                                                      price: FFAppState().propPrice,
+                                                      categoryId: _model.categoryValue,
+                                                      time: _model.hourArrivedValue,
+                                                    ),
+                                                  );
                                                   _shouldSetState = true;
                                                   logFirebaseEvent(
                                                       'Button_update_app_state');
@@ -2295,6 +2254,8 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                             '',
                                                                         imageQuality:
                                                                             70,
+                                                                        maxWidth:
+                                                                            1080.0,
                                                                         allowPhoto:
                                                                             true,
                                                                         includeDimensions:
@@ -2316,6 +2277,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                         var downloadUrls =
                                                                             <String>[];
                                                                         try {
+                                                                          showUploadMessage(context, 'Subindo...', showLoading: true);
                                                                           selectedUploadedFiles = selectedMedia
                                                                               .map((m) => FFUploadedFile(
                                                                                     name: m.storagePath.split('/').last,
@@ -2335,6 +2297,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                                 selectedMedia,
                                                                           );
                                                                         } finally {
+                                                                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                                                           _model.isDataUploading_uploadUrgenteEditar =
                                                                               false;
                                                                         }
@@ -2348,40 +2311,41 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                             _model.uploadedFileUrl_uploadUrgenteEditar =
                                                                                 downloadUrls.first;
                                                                           });
+                                                                          showUploadMessage(context, 'Sucesso!');
                                                                         } else {
                                                                           safeSetState(
                                                                               () {});
                                                                           return;
                                                                         }
+
+                                                                        logFirebaseEvent(
+                                                                            'IconButton_backend_call');
+                                                                        _model.createImage =
+                                                                            await ServicesImagesTable()
+                                                                                .insert({
+                                                                          'serviceId':
+                                                                              FFAppState().serviceId,
+                                                                          'image':
+                                                                              _model.uploadedFileUrl_uploadUrgenteEditar,
+                                                                        });
+                                                                        logFirebaseEvent(
+                                                                            'IconButton_update_page_state');
+                                                                        _model.addToImages(
+                                                                            _model
+                                                                                .uploadedFileUrl_uploadUrgenteEditar);
+                                                                        safeSetState(
+                                                                            () {});
+                                                                        logFirebaseEvent(
+                                                                            'IconButton_refresh_database_request');
+                                                                        safeSetState(() =>
+                                                                            _model.requestCompleter1 =
+                                                                                null);
+                                                                        await _model
+                                                                            .waitForRequestCompleted1();
+
+                                                                        safeSetState(
+                                                                            () {});
                                                                       }
-
-                                                                      logFirebaseEvent(
-                                                                          'IconButton_backend_call');
-                                                                      _model.createImage =
-                                                                          await ServicesImagesTable()
-                                                                              .insert({
-                                                                        'serviceId':
-                                                                            FFAppState().serviceId,
-                                                                        'image':
-                                                                            _model.uploadedFileUrl_uploadUrgenteEditar,
-                                                                      });
-                                                                      logFirebaseEvent(
-                                                                          'IconButton_update_page_state');
-                                                                      _model.addToImages(
-                                                                          _model
-                                                                              .uploadedFileUrl_uploadUrgenteEditar);
-                                                                      safeSetState(
-                                                                          () {});
-                                                                      logFirebaseEvent(
-                                                                          'IconButton_refresh_database_request');
-                                                                      safeSetState(() =>
-                                                                          _model.requestCompleter1 =
-                                                                              null);
-                                                                      await _model
-                                                                          .waitForRequestCompleted1();
-
-                                                                      safeSetState(
-                                                                          () {});
                                                                     },
                                                                   ),
                                                                 ],
@@ -2508,8 +2472,8 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                                       transitionOnUserGestures: true,
                                                                                       child: ClipRRect(
                                                                                         borderRadius: BorderRadius.circular(8.0),
-                                                                                        child: Image.network(
-                                                                                          staggeredViewServicesImagesRow.image!,
+                                                                                        child: CachedNetworkImage(
+                                                                                          imageUrl: staggeredViewServicesImagesRow.image!,
                                                                                           width: double.infinity,
                                                                                           height: double.infinity,
                                                                                           fit: BoxFit.cover,
@@ -3498,6 +3462,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                       ),
                                       FFButtonWidget(
                                         onPressed: () async {
+                                          try {
                                           logFirebaseEvent(
                                               'SERVICE_SCHEDULE_PAGE_PAGE_button_ON_TAP');
                                           logFirebaseEvent(
@@ -3554,6 +3519,11 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                               HomePageWidget.routeName);
 
                                           safeSetState(() {});
+                                          } catch (e) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Erro ao finalizar o serviço. Tente novamente.')),
+                                            );
+                                          }
                                         },
                                         text: 'Finalizar',
                                         options: FFButtonOptions(

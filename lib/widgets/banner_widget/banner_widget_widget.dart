@@ -2,7 +2,9 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'banner_widget_model.dart';
 export 'banner_widget_model.dart';
 
@@ -20,6 +22,7 @@ class BannerWidgetWidget extends StatefulWidget {
 
 class _BannerWidgetWidgetState extends State<BannerWidgetWidget> {
   late BannerWidgetModel _model;
+  Future<List<BannersRow>>? _bannersFuture;
 
   @override
   void setState(VoidCallback callback) {
@@ -31,6 +34,22 @@ class _BannerWidgetWidgetState extends State<BannerWidgetWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => BannerWidgetModel());
+
+    _bannersFuture = BannersTable().queryRows(
+      queryFn: (q) => q
+          .eqOrNull(
+            'position',
+            widget.position,
+          )
+          .eqOrNull(
+            'status',
+            true,
+          )
+          .containsOrNull(
+            'device',
+            '{${'empresa'}}',
+          ),
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -45,31 +64,21 @@ class _BannerWidgetWidgetState extends State<BannerWidgetWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<BannersRow>>(
-      future: BannersTable().queryRows(
-        queryFn: (q) => q
-            .eqOrNull(
-              'position',
-              widget.position,
-            )
-            .eqOrNull(
-              'status',
-              true,
-            )
-            .containsOrNull(
-              'device',
-              '{${'empresa'}}',
-            ),
-      ),
+      future: _bannersFuture,
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
-          return Center(
-            child: SizedBox(
-              width: 40.0,
-              height: 40.0,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Color(0x004B39EF),
+          return Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 15.0),
+            child: Shimmer.fromColors(
+              baseColor: FlutterFlowTheme.of(context).alternate,
+              highlightColor:
+                  FlutterFlowTheme.of(context).alternate.withValues(alpha: 0.4),
+              child: Container(
+                width: double.infinity,
+                height: 120.0,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).alternate,
+                  borderRadius: BorderRadius.circular(9.0),
                 ),
               ),
             ),
@@ -77,12 +86,17 @@ class _BannerWidgetWidgetState extends State<BannerWidgetWidget> {
         }
         List<BannersRow> containerBannersRowList = snapshot.data!;
 
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9.0),
-          ),
-          child: Visibility(
-            visible: containerBannersRowList.length > 0,
+        if (containerBannersRowList.isEmpty) {
+          return SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+              12.0, 0.0, 12.0, 15.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9.0),
+            ),
             child: Builder(
               builder: (context) {
                 final banner = containerBannersRowList.toList();
@@ -103,7 +117,10 @@ class _BannerWidgetWidgetState extends State<BannerWidgetWidget> {
                           logFirebaseEvent(
                               'BANNER_WIDGET_COMP_Image_1s237imi_ON_TAP');
                           logFirebaseEvent('Image_launch_u_r_l');
-                          await launchURL(bannerItem.url!);
+                          if (bannerItem.url != null &&
+                              bannerItem.url!.isNotEmpty) {
+                            await launchURL(bannerItem.url!);
+                          }
                         },
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(9.0),

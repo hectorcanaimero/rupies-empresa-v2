@@ -1,5 +1,9 @@
 import '/backend/schema/enums/enums.dart';
 import '/backend/supabase/supabase.dart';
+import '/custom_code/actions/record_audio.dart';
+import '/custom_code/widgets/audio_message_player.dart';
+import 'dart:async';
+import 'dart:io';
 import '/flutter_flow/flutter_flow_expanded_image_view.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -70,6 +74,32 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
     _model.contentTextController ??= TextEditingController();
     _model.contentFocusNode ??= FocusNode();
 
+    // Subscribe to typing broadcast channel.
+    _model.typingChannel = SupaFlow.client.channel('chat:${widget.chatId}');
+    _model.typingChannel!
+        .onBroadcast(
+          event: 'typing',
+          callback: (payload) {
+            if (mounted) {
+              safeSetState(() {
+                _model.isOtherUserTyping = true;
+              });
+              _model.typingTimer?.cancel();
+              _model.typingTimer = Timer(
+                const Duration(seconds: 3),
+                () {
+                  if (mounted) {
+                    safeSetState(() {
+                      _model.isOtherUserTyping = false;
+                    });
+                  }
+                },
+              );
+            }
+          },
+        )
+        .subscribe();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -91,7 +121,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+        backgroundColor: Color(0xFFECE5DD),
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
           automaticallyImplyLeading: false,
@@ -111,23 +141,94 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
               context.pop();
             },
           ),
-          title: Text(
-            'Chat',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.interTight(
-                    fontWeight:
-                        FlutterFlowTheme.of(context).headlineMedium.fontWeight,
-                    fontStyle:
-                        FlutterFlowTheme.of(context).headlineMedium.fontStyle,
-                  ),
-                  color: FlutterFlowTheme.of(context).secondaryText,
-                  fontSize: 22.0,
-                  letterSpacing: 0.0,
-                  fontWeight:
-                      FlutterFlowTheme.of(context).headlineMedium.fontWeight,
-                  fontStyle:
-                      FlutterFlowTheme.of(context).headlineMedium.fontStyle,
+          title: FutureBuilder<List<ChatsRow>>(
+            future: ChatsTable().querySingleRow(
+              queryFn: (q) => q.eqOrNull('id', widget.chatId),
+            ),
+            builder: (context, chatSnapshot) {
+              if (!chatSnapshot.hasData ||
+                  chatSnapshot.data!.isEmpty) {
+                return Text(
+                  'Chat',
+                  style: FlutterFlowTheme.of(context)
+                      .headlineMedium
+                      .override(
+                        font: GoogleFonts.interTight(
+                          fontWeight: FlutterFlowTheme.of(context)
+                              .headlineMedium
+                              .fontWeight,
+                          fontStyle: FlutterFlowTheme.of(context)
+                              .headlineMedium
+                              .fontStyle,
+                        ),
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 22.0,
+                        letterSpacing: 0.0,
+                      ),
+                );
+              }
+              final chatRow = chatSnapshot.data!.first;
+              return FutureBuilder<List<UsersRow>>(
+                future: UsersTable().querySingleRow(
+                  queryFn: (q) =>
+                      q.eqOrNull('id', chatRow.userCandidate),
                 ),
+                builder: (context, userSnapshot) {
+                  final userName = userSnapshot.data?.firstOrNull
+                          ?.displayName ??
+                      'Chat';
+                  final userPhoto =
+                      userSnapshot.data?.firstOrNull?.photoUrl;
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        radius: 18.0,
+                        backgroundColor:
+                            FlutterFlowTheme.of(context).accent3,
+                        backgroundImage: userPhoto != null &&
+                                userPhoto.isNotEmpty
+                            ? NetworkImage(userPhoto)
+                            : null,
+                        child: userPhoto == null || userPhoto.isEmpty
+                            ? Text(
+                                userName.isNotEmpty
+                                    ? userName[0].toUpperCase()
+                                    : '?',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      letterSpacing: 0.0,
+                                    ),
+                              )
+                            : null,
+                      ),
+                      SizedBox(width: 12.0),
+                      Flexible(
+                        child: Text(
+                          userName,
+                          overflow: TextOverflow.ellipsis,
+                          style: FlutterFlowTheme.of(context)
+                              .titleMedium
+                              .override(
+                                font: GoogleFonts.interTight(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                color: FlutterFlowTheme.of(context)
+                                    .primaryText,
+                                fontSize: 18.0,
+                                letterSpacing: 0.0,
+                              ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
           actions: [],
           centerTitle: false,
@@ -171,15 +272,15 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Expanded(
-                      child: FutureBuilder<List<ChatsMessageRow>>(
-                        future: ChatsMessageTable().queryRows(
-                          queryFn: (q) => q
-                              .eqOrNull(
-                                'chatId',
-                                widget.chatId,
-                              )
-                              .order('created_at'),
-                        ),
+                      child: StreamBuilder<List<ChatsMessageRow>>(
+                        stream: _model.chatMessagesStream ??= SupaFlow.client
+                            .from("chats_message")
+                            .stream(primaryKey: ['id'])
+                            .eq('chatId', widget.chatId!)
+                            .order('created_at')
+                            .map((list) => list
+                                .map((e) => ChatsMessageRow(e))
+                                .toList()),
                         builder: (context, snapshot) {
                           // Customize what your widget looks like when it's loading.
                           if (!snapshot.hasData) {
@@ -217,6 +318,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                 .toList();
 
                                         return ListView.separated(
+                                          controller: _model.chatListController ??= ScrollController(),
                                           padding: EdgeInsets.fromLTRB(
                                             0,
                                             24.0,
@@ -227,7 +329,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                           scrollDirection: Axis.vertical,
                                           itemCount: containerVar.length,
                                           separatorBuilder: (_, __) =>
-                                              SizedBox(height: 15.0),
+                                              SizedBox(height: 4.0),
                                           itemBuilder:
                                               (context, containerVarIndex) {
                                             final containerVarItem =
@@ -245,17 +347,46 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                   ),
                                                   0.0),
                                               child: Container(
-                                                width:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width *
-                                                        0.7,
+                                                constraints: BoxConstraints(
+                                                  maxWidth:
+                                                      MediaQuery.sizeOf(context)
+                                                              .width *
+                                                          0.75,
+                                                ),
                                                 decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .primaryBackground,
+                                                  color: containerVarItem
+                                                              .typeMessage ==
+                                                          MessageSendType
+                                                              .Contractor.name
+                                                      ? Color(0xFFDCF8C6)
+                                                      : Colors.white,
                                                   borderRadius:
-                                                      BorderRadius.circular(
-                                                          9.0),
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(12.0),
+                                                    topRight:
+                                                        Radius.circular(12.0),
+                                                    bottomLeft: containerVarItem
+                                                                .typeMessage ==
+                                                            MessageSendType
+                                                                .Contractor.name
+                                                        ? Radius.circular(12.0)
+                                                        : Radius.circular(4.0),
+                                                    bottomRight: containerVarItem
+                                                                .typeMessage ==
+                                                            MessageSendType
+                                                                .Contractor.name
+                                                        ? Radius.circular(4.0)
+                                                        : Radius.circular(12.0),
+                                                  ),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withValues(alpha: 0.05),
+                                                      blurRadius: 3.0,
+                                                      offset: Offset(0, 1),
+                                                    ),
+                                                  ],
                                                 ),
                                                 child: Padding(
                                                   padding: EdgeInsets.all(9.0),
@@ -339,29 +470,23 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                                             9.0),
                                                                     child:
                                                                         OctoImage(
-                                                                      placeholderBuilder:
-                                                                          (_) =>
+                                                                      placeholderBuilder: _model
+                                                                                  .uploadedLocalFile_uploadDataDgg
+                                                                                  .blurHash !=
+                                                                              null
+                                                                          ? (_) =>
                                                                               SizedBox.expand(
-                                                                        child:
-                                                                            Image(
-                                                                          image: BlurHashImage(_model
-                                                                              .uploadedLocalFile_uploadDataDgg
-                                                                              .blurHash!),
-                                                                          fit: BoxFit
-                                                                              .cover,
-                                                                        ),
-                                                                      ),
+                                                                                child: Image(
+                                                                                  image: BlurHashImage(_model.uploadedLocalFile_uploadDataDgg.blurHash!),
+                                                                                  fit: BoxFit.cover,
+                                                                                ),
+                                                                              )
+                                                                          : null,
                                                                       image:
                                                                           NetworkImage(
                                                                         functions
                                                                             .parseTextToImage(containerVarItem.content!),
                                                                       ),
-                                                                      width: _model
-                                                                          .uploadedLocalFile_uploadDataDgg
-                                                                          .width,
-                                                                      height: _model
-                                                                          .uploadedLocalFile_uploadDataDgg
-                                                                          .height,
                                                                       fit: BoxFit
                                                                           .cover,
                                                                     ),
@@ -373,32 +498,15 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                                 TypeMessage
                                                                     .audio
                                                                     .name) {
-                                                              return Text(
-                                                                'Not Available',
-                                                                style: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .override(
-                                                                      font: GoogleFonts
-                                                                          .inter(
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .fontStyle,
-                                                                      ),
-                                                                      letterSpacing:
-                                                                          0.0,
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontStyle,
-                                                                    ),
+                                                              return AudioMessagePlayer(
+                                                                audioUrl:
+                                                                    containerVarItem
+                                                                        .content!,
+                                                                isOwn: containerVarItem
+                                                                        .typeMessage ==
+                                                                    MessageSendType
+                                                                        .Contractor
+                                                                        .name,
                                                               );
                                                             } else {
                                                               return Text(
@@ -444,48 +552,20 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                             EdgeInsetsDirectional
                                                                 .fromSTEB(
                                                                     0.0,
-                                                                    3.0,
+                                                                    4.0,
                                                                     0.0,
                                                                     0.0),
                                                         child: Row(
                                                           mainAxisSize:
-                                                              MainAxisSize.max,
+                                                              MainAxisSize.min,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .end,
                                                           children: [
-                                                            if (containerVarItem
-                                                                    .typeMessage ==
-                                                                MessageSendType
-                                                                    .Contractor
-                                                                    .name)
-                                                              Builder(
-                                                                builder:
-                                                                    (context) {
-                                                                  if (!containerVarItem
-                                                                      .readMessage!) {
-                                                                    return Icon(
-                                                                      Icons
-                                                                          .check_rounded,
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .secondaryText,
-                                                                      size:
-                                                                          15.0,
-                                                                    );
-                                                                  } else {
-                                                                    return Icon(
-                                                                      Icons
-                                                                          .done_all,
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .secondary,
-                                                                      size:
-                                                                          15.0,
-                                                                    );
-                                                                  }
-                                                                },
-                                                              ),
+                                                            Spacer(),
                                                             Text(
                                                               dateTimeFormat(
-                                                                "relative",
+                                                                "Hm",
                                                                 containerVarItem
                                                                     .createdAt,
                                                                 locale: FFLocalizations.of(
@@ -497,35 +577,63 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                               ),
                                                               style: FlutterFlowTheme
                                                                       .of(context)
-                                                                  .bodyMedium
+                                                                  .bodySmall
                                                                   .override(
                                                                     font: GoogleFonts
                                                                         .inter(
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontStyle,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .normal,
                                                                     ),
+                                                                    color: Color(
+                                                                        0xFF667781),
                                                                     fontSize:
-                                                                        12.0,
+                                                                        11.0,
                                                                     letterSpacing:
                                                                         0.0,
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
                                                                   ),
                                                             ),
-                                                          ].divide(SizedBox(
-                                                              width: 9.0)),
+                                                            if (containerVarItem
+                                                                    .typeMessage ==
+                                                                MessageSendType
+                                                                    .Contractor
+                                                                    .name)
+                                                              Padding(
+                                                                padding:
+                                                                    EdgeInsetsDirectional
+                                                                        .fromSTEB(
+                                                                            4.0,
+                                                                            0.0,
+                                                                            0.0,
+                                                                            0.0),
+                                                                child: Builder(
+                                                                  builder:
+                                                                      (context) {
+                                                                    if (containerVarItem
+                                                                            .readMessage ==
+                                                                        true) {
+                                                                      return Icon(
+                                                                        Icons
+                                                                            .done_all,
+                                                                        color: Color(
+                                                                            0xFF53BDEB),
+                                                                        size:
+                                                                            16.0,
+                                                                      );
+                                                                    } else {
+                                                                      return Icon(
+                                                                        Icons
+                                                                            .check_rounded,
+                                                                        color: Color(
+                                                                            0xFF667781),
+                                                                        size:
+                                                                            16.0,
+                                                                      );
+                                                                    }
+                                                                  },
+                                                                ),
+                                                              ),
+                                                          ],
                                                         ),
                                                       ),
                                                     ],
@@ -628,15 +736,36 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                         },
                       ),
                     ),
+                    if (_model.isOtherUserTyping)
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            20.0, 4.0, 20.0, 4.0),
+                        color:
+                            FlutterFlowTheme.of(context).primaryBackground,
+                        child: Text(
+                          'digitando...',
+                          style: FlutterFlowTheme.of(context)
+                              .bodySmall
+                              .override(
+                                font: GoogleFonts.inter(
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                color: Color(0xFF667781),
+                                fontSize: 12.0,
+                                letterSpacing: 0.0,
+                              ),
+                        ),
+                      ),
                     Container(
                       width: double.infinity,
-                      height: 70.0,
+                      constraints: BoxConstraints(minHeight: 60.0),
                       decoration: BoxDecoration(
                         color: FlutterFlowTheme.of(context).primaryBackground,
                       ),
                       child: Padding(
                         padding: EdgeInsetsDirectional.fromSTEB(
-                            12.0, 10.0, 12.0, 0.0),
+                            12.0, 8.0, 12.0, 8.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -656,39 +785,52 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                         'content_update_page_state');
                                     _model.typeText = true;
                                     safeSetState(() {});
+                                    // Broadcast typing event.
+                                    _model.typingChannel?.sendBroadcastMessage(
+                                      event: 'typing',
+                                      payload: {},
+                                    );
                                   },
                                 ),
                                 onFieldSubmitted: (_) async {
                                   logFirebaseEvent(
                                       'CHAT_content_ON_TEXTFIELD_SUBMIT');
+                                  final messageText = _model.contentTextController.text;
+                                  logFirebaseEvent('content_reset_form_fields');
+                                  safeSetState(() {
+                                    _model.contentTextController?.clear();
+                                    _model.typeText = false;
+                                  });
                                   logFirebaseEvent('content_backend_call');
                                   _model.createCopy =
                                       await ChatsMessageTable().insert({
                                     'chatId': widget.chatId,
-                                    'content':
-                                        _model.contentTextController.text,
+                                    'content': messageText,
                                     'typeMessage':
                                         MessageSendType.Contractor.name,
                                     'sendType': TypeMessage.text.name,
                                   });
                                   logFirebaseEvent('content_backend_call');
                                   await NotificationsTable().insert({
-                                    'body': 'A empresa entrou em contato',
+                                    'title': 'Nova mensagem!',
+                                    'body': messageText.length > 50
+                                        ? '${messageText.substring(0, 50)}...'
+                                        : messageText,
                                     'recipient_id':
                                         containerChatsRow?.userCandidate,
-                                    'title': 'Opa! Tem um mensagem',
+                                    'data': {
+                                      'route':
+                                          '/chatPage?chatId=${widget.chatId}',
+                                      'chatId': widget.chatId,
+                                    },
                                   });
-                                  logFirebaseEvent('content_reset_form_fields');
-                                  safeSetState(() {
-                                    _model.contentTextController?.clear();
-                                  });
-                                  logFirebaseEvent('content_update_page_state');
-                                  _model.typeText = false;
-                                  safeSetState(() {});
-                                  logFirebaseEvent('content_rebuild_page');
-                                  safeSetState(() {});
-
-                                  safeSetState(() {});
+                                  if (_model.chatListController?.hasClients ?? false) {
+                                    _model.chatListController!.animateTo(
+                                      0.0,
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut,
+                                    );
+                                  }
                                 },
                                 autofocus: false,
                                 textCapitalization:
@@ -828,14 +970,14 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                             onTap: () async {
                                               logFirebaseEvent(
                                                   'CHAT_PAGE_PAGE_Icon_e39tvqkj_ON_TAP');
+                                              final messageText = _model.contentTextController.text;
                                               logFirebaseEvent(
                                                   'Icon_backend_call');
                                               _model.create =
                                                   await ChatsMessageTable()
                                                       .insert({
                                                 'chatId': widget.chatId,
-                                                'content': _model
-                                                    .contentTextController.text,
+                                                'content': messageText,
                                                 'typeMessage': MessageSendType
                                                     .Contractor.name,
                                                 'sendType':
@@ -846,27 +988,32 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                               safeSetState(() {
                                                 _model.contentTextController
                                                     ?.clear();
+                                                _model.typeText = false;
                                               });
-                                              logFirebaseEvent(
-                                                  'Icon_update_page_state');
-                                              _model.typeText = false;
-                                              safeSetState(() {});
                                               logFirebaseEvent(
                                                   'Icon_backend_call');
                                               await NotificationsTable()
                                                   .insert({
-                                                'body':
-                                                    'A empresa entrou em contato',
+                                                'title': 'Nova mensagem!',
+                                                'body': messageText.length > 50
+                                                    ? '${messageText.substring(0, 50)}...'
+                                                    : messageText,
                                                 'recipient_id':
                                                     containerChatsRow
                                                         ?.userCandidate,
-                                                'title': 'Opa! Tem um mensagem',
+                                                'data': {
+                                                  'route':
+                                                      '/chatPage?chatId=${widget.chatId}',
+                                                  'chatId': widget.chatId,
+                                                },
                                               });
-                                              logFirebaseEvent(
-                                                  'Icon_rebuild_page');
-                                              safeSetState(() {});
-
-                                              safeSetState(() {});
+                                              if (_model.chatListController?.hasClients ?? false) {
+                                                _model.chatListController!.animateTo(
+                                                  0.0,
+                                                  duration: Duration(milliseconds: 300),
+                                                  curve: Curves.easeOut,
+                                                );
+                                              }
                                             },
                                             child: Icon(
                                               Icons.send_rounded,
@@ -899,6 +1046,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                     storageFolderPath:
                                                         FFAppState().serviceId,
                                                     imageQuality: 70,
+                                                    maxWidth: 1080.0,
                                                     allowPhoto: true,
                                                     allowVideo: true,
                                                     includeBlurHash: true,
@@ -917,6 +1065,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                     var downloadUrls =
                                                         <String>[];
                                                     try {
+                                                      showUploadMessage(context, 'Subindo...', showLoading: true);
                                                       selectedUploadedFiles =
                                                           selectedMedia
                                                               .map((m) =>
@@ -948,6 +1097,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                             selectedMedia,
                                                       );
                                                     } finally {
+                                                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                                       _model.isDataUploading_uploadDataDgg =
                                                           false;
                                                     }
@@ -965,46 +1115,156 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                         _model.uploadedFileUrl_uploadDataDgg =
                                                             downloadUrls.first;
                                                       });
+                                                      showUploadMessage(context, 'Sucesso!');
                                                     } else {
                                                       safeSetState(() {});
                                                       return;
                                                     }
-                                                  }
 
-                                                  logFirebaseEvent(
-                                                      'Icon_backend_call');
-                                                  await ChatsMessageTable()
-                                                      .insert({
-                                                    'chatId': widget.chatId,
-                                                    'content': _model
-                                                        .uploadedFileUrl_uploadDataDgg,
-                                                    'sendType':
-                                                        TypeMessage.image.name,
-                                                    'typeMessage':
-                                                        MessageSendType
-                                                            .Contractor.name,
-                                                  });
-                                                  logFirebaseEvent(
-                                                      'Icon_backend_call');
-                                                  await NotificationsTable()
-                                                      .insert({
-                                                    'body':
-                                                        'A emprsa entrou em contato',
-                                                    'recipient_id':
-                                                        containerChatsRow
-                                                            ?.userCandidate,
-                                                    'title':
-                                                        'Opa! Tem um mensagem',
-                                                  });
-                                                  logFirebaseEvent(
-                                                      'Icon_rebuild_page');
-                                                  safeSetState(() {});
+                                                    logFirebaseEvent(
+                                                        'Icon_backend_call');
+                                                    await ChatsMessageTable()
+                                                        .insert({
+                                                      'chatId': widget.chatId,
+                                                      'content': _model
+                                                          .uploadedFileUrl_uploadDataDgg,
+                                                      'sendType':
+                                                          TypeMessage.image.name,
+                                                      'typeMessage':
+                                                          MessageSendType
+                                                              .Contractor.name,
+                                                    });
+                                                    logFirebaseEvent(
+                                                        'Icon_backend_call');
+                                                    await NotificationsTable()
+                                                        .insert({
+                                                      'title': 'Nova mensagem!',
+                                                      'body': '📷 Imagem',
+                                                      'recipient_id':
+                                                          containerChatsRow
+                                                              ?.userCandidate,
+                                                      'data': {
+                                                        'route':
+                                                            '/chatPage?chatId=${widget.chatId}',
+                                                        'chatId': widget.chatId,
+                                                      },
+                                                    });
+                                                    if (_model.chatListController?.hasClients ?? false) {
+                                                      _model.chatListController!.animateTo(
+                                                        0.0,
+                                                        duration: Duration(milliseconds: 300),
+                                                        curve: Curves.easeOut,
+                                                      );
+                                                    }
+                                                  }
                                                 },
                                                 child: Icon(
                                                   Icons.camera_alt_rounded,
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .primaryText,
+                                                  size: 30.0,
+                                                ),
+                                              ),
+                                              InkWell(
+                                                splashColor: Colors.transparent,
+                                                focusColor: Colors.transparent,
+                                                hoverColor: Colors.transparent,
+                                                highlightColor:
+                                                    Colors.transparent,
+                                                onTap: () async {
+                                                  if (_model.isRecording) {
+                                                    // Stop recording and send
+                                                    final audioPath =
+                                                        await stopAudioRecording();
+                                                    safeSetState(() {
+                                                      _model.isRecording =
+                                                          false;
+                                                    });
+                                                    if (audioPath != null) {
+                                                      // Upload to Supabase Storage
+                                                      final file =
+                                                          File(audioPath);
+                                                      final bytes =
+                                                          await file
+                                                              .readAsBytes();
+                                                      final fileName =
+                                                          'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+                                                      final storagePath =
+                                                          '${FFAppState().serviceId}/$fileName';
+
+                                                      await SupaFlow
+                                                          .client.storage
+                                                          .from('App')
+                                                          .uploadBinary(
+                                                            storagePath,
+                                                            bytes,
+                                                            fileOptions:
+                                                                FileOptions(
+                                                              contentType:
+                                                                  'audio/mp4',
+                                                            ),
+                                                          );
+
+                                                      final audioUrl = SupaFlow
+                                                          .client.storage
+                                                          .from('App')
+                                                          .getPublicUrl(
+                                                              storagePath);
+
+                                                      await ChatsMessageTable()
+                                                          .insert({
+                                                        'chatId':
+                                                            widget.chatId,
+                                                        'content': audioUrl,
+                                                        'sendType': TypeMessage
+                                                            .audio.name,
+                                                        'typeMessage':
+                                                            MessageSendType
+                                                                .Contractor
+                                                                .name,
+                                                      });
+
+                                                      await NotificationsTable()
+                                                          .insert({
+                                                        'title':
+                                                            'Nova mensagem!',
+                                                        'body':
+                                                            '🎙️ Áudio',
+                                                        'recipient_id':
+                                                            containerChatsRow
+                                                                ?.userCandidate,
+                                                        'data': {
+                                                          'route':
+                                                              '/chatPage?chatId=${widget.chatId}',
+                                                          'chatId':
+                                                              widget.chatId,
+                                                        },
+                                                      });
+                                                    }
+                                                  } else {
+                                                    // Start recording
+                                                    final started =
+                                                        await startAudioRecording();
+                                                    if (started) {
+                                                      safeSetState(() {
+                                                        _model.isRecording =
+                                                            true;
+                                                      });
+                                                    }
+                                                  }
+                                                },
+                                                child: Icon(
+                                                  _model.isRecording
+                                                      ? Icons.stop_circle
+                                                      : Icons.mic_rounded,
+                                                  color: _model.isRecording
+                                                      ? FlutterFlowTheme.of(
+                                                              context)
+                                                          .error
+                                                      : FlutterFlowTheme.of(
+                                                              context)
+                                                          .primaryText,
                                                   size: 30.0,
                                                 ),
                                               ),

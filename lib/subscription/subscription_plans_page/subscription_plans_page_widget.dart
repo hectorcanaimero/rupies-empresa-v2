@@ -7,7 +7,6 @@ import '/custom_code/actions/index.dart' as actions;
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'subscription_plans_page_model.dart';
 export 'subscription_plans_page_model.dart';
@@ -29,6 +28,13 @@ class _SubscriptionPlansPageWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Planos v2 carregados do Supabase
+  List<SubscriptionPlansRow> _planosV2 = [];
+  bool _loadingPlans = true;
+
+  // Controla se o seletor de plano está visível (para alterar plano ativo)
+  bool _showPlanSelector = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,60 +42,79 @@ class _SubscriptionPlansPageWidgetState
 
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'SubscriptionPlansPage'});
-    // On page load action.
+
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      logFirebaseEvent('SUBSCRIPTION_PLANS_SubscriptionPlansPage');
-      logFirebaseEvent('SubscriptionPlansPage_backend_call');
-      _model.planos = await SubscriptionPlansTable().queryRows(
-        queryFn: (q) => q,
-      );
+      await _loadPlans();
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
+  Future<void> _loadPlans() async {
+    final plans = await SubscriptionPlansTable().queryRows(
+      queryFn: (q) => q
+          .eq('plan_version', 2)
+          .eq('is_active', true)
+          .order('sort_order', ascending: true),
+    );
+    if (mounted) {
+      setState(() {
+        _planosV2 = plans;
+        _loadingPlans = false;
+        // Pre-selecionar o plano gratuito (sort_order = 0)
+        final freeIndex = plans.indexWhere((p) => p.planType == 'free');
+        _model.selectedPlanIndex = freeIndex >= 0 ? freeIndex : 0;
+        if (plans.isNotEmpty) {
+          _model.selectedPlanId = plans[_model.selectedPlanIndex].id;
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
+  }
+
+  String _formatFreeTierExpiry(DateTime? expiresAt) {
+    if (expiresAt == null) return '';
+    return 'Até ${DateFormat('dd/MM/yyyy').format(expiresAt.toLocal())}';
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<ViewSubsRow>>(
-      stream: _model.subscriptionPlansPageSupabaseStream ??= SupaFlow.client
-          .from("view_subs")
-          .stream(primaryKey: ['id'])
-          .eqOrNull(
-            'user_id',
-            currentUserUid,
-          )
-          .map((list) => list.map((item) => ViewSubsRow(item)).toList()),
+      stream: _model.subscriptionPlansPageSupabaseStream ??=
+          SupaFlow.client
+              .from('view_subs')
+              .stream(primaryKey: ['id'])
+              .eqOrNull('user_id', currentUserUid)
+              .map((list) => list.map((item) => ViewSubsRow(item)).toList()),
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
           return Scaffold(
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             body: Center(
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
-                  ),
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  FlutterFlowTheme.of(context).primary,
                 ),
               ),
             ),
           );
         }
-        List<ViewSubsRow> subscriptionPlansPageViewSubsRowList = snapshot.data!;
 
-        final subscriptionPlansPageViewSubsRow =
-            subscriptionPlansPageViewSubsRowList.isNotEmpty
-                ? subscriptionPlansPageViewSubsRowList.first
-                : null;
+        final viewSubsRows = snapshot.data!;
+        final activeSubscription = viewSubsRows.isNotEmpty
+            ? viewSubsRows.firstWhere(
+                (r) => r.status == 'active' || r.status == 'pending',
+                orElse: () => viewSubsRows.first,
+              )
+            : null;
+
+        final hasActiveSub = activeSubscription?.id != null &&
+            activeSubscription!.id!.isNotEmpty;
 
         return GestureDetector(
           onTap: () {
@@ -105,7 +130,6 @@ class _SubscriptionPlansPageWidgetState
               leading: FlutterFlowIconButton(
                 borderColor: Colors.transparent,
                 borderRadius: 30.0,
-                borderWidth: 1.0,
                 buttonSize: 60.0,
                 icon: Icon(
                   Icons.arrow_back_rounded,
@@ -113,1274 +137,639 @@ class _SubscriptionPlansPageWidgetState
                   size: 30.0,
                 ),
                 onPressed: () async {
-                  logFirebaseEvent('SUBSCRIPTION_PLANS_arrow_back_rounded_IC');
-                  logFirebaseEvent('IconButton_navigate_back');
+                  logFirebaseEvent('SUBSCRIPTION_PLANS_back_ICN_ON_TAP');
                   context.pop();
                 },
               ),
               title: Text(
-                'Clube dos 100',
+                'Plano Crédito por Assinatura',
                 style: FlutterFlowTheme.of(context).headlineMedium.override(
                       font: GoogleFonts.interTight(
                         fontWeight: FlutterFlowTheme.of(context)
                             .headlineMedium
                             .fontWeight,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .headlineMedium
-                            .fontStyle,
                       ),
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      fontSize: 22.0,
+                      color: FlutterFlowTheme.of(context).primaryText,
+                      fontSize: 18.0,
                       letterSpacing: 0.0,
-                      fontWeight: FlutterFlowTheme.of(context)
-                          .headlineMedium
-                          .fontWeight,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).headlineMedium.fontStyle,
                     ),
               ),
-              actions: [],
               centerTitle: true,
               elevation: 0.0,
             ),
             body: SafeArea(
               top: true,
-              child: Builder(
-                builder: (context) {
-                  if (subscriptionPlansPageViewSubsRow?.id != null &&
-                      subscriptionPlansPageViewSubsRow?.id != '') {
-                    return Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(),
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            16.0, 0.0, 16.0, 0.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Material(
-                              color: Colors.transparent,
-                              elevation: 1.0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(9.0),
-                                  topRight: Radius.circular(9.0),
-                                ),
-                              ),
-                              child: Container(
-                                width: double.infinity,
-                                constraints: BoxConstraints(
-                                  minHeight: 200.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFF2F1788),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(9.0),
-                                    topRight: Radius.circular(9.0),
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(9.0),
-                                    topRight: Radius.circular(9.0),
-                                  ),
-                                  child: Image.network(
-                                    subscriptionPlansPageViewSubsRow!.spImage2!,
-                                    fit: BoxFit.cover,
-                                    cacheHeight: 200,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 18.0),
-                              child: FutureBuilder<List<SubscriptionPlansRow>>(
-                                future: SubscriptionPlansTable().querySingleRow(
-                                  queryFn: (q) => q.eqOrNull(
-                                    'id',
-                                    subscriptionPlansPageViewSubsRow.planId,
-                                  ),
-                                ),
-                                builder: (context, snapshot) {
-                                  // Customize what your widget looks like when it's loading.
-                                  if (!snapshot.hasData) {
-                                    return Center(
-                                      child: SizedBox(
-                                        width: 50.0,
-                                        height: 50.0,
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            FlutterFlowTheme.of(context)
-                                                .primary,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  List<SubscriptionPlansRow>
-                                      containerSubscriptionPlansRowList =
-                                      snapshot.data!;
-
-                                  // Return an empty Container when the item does not exist.
-                                  if (snapshot.data!.isEmpty) {
-                                    return Container();
-                                  }
-                                  final containerSubscriptionPlansRow =
-                                      containerSubscriptionPlansRowList
-                                              .isNotEmpty
-                                          ? containerSubscriptionPlansRowList
-                                              .first
-                                          : null;
-
-                                  return Material(
-                                    color: Colors.transparent,
-                                    elevation: 1.0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(9.0),
-                                        bottomRight: Radius.circular(9.0),
-                                      ),
-                                    ),
-                                    child: Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFF2F1788),
-                                        borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(9.0),
-                                          bottomRight: Radius.circular(9.0),
-                                        ),
-                                      ),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            24.0, 0.0, 24.0, 24.0),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 6.0),
-                                              child: Text(
-                                                'Plan Contratado:',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleMedium
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .interTight(
-                                                            fontWeight:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleMedium
-                                                                    .fontWeight,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                          color: Colors.white,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .titleMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .titleMedium
-                                                                  .fontStyle,
-                                                        ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 9.0),
-                                              child: Text(
-                                                subscriptionPlansPageViewSubsRow
-                                                    .spName!,
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .interTight(
-                                                            fontWeight:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .fontWeight,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .fontStyle,
-                                                          ),
-                                                          color: Colors.white,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .titleSmall
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .titleSmall
-                                                                  .fontStyle,
-                                                        ),
-                                              ),
-                                            ),
-                                            Divider(
-                                              thickness: 1.0,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .alternate,
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      0.0, 6.0, 0.0, 18.0),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Estado da subscrição: ',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          font:
-                                                              GoogleFonts.inter(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .normal,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primaryBackground,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                  ),
-                                                  Text(
-                                                    subscriptionPlansPageViewSubsRow
-                                                        .status!,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          font:
-                                                              GoogleFonts.inter(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primaryBackground,
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                  ),
-                                                ].divide(SizedBox(width: 6.0)),
-                                              ),
-                                            ),
-                                            if (subscriptionPlansPageViewSubsRow
-                                                    .status ==
-                                                'pending')
-                                              Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: FFButtonWidget(
-                                                  onPressed: () async {
-                                                    logFirebaseEvent(
-                                                        'SUBSCRIPTION_PLANS_IR_PARA_O_LINK_DE_PAG');
-                                                    logFirebaseEvent(
-                                                        'Button_launch_u_r_l');
-                                                    await launchURL(
-                                                        getJsonField(
-                                                      subscriptionPlansPageViewSubsRow
-                                                          .metadata!,
-                                                      r'''$.payment_link_url''',
-                                                    ).toString());
-                                                  },
-                                                  text:
-                                                      'Ir para o Link de pagamento',
-                                                  options: FFButtonOptions(
-                                                    width: 220.0,
-                                                    height: 40.0,
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
-                                                    iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryBackground,
-                                                    textStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .titleSmall
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .interTight(
-                                                                fontWeight: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .fontWeight,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .fontStyle,
-                                                              ),
-                                                              color: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .primaryText,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .titleSmall
-                                                                      .fontWeight,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .titleSmall
-                                                                      .fontStyle,
-                                                            ),
-                                                    elevation: 0.0,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 18.0),
-                              child: Material(
-                                color: Colors.transparent,
-                                elevation: 1.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(9.0),
-                                ),
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(9.0),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(24.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.campaign_sharp,
-                                              color: Color(0xFFBABABA),
-                                              size: 36.0,
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                'Em caso de dúvidas, entre em contato com o suporte. Estamos aqui para ajudar.',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          font:
-                                                              GoogleFonts.inter(
-                                                            fontWeight:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontWeight,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                              ),
-                                            ),
-                                          ].divide(SizedBox(width: 16.0)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: AlignmentDirectional(0.0, 0.0),
-                              child: FFButtonWidget(
-                                onPressed: () async {
-                                  logFirebaseEvent(
-                                      'SUBSCRIPTION_PLANS_ENTRA_EM_CONTATO_BTN_');
-                                  logFirebaseEvent('Button_launch_u_r_l');
-                                  await launchURL(
-                                      'https://wa.me/5511965939170');
-                                },
-                                text: 'Entra em contato',
-                                icon: FaIcon(
-                                  FontAwesomeIcons.envelope,
-                                  size: 15.0,
-                                ),
-                                options: FFButtonOptions(
-                                  width: 229.0,
-                                  height: 40.0,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 12.0, 0.0),
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.interTight(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: Colors.white,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderSide: BorderSide(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                            ),
-                          ]
-                              .addToStart(SizedBox(height: 24.0))
-                              .addToEnd(SizedBox(height: 24.0)),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return FutureBuilder<List<SubscriptionPlansRow>>(
-                      future: SubscriptionPlansTable().queryRows(
-                        queryFn: (q) => q,
-                      ),
-                      builder: (context, snapshot) {
-                        // Customize what your widget looks like when it's loading.
-                        if (!snapshot.hasData) {
-                          return Center(
-                            child: SizedBox(
-                              width: 50.0,
-                              height: 50.0,
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  FlutterFlowTheme.of(context).primary,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                        List<SubscriptionPlansRow>
-                            containerSubscriptionPlansRowList = snapshot.data!;
-
-                        return Container(
-                          decoration: BoxDecoration(),
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                12.0, 0.0, 12.0, 0.0),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(9.0),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Align(
-                                            alignment:
-                                                AlignmentDirectional(0.0, 0.0),
-                                            child: Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 6.0),
-                                              child: RichText(
-                                                textScaler:
-                                                    MediaQuery.of(context)
-                                                        .textScaler,
-                                                text: TextSpan(
-                                                  children: [
-                                                    TextSpan(
-                                                      text: 'Escolha o',
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .headlineLarge
-                                                              .override(
-                                                                font: GoogleFonts
-                                                                    .interTight(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .headlineLarge
-                                                                      .fontStyle,
-                                                                ),
-                                                                color: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .primaryText,
-                                                                fontSize: 20.0,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .normal,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .headlineLarge
-                                                                    .fontStyle,
-                                                              ),
-                                                    ),
-                                                    TextSpan(
-                                                      text: ' Plano Ideal ',
-                                                      style: TextStyle(
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                      ),
-                                                    ),
-                                                    TextSpan(
-                                                      text: 'para você:',
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    )
-                                                  ],
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .headlineLarge
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .interTight(
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .headlineLarge
-                                                                  .fontStyle,
-                                                        ),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        fontSize: 20.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.normal,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .headlineLarge
-                                                                .fontStyle,
-                                                      ),
-                                                ),
-                                                textAlign: TextAlign.start,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 36.0),
-                                    child: Builder(
-                                      builder: (context) {
-                                        final ouro =
-                                            containerSubscriptionPlansRowList
-                                                .where((e) => e.type == 'ouro')
-                                                .toList()
-                                                .map((e) => e)
-                                                .toList()
-                                                .take(1)
-                                                .toList();
-
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: List.generate(ouro.length,
-                                              (ouroIndex) {
-                                            final ouroItem = ouro[ouroIndex];
-                                            return Column(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: [
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          0.0, 0.0, 0.0, 12.0),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12.0),
-                                                    ),
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      children: [
-                                                        ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      8.0),
-                                                          child: Image.network(
-                                                            ouroItem.image!,
-                                                            width:
-                                                                double.infinity,
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                FFButtonWidget(
-                                                  onPressed: () async {
-                                                    logFirebaseEvent(
-                                                        'SUBSCRIPTION_PLANS_COMEAR_O_PLANO_RECOME');
-                                                    logFirebaseEvent(
-                                                        'Button_update_page_state');
-                                                    _model.isCreating = true;
-                                                    safeSetState(() {});
-                                                    logFirebaseEvent(
-                                                        'Button_custom_action');
-                                                    _model.createSubResult =
-                                                        await actions
-                                                            .createSubscription(
-                                                      ouroItem.id,
-                                                      'yearly',
-                                                      'pix',
-                                                    );
-                                                    logFirebaseEvent(
-                                                        'Button_wait__delay');
-                                                    await Future.delayed(
-                                                      Duration(
-                                                        milliseconds: 500,
-                                                      ),
-                                                    );
-                                                    logFirebaseEvent(
-                                                        'Button_backend_call');
-                                                    _model.dtaSubs =
-                                                        await SubscriptionsTable()
-                                                            .queryRows(
-                                                      queryFn: (q) =>
-                                                          q.eqOrNull(
-                                                        'user_id',
-                                                        currentUserUid,
-                                                      ),
-                                                    );
-                                                    logFirebaseEvent(
-                                                        'Button_update_page_state');
-                                                    _model.isCreating = false;
-                                                    safeSetState(() {});
-                                                    logFirebaseEvent(
-                                                        'Button_launch_u_r_l');
-                                                    await launchURL(
-                                                        getJsonField(
-                                                      _model
-                                                          .dtaSubs!
-                                                          .firstOrNull!
-                                                          .metadata!,
-                                                      r'''$.payment_link_url''',
-                                                    ).toString());
-
-                                                    safeSetState(() {});
-                                                  },
-                                                  text:
-                                                      'Começar o plano recomendado',
-                                                  options: FFButtonOptions(
-                                                    height: 40.0,
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
-                                                    iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .tertiary,
-                                                    textStyle: FlutterFlowTheme
-                                                            .of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .interTight(
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .fontStyle,
-                                                          ),
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primaryText,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .titleSmall
-                                                                  .fontStyle,
-                                                        ),
-                                                    elevation: 0.0,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-                                          }),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 6.0),
-                                      child: Text(
-                                        'Prefere OUTRO PLANO?',
-                                        textAlign: TextAlign.start,
-                                        style: FlutterFlowTheme.of(context)
-                                            .headlineLarge
-                                            .override(
-                                              font: GoogleFonts.interTight(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .headlineLarge
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .headlineLarge
-                                                        .fontStyle,
-                                              ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              fontSize: 20.0,
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .headlineLarge
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .headlineLarge
-                                                      .fontStyle,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 24.0),
-                                      child: Text(
-                                        'Veja as opções: ',
-                                        textAlign: TextAlign.start,
-                                        style: FlutterFlowTheme.of(context)
-                                            .headlineLarge
-                                            .override(
-                                              font: GoogleFonts.interTight(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .headlineLarge
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .headlineLarge
-                                                        .fontStyle,
-                                              ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              fontSize: 20.0,
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .headlineLarge
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .headlineLarge
-                                                      .fontStyle,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 18.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            constraints: BoxConstraints(
-                                              minHeight: 100.0,
-                                            ),
-                                            decoration: BoxDecoration(),
-                                            child: Builder(
-                                              builder: (context) {
-                                                final prata =
-                                                    containerSubscriptionPlansRowList
-                                                        .where((e) =>
-                                                            e.type == 'prata')
-                                                        .toList()
-                                                        .map((e) => e)
-                                                        .toList()
-                                                        .take(1)
-                                                        .toList();
-
-                                                return Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: List.generate(
-                                                      prata.length,
-                                                      (prataIndex) {
-                                                    final prataItem =
-                                                        prata[prataIndex];
-                                                    return Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      children: [
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsetsDirectional
-                                                                  .fromSTEB(
-                                                                      0.0,
-                                                                      0.0,
-                                                                      0.0,
-                                                                      12.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8.0),
-                                                            child:
-                                                                Image.network(
-                                                              prataItem.image!,
-                                                              width: 200.0,
-                                                              fit: BoxFit.cover,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        FFButtonWidget(
-                                                          onPressed: () async {
-                                                            logFirebaseEvent(
-                                                                'SUBSCRIPTION_PLANS_COMEAR_J_BTN_ON_TAP');
-                                                            logFirebaseEvent(
-                                                                'Button_update_page_state');
-                                                            _model.isCreating =
-                                                                true;
-                                                            safeSetState(() {});
-                                                            logFirebaseEvent(
-                                                                'Button_custom_action');
-                                                            _model.createSubResult1 =
-                                                                await actions
-                                                                    .createSubscription(
-                                                              prataItem.id,
-                                                              'semiannually',
-                                                              'pix',
-                                                            );
-                                                            logFirebaseEvent(
-                                                                'Button_wait__delay');
-                                                            await Future
-                                                                .delayed(
-                                                              Duration(
-                                                                milliseconds:
-                                                                    700,
-                                                              ),
-                                                            );
-                                                            logFirebaseEvent(
-                                                                'Button_backend_call');
-                                                            _model.dtaSubs1 =
-                                                                await SubscriptionsTable()
-                                                                    .queryRows(
-                                                              queryFn: (q) =>
-                                                                  q.eqOrNull(
-                                                                'user_id',
-                                                                currentUserUid,
-                                                              ),
-                                                            );
-                                                            logFirebaseEvent(
-                                                                'Button_update_page_state');
-                                                            _model.isCreating =
-                                                                false;
-                                                            safeSetState(() {});
-                                                            logFirebaseEvent(
-                                                                'Button_launch_u_r_l');
-                                                            await launchURL(
-                                                                getJsonField(
-                                                              _model
-                                                                  .dtaSubs!
-                                                                  .firstOrNull!
-                                                                  .metadata!,
-                                                              r'''$.payment_link_url''',
-                                                            ).toString());
-
-                                                            safeSetState(() {});
-                                                          },
-                                                          text: 'Começar Já!',
-                                                          options:
-                                                              FFButtonOptions(
-                                                            height: 40.0,
-                                                            padding:
-                                                                EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                        16.0,
-                                                                        0.0,
-                                                                        16.0,
-                                                                        0.0),
-                                                            iconPadding:
-                                                                EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                        0.0,
-                                                                        0.0,
-                                                                        0.0,
-                                                                        0.0),
-                                                            color: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .tertiary,
-                                                            textStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .override(
-                                                                      font: GoogleFonts
-                                                                          .interTight(
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .titleSmall
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .titleSmall
-                                                                            .fontStyle,
-                                                                      ),
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .primaryText,
-                                                                      letterSpacing:
-                                                                          0.0,
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .titleSmall
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .titleSmall
-                                                                          .fontStyle,
-                                                                    ),
-                                                            elevation: 0.0,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8.0),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  }),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Container(
-                                            constraints: BoxConstraints(
-                                              minHeight: 100.0,
-                                            ),
-                                            decoration: BoxDecoration(),
-                                            child: Builder(
-                                              builder: (context) {
-                                                final basic =
-                                                    containerSubscriptionPlansRowList
-                                                        .where((e) =>
-                                                            e.type == 'basic')
-                                                        .toList()
-                                                        .map((e) => e)
-                                                        .toList()
-                                                        .take(1)
-                                                        .toList();
-
-                                                return Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: List.generate(
-                                                      basic.length,
-                                                      (basicIndex) {
-                                                    final basicItem =
-                                                        basic[basicIndex];
-                                                    return Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      children: [
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsetsDirectional
-                                                                  .fromSTEB(
-                                                                      0.0,
-                                                                      0.0,
-                                                                      0.0,
-                                                                      12.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8.0),
-                                                            child:
-                                                                Image.network(
-                                                              basicItem.image!,
-                                                              width: 200.0,
-                                                              fit: BoxFit.cover,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        FFButtonWidget(
-                                                          onPressed: () async {
-                                                            logFirebaseEvent(
-                                                                'SUBSCRIPTION_PLANS_COMEAR_J_BTN_ON_TAP');
-                                                            logFirebaseEvent(
-                                                                'Button_update_page_state');
-                                                            _model.isCreating =
-                                                                true;
-                                                            safeSetState(() {});
-                                                            logFirebaseEvent(
-                                                                'Button_custom_action');
-                                                            _model.createSubResult2 =
-                                                                await actions
-                                                                    .createSubscription(
-                                                              basicItem.id,
-                                                              'monthly',
-                                                              'pix',
-                                                            );
-                                                            logFirebaseEvent(
-                                                                'Button_wait__delay');
-                                                            await Future
-                                                                .delayed(
-                                                              Duration(
-                                                                milliseconds:
-                                                                    500,
-                                                              ),
-                                                            );
-                                                            logFirebaseEvent(
-                                                                'Button_backend_call');
-                                                            _model.dtaSubs2 =
-                                                                await SubscriptionsTable()
-                                                                    .queryRows(
-                                                              queryFn: (q) =>
-                                                                  q.eqOrNull(
-                                                                'user_id',
-                                                                currentUserUid,
-                                                              ),
-                                                            );
-                                                            logFirebaseEvent(
-                                                                'Button_update_page_state');
-                                                            _model.isCreating =
-                                                                false;
-                                                            safeSetState(() {});
-                                                            logFirebaseEvent(
-                                                                'Button_launch_u_r_l');
-                                                            await launchURL(
-                                                                getJsonField(
-                                                              _model
-                                                                  .dtaSubs2!
-                                                                  .firstOrNull!
-                                                                  .metadata!,
-                                                              r'''$.payment_link_url''',
-                                                            ).toString());
-
-                                                            safeSetState(() {});
-                                                          },
-                                                          text: 'Começar Já!',
-                                                          options:
-                                                              FFButtonOptions(
-                                                            height: 40.0,
-                                                            padding:
-                                                                EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                        16.0,
-                                                                        0.0,
-                                                                        16.0,
-                                                                        0.0),
-                                                            iconPadding:
-                                                                EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                        0.0,
-                                                                        0.0,
-                                                                        0.0,
-                                                                        0.0),
-                                                            color: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .tertiary,
-                                                            textStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .override(
-                                                                      font: GoogleFonts
-                                                                          .interTight(
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .titleSmall
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .titleSmall
-                                                                            .fontStyle,
-                                                                      ),
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .primaryText,
-                                                                      letterSpacing:
-                                                                          0.0,
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .titleSmall
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .titleSmall
-                                                                          .fontStyle,
-                                                                    ),
-                                                            elevation: 0.0,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8.0),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  }),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ].divide(SizedBox(width: 15.0)),
-                                    ),
-                                  ),
-                                ]
-                                    .addToStart(SizedBox(height: 12.0))
-                                    .addToEnd(SizedBox(height: 24.0)),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }
-                },
-              ),
+              child: hasActiveSub && !_showPlanSelector
+                  ? _buildActiveSubscriptionView(context, activeSubscription)
+                  : _buildPlanSelectorView(
+                      context,
+                      currentSub: hasActiveSub ? activeSubscription : null,
+                    ),
             ),
           ),
         );
       },
     );
+  }
+
+  // ───────────────────────────────────────────────────────
+  // Vista: ya tiene assinatura ativa
+  // ───────────────────────────────────────────────────────
+  Widget _buildActiveSubscriptionView(
+      BuildContext context, ViewSubsRow sub) {
+    final isUnlimited = sub.cbIsUnlimited ?? false;
+    final creditsRemaining = sub.creditsRemaining ?? 0;
+    final creditsGranted = sub.creditsGranted ?? 0;
+    final isFree = sub.spIsFree ?? false;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8.0),
+          // Título
+          Text(
+            'Seu plano atual',
+            style: FlutterFlowTheme.of(context).titleLarge.override(
+                  font: GoogleFonts.interTight(fontWeight: FontWeight.w700),
+                  letterSpacing: 0.0,
+                ),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            'Recorrência no Cartão de Crédito ou PIX',
+            style: FlutterFlowTheme.of(context).bodySmall.override(
+                  font: GoogleFonts.inter(),
+                  color: FlutterFlowTheme.of(context).secondaryText,
+                  letterSpacing: 0.0,
+                ),
+          ),
+          const SizedBox(height: 24.0),
+          // Card do plano ativo
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4A6CF7),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 28.0,
+                      height: 28.0,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.circle,
+                          color: Color(0xFF4A6CF7), size: 14.0),
+                    ),
+                    const SizedBox(width: 12.0),
+                    Expanded(
+                      child: Text(
+                        (sub.spName ?? 'Plano').toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18.0,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    if (isFree && sub.spFreeTierExpiresAt != null)
+                      Text(
+                        _formatFreeTierExpiry(sub.spFreeTierExpiresAt),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12.0,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                // Saldo de créditos
+                if (!isUnlimited) ...[
+                  Text(
+                    '$creditsRemaining de $creditsGranted créditos restantes',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.0,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4.0),
+                    child: LinearProgressIndicator(
+                      value: creditsGranted > 0
+                          ? creditsRemaining / creditsGranted
+                          : 0.0,
+                      backgroundColor: Colors.white24,
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                      minHeight: 6.0,
+                    ),
+                  ),
+                ] else
+                  const Text(
+                    'Créditos ilimitados',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                const SizedBox(height: 8.0),
+                Text(
+                  'Status: ${sub.status ?? '-'}',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24.0),
+          // Botão de ir para link de pagamento (se pending)
+          if (sub.status == 'pending') ...[
+            FFButtonWidget(
+              onPressed: () async {
+                logFirebaseEvent('SUBSCRIPTION_PLANS_pagamento_BTN_ON_TAP');
+                await launchURL(
+                    getJsonField(sub.metadata, r'''$.payment_link_url''')
+                        .toString());
+              },
+              text: 'Ir para o Link de pagamento',
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 48.0,
+                color: FlutterFlowTheme.of(context).primary,
+                textStyle: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w600),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+            const SizedBox(height: 12.0),
+          ],
+          // Botão: alterar plano
+          FFButtonWidget(
+            onPressed: () {
+              logFirebaseEvent('SUBSCRIPTION_PLANS_alterar_BTN_ON_TAP');
+              setState(() {
+                _showPlanSelector = true;
+                // Pré-selecionar um plano diferente do atual
+                if (_planosV2.isNotEmpty) {
+                  final differentIndex = _planosV2.indexWhere(
+                    (p) => p.id != sub.planId,
+                  );
+                  _model.selectedPlanIndex =
+                      differentIndex >= 0 ? differentIndex : 0;
+                  _model.selectedPlanId =
+                      _planosV2[_model.selectedPlanIndex].id;
+                }
+              });
+            },
+            text: 'Alterar plano',
+            icon: const Icon(Icons.swap_horiz, size: 16.0),
+            options: FFButtonOptions(
+              width: double.infinity,
+              height: 48.0,
+              color: Colors.transparent,
+              textStyle: TextStyle(
+                color: FlutterFlowTheme.of(context).primary,
+                fontWeight: FontWeight.w600,
+              ),
+              borderSide: BorderSide(
+                color: FlutterFlowTheme.of(context).primary,
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(8.0),
+              elevation: 0.0,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          // Suporte
+          Row(
+            children: [
+              const Icon(Icons.headset_mic_outlined,
+                  color: Color(0xFFBABABA), size: 24.0),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  'Em caso de dúvidas, entre em contato com o suporte.',
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        font: GoogleFonts.inter(),
+                        letterSpacing: 0.0,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12.0),
+          FFButtonWidget(
+            onPressed: () async {
+              logFirebaseEvent('SUBSCRIPTION_PLANS_suporte_BTN_ON_TAP');
+              await launchURL('https://wa.me/5511965939170');
+            },
+            text: 'Entrar em contato',
+            icon: const Icon(Icons.chat_bubble_outline, size: 16.0),
+            options: FFButtonOptions(
+              height: 44.0,
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              color: FlutterFlowTheme.of(context).secondaryText,
+              textStyle: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.w600),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────────────────────────────────────────────────
+  // Vista: seletor de planos (radio buttons)
+  // ───────────────────────────────────────────────────────
+  Widget _buildPlanSelectorView(BuildContext context, {ViewSubsRow? currentSub}) {
+    if (_loadingPlans) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_planosV2.isEmpty) {
+      return Center(
+        child: Text(
+          'Nenhum plano disponível no momento.',
+          style: FlutterFlowTheme.of(context).bodyMedium,
+        ),
+      );
+    }
+
+    final selectedPlan = _model.selectedPlanIndex < _planosV2.length
+        ? _planosV2[_model.selectedPlanIndex]
+        : null;
+
+    final isFreePlanSelected = selectedPlan?.planType == 'free' ||
+        selectedPlan?.isFree == true;
+
+    final isChangingPlan = currentSub != null;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8.0),
+          // Header com botão voltar quando está alterando plano
+          if (isChangingPlan)
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => setState(() => _showPlanSelector = false),
+                  child: const Icon(Icons.arrow_back_ios, size: 18.0),
+                ),
+                const SizedBox(width: 8.0),
+                Expanded(
+                  child: Text(
+                    'Alterar plano',
+                    style: FlutterFlowTheme.of(context).titleLarge.override(
+                          font: GoogleFonts.interTight(fontWeight: FontWeight.w700),
+                          letterSpacing: 0.0,
+                        ),
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              'Plano Crédito por Assinatura',
+              style: FlutterFlowTheme.of(context).titleLarge.override(
+                    font: GoogleFonts.interTight(fontWeight: FontWeight.w700),
+                    letterSpacing: 0.0,
+                  ),
+            ),
+          const SizedBox(height: 4.0),
+          Text(
+            isChangingPlan
+                ? 'Seu plano atual: ${currentSub.spName ?? '-'}'
+                : 'Recorrência no Cartão de Crédito ou PIX',
+            style: FlutterFlowTheme.of(context).bodySmall.override(
+                  font: GoogleFonts.inter(),
+                  color: FlutterFlowTheme.of(context).secondaryText,
+                  letterSpacing: 0.0,
+                ),
+          ),
+          const SizedBox(height: 24.0),
+          // Radio list de planos
+          ...List.generate(_planosV2.length, (index) {
+            final plan = _planosV2[index];
+            final isSelected = _model.selectedPlanIndex == index;
+            // Quando alterando, marcar o plano atual com indicador
+            final isCurrentPlan = currentSub != null && plan.id == currentSub.planId;
+            return _buildPlanTile(
+              context, plan, index, isSelected,
+              isCurrentPlan: isCurrentPlan,
+            );
+          }),
+          const SizedBox(height: 32.0),
+          // Botão principal
+          _model.isCreating
+              ? const Center(child: CircularProgressIndicator())
+              : FFButtonWidget(
+                  onPressed: () async {
+                    logFirebaseEvent('SUBSCRIPTION_PLANS_assinar_BTN_ON_TAP');
+                    await _handleSubscribe(
+                      context,
+                      selectedPlan,
+                      currentSub: currentSub,
+                    );
+                  },
+                  text: isFreePlanSelected
+                      ? 'Ativar plano gratuito'
+                      : isChangingPlan
+                          ? 'Confirmar alteração'
+                          : 'Assinar',
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 52.0,
+                    color: const Color(0xFF4A6CF7),
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.0,
+                    ),
+                    borderRadius: BorderRadius.circular(12.0),
+                    elevation: 0.0,
+                  ),
+                ),
+          const SizedBox(height: 24.0),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlanTile(
+    BuildContext context,
+    SubscriptionPlansRow plan,
+    int index,
+    bool isSelected, {
+    bool isCurrentPlan = false,
+  }) {
+    final isFree = plan.planType == 'free' || plan.isFree == true;
+    final hasTag = !isFree;
+    final tagText = plan.sortOrder == 1
+        ? 'PLANO 1'
+        : plan.sortOrder == 2
+            ? 'PLANO 2'
+            : null;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _model.selectedPlanIndex = index;
+          _model.selectedPlanId = plan.id;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12.0),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF4A6CF7)
+              : FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF4A6CF7)
+                : FlutterFlowTheme.of(context).alternate,
+            width: isSelected ? 2.0 : 1.0,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0, vertical: 18.0),
+              child: Row(
+                children: [
+                  // Radio button
+                  Container(
+                    width: 24.0,
+                    height: 24.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.white
+                            : FlutterFlowTheme.of(context).alternate,
+                        width: 2.0,
+                      ),
+                    ),
+                    child: isSelected
+                        ? Center(
+                            child: Container(
+                              width: 10.0,
+                              height: 10.0,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 16.0),
+                  // Nome do plano
+                  Expanded(
+                    child: Text(
+                      _getPlanDisplayName(plan).toUpperCase(),
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : FlutterFlowTheme.of(context).primaryText,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16.0,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  // Preço ou expiry
+                  if (isFree && plan.freeTierExpiresAt != null)
+                    Text(
+                      _formatFreeTierExpiry(plan.freeTierExpiresAt),
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white70
+                            : FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 12.0,
+                      ),
+                    )
+                  else if (!isFree && plan.priceMonthly != null)
+                    Text(
+                      'R\$ ${plan.priceMonthly!.toStringAsFixed(2).replaceAll('.', ',')}/ mês',
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF4A6CF7),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.0,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // Badge "Plano atual" (quando alterando)
+            if (isCurrentPlan)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : FlutterFlowTheme.of(context).secondaryText,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(10.0),
+                      bottomLeft: Radius.circular(10.0),
+                    ),
+                  ),
+                  child: Text(
+                    'ATUAL',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11.0,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              )
+            // Tag do plano (PLANO 1 / PLANO 2)
+            else if (hasTag && tagText != null)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 4.0),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4A6CF7),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10.0),
+                      bottomLeft: Radius.circular(10.0),
+                    ),
+                  ),
+                  child: Text(
+                    tagText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11.0,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getPlanDisplayName(SubscriptionPlansRow plan) {
+    if (plan.planType == 'free') return 'Gratuito';
+    if (plan.isUnlimited == true) return 'Ilimitado';
+    final credits = plan.creditsPerMonth;
+    if (credits != null) return '$credits Créditos';
+    return plan.name;
+  }
+
+  Future<void> _handleSubscribe(
+    BuildContext context,
+    SubscriptionPlansRow? plan, {
+    ViewSubsRow? currentSub,
+  }) async {
+    if (plan == null) return;
+
+    // Não permite assinar o mesmo plano que já está ativo
+    if (currentSub != null && plan.id == currentSub.planId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Este já é o seu plano atual.')),
+      );
+      return;
+    }
+
+    setState(() => _model.isCreating = true);
+
+    try {
+      // Se está alterando plano, cancela o atual antes
+      if (currentSub != null && currentSub.id != null) {
+        final cancelResult = await actions.cancelSubscription(
+          currentSub.id!,
+          true,
+          'plan_change',
+        );
+        if (cancelResult is Map && cancelResult['success'] == false) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(cancelResult['error']?.toString() ??
+                    'Erro ao cancelar plano atual'),
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      final result = await actions.createSubscription(
+        plan.id,
+        'monthly',
+        'pix',
+      );
+
+      if (result is Map && result['success'] == false) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['error']?.toString() ??
+                  'Erro ao criar assinatura'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Plano gratuito: ativado diretamente
+      if (result is Map && result['isFree'] == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Plano gratuito ativado com sucesso!')),
+          );
+          context.pop();
+        }
+        return;
+      }
+
+      // Plano pago: abrir link de pagamento
+      final paymentLink = result is Map ? result['paymentLink'] as String? : null;
+      if (mounted) {
+        setState(() => _showPlanSelector = false);
+        if (paymentLink != null && paymentLink.isNotEmpty) {
+          await launchURL(paymentLink);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Assinatura criada! Aguardando pagamento.')),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _model.isCreating = false);
+    }
   }
 }

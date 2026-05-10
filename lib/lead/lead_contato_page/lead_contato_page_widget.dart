@@ -129,7 +129,7 @@ class _LeadContatoPageWidgetState extends State<LeadContatoPageWidget> {
                     decoration: BoxDecoration(),
                     child: Form(
                       key: _model.formKey,
-                      autovalidateMode: AutovalidateMode.always,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       child: Padding(
                         padding: EdgeInsetsDirectional.fromSTEB(
                             12.0, 0.0, 12.0, 0.0),

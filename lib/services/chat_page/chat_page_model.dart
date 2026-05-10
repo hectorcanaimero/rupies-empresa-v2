@@ -2,13 +2,26 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'chat_page_widget.dart' show ChatPageWidget;
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 class ChatPageModel extends FlutterFlowModel<ChatPageWidget> {
   ///  Local state fields for this page.
 
   bool typeText = false;
+  bool isRecording = false;
+  bool isOtherUserTyping = false;
+
+  // ScrollController for auto-scroll after sending messages.
+  ScrollController? chatListController;
+
+  // Typing indicator channel and timer.
+  RealtimeChannel? typingChannel;
+  Timer? typingTimer;
 
   ///  State fields for stateful widgets in this page.
+
+  // Supabase Realtime stream for chat messages.
+  Stream<List<ChatsMessageRow>>? chatMessagesStream;
 
   // Stores action output result for [Backend Call - Update Row(s)] action in ChatPage widget.
   List<ChatsMessageRow>? update;
@@ -32,5 +45,8 @@ class ChatPageModel extends FlutterFlowModel<ChatPageWidget> {
   void dispose() {
     contentFocusNode?.dispose();
     contentTextController?.dispose();
+    chatListController?.dispose();
+    typingTimer?.cancel();
+    typingChannel?.unsubscribe();
   }
 }

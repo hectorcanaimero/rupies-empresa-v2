@@ -9,3 +9,7 @@ export 'check_subscription.dart' show checkSubscription;
 export 'create_subscription.dart' show createSubscription;
 export 'cancel_subscription.dart' show cancelSubscription;
 export 'update_password.dart' show updatePassword;
+export 'record_audio.dart'
+    show startAudioRecording, stopAudioRecording, cancelAudioRecording;
+export 'consume_credit.dart' show consumeCredit;
+export 'get_credit_balance.dart' show getCreditBalance;

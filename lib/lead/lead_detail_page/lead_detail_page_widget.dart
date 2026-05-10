@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
@@ -271,8 +272,8 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(0.0),
-                                                        child: Image.network(
-                                                          valueOrDefault<
+                                                        child: CachedNetworkImage(
+                                                          imageUrl: valueOrDefault<
                                                               String>(
                                                             imageItem.image,
                                                             'https://images.unsplash.com/photo-1645651964715-d200ce0939cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxM3x8Y2FycGludGVyaWF8ZW58MHx8fHwxNzQ3MjcyNzU3fDA&ixlib=rb-4.1.0&q=80&w=400',
@@ -282,6 +283,22 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                                           height:
                                                               double.infinity,
                                                           fit: BoxFit.contain,
+                                                          placeholder: (context, url) => Center(
+                                                            child: SizedBox(
+                                                              width: 32.0,
+                                                              height: 32.0,
+                                                              child: CircularProgressIndicator(
+                                                                strokeWidth: 2.0,
+                                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                                  FlutterFlowTheme.of(context).primary,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          errorWidget: (context, url, error) => Icon(
+                                                            Icons.broken_image_outlined,
+                                                            color: FlutterFlowTheme.of(context).secondaryText,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
@@ -347,7 +364,8 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                               .querySingleRow(
                                             queryFn: (q) => q.eqOrNull(
                                               'id',
-                                              '',
+                                              leadDetailPageLeadsRow
+                                                  ?.typeFornecedor,
                                             ),
                                           ),
                                           builder: (context, snapshot) {
@@ -1452,18 +1470,31 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                           if (confirmDialogResponse) {
                                             logFirebaseEvent(
                                                 'Apagar_backend_call');
-                                            await LeadsTable().delete(
-                                              matchingRows: (rows) =>
-                                                  rows.eqOrNull(
-                                                'id',
-                                                widget.id,
-                                              ),
-                                            );
-                                            logFirebaseEvent(
-                                                'Apagar_navigate_to');
-
-                                            context.pushNamed(
-                                                LeadPageWidget.routeName);
+                                            try {
+                                              await LeadsTable().delete(
+                                                matchingRows: (rows) =>
+                                                    rows.eqOrNull(
+                                                  'id',
+                                                  widget.id,
+                                                ),
+                                              );
+                                              logFirebaseEvent(
+                                                  'Apagar_navigate_to');
+                                              if (context.mounted) {
+                                                context.pushNamed(
+                                                    LeadPageWidget.routeName);
+                                              }
+                                            } catch (e) {
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                        'Erro ao apagar. Tente novamente.'),
+                                                  ),
+                                                );
+                                              }
+                                            }
                                           }
                                         },
                                         text: 'Apagar',
@@ -1512,8 +1543,8 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                         ),
                                         showLoadingIndicator: false,
                                       ),
-                                      if (leadDetailPageLeadsRow.endRegister ??
-                                          true)
+                                      if (!(leadDetailPageLeadsRow.endRegister ??
+                                          false))
                                         FFButtonWidget(
                                           onPressed: () async {
                                             logFirebaseEvent(
@@ -1554,21 +1585,34 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                             if (confirmDialogResponse) {
                                               logFirebaseEvent(
                                                   'Finalizar_backend_call');
-                                              await LeadsTable().update(
-                                                data: {
-                                                  'finished': true,
-                                                },
-                                                matchingRows: (rows) =>
-                                                    rows.eqOrNull(
-                                                  'id',
-                                                  widget.id,
-                                                ),
-                                              );
-                                              logFirebaseEvent(
-                                                  'Finalizar_navigate_to');
-
-                                              context.goNamed(
-                                                  LeadPageWidget.routeName);
+                                              try {
+                                                await LeadsTable().update(
+                                                  data: {
+                                                    'finished': true,
+                                                  },
+                                                  matchingRows: (rows) =>
+                                                      rows.eqOrNull(
+                                                    'id',
+                                                    widget.id,
+                                                  ),
+                                                );
+                                                logFirebaseEvent(
+                                                    'Finalizar_navigate_to');
+                                                if (context.mounted) {
+                                                  context.goNamed(
+                                                      LeadPageWidget.routeName);
+                                                }
+                                              } catch (e) {
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                          'Erro ao finalizar. Tente novamente.'),
+                                                    ),
+                                                  );
+                                                }
+                                              }
                                             }
 
                                             safeSetState(() {});

@@ -52,5 +52,8 @@
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
     <meta-data android:name="flutterEmbedding" android:value="2"/>
     <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDyp9tahhSNSauP8JfcPtbICsiz1UqutN8"/>
+    <meta-data
+        android:name="com.google.firebase.messaging.default_notification_channel_id"
+        android:value="rupies_notifications_v2" />
   </application>
 </manifest>

@@ -53,7 +53,10 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
 
   @override
   Widget build(BuildContext context) {
-    context.watch<FFAppState>();
+    // Observa apenas os campos usados nesta página para evitar rebuilds desnecessários.
+    context.select<FFAppState, (String?, String)>(
+      (s) => (s.subscription.status, s.trial?.toString() ?? ''),
+    );
 
     return GestureDetector(
       onTap: () {
@@ -299,18 +302,8 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                   controller: _model.tabBarController,
                                   children: [
                                     FutureBuilder<List<LeadsRow>>(
-                                      future: LeadsTable().queryRows(
-                                        queryFn: (q) => q
-                                            .neqOrNull(
-                                              'userId',
-                                              currentUserUid,
-                                            )
-                                            .eqOrNull(
-                                              'finished',
-                                              false,
-                                            )
-                                            .order('created_at'),
-                                      ),
+                                      future: _model
+                                          .fetchLeadsAvailable(currentUserUid),
                                       builder: (context, snapshot) {
                                         // Customize what your widget looks like when it's loading.
                                         if (!snapshot.hasData) {
@@ -349,6 +342,8 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                 listViewLeadsRowList[
                                                     listViewIndex];
                                             return Padding(
+                                              key: ValueKey(
+                                                  listViewLeadsRow.id),
                                               padding: EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 0.0, 0.0, 15.0),
@@ -457,38 +452,13 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                                       children: [
                                                                         Expanded(
                                                                           child:
-                                                                              FutureBuilder<List<TypeProviderRow>>(
-                                                                            future:
-                                                                                TypeProviderTable().querySingleRow(
-                                                                              queryFn: (q) => q.eqOrNull(
-                                                                                'id',
-                                                                                listViewLeadsRow.typeFornecedor,
-                                                                              ),
-                                                                            ),
+                                                                              Builder(
                                                                             builder:
-                                                                                (context, snapshot) {
-                                                                              // Customize what your widget looks like when it's loading.
-                                                                              if (!snapshot.hasData) {
-                                                                                return Center(
-                                                                                  child: SizedBox(
-                                                                                    width: 16.0,
-                                                                                    height: 16.0,
-                                                                                    child: CircularProgressIndicator(
-                                                                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                                                                        Color(0x004B39EF),
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                );
-                                                                              }
-                                                                              List<TypeProviderRow> richTextTypeProviderRowList = snapshot.data!;
-
-                                                                              // Return an empty Container when the item does not exist.
-                                                                              if (snapshot.data!.isEmpty) {
+                                                                                (context) {
+                                                                              final typeProvider = _model.typeProviderCache[listViewLeadsRow.typeFornecedor];
+                                                                              if (typeProvider == null || typeProvider.name == null) {
                                                                                 return Container();
                                                                               }
-                                                                              final richTextTypeProviderRow = richTextTypeProviderRowList.isNotEmpty ? richTextTypeProviderRowList.first : null;
-
                                                                               return RichText(
                                                                                 textScaler: MediaQuery.of(context).textScaler,
                                                                                 text: TextSpan(
@@ -507,7 +477,7 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                                                           ),
                                                                                     ),
                                                                                     TextSpan(
-                                                                                      text: richTextTypeProviderRow!.name!,
+                                                                                      text: typeProvider.name!,
                                                                                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                             font: GoogleFonts.inter(
                                                                                               fontWeight: FontWeight.w300,
@@ -837,14 +807,8 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                       },
                                     ),
                                     FutureBuilder<List<LeadsRow>>(
-                                      future: LeadsTable().queryRows(
-                                        queryFn: (q) => q
-                                            .eqOrNull(
-                                              'userId',
-                                              currentUserUid,
-                                            )
-                                            .order('created_at'),
-                                      ),
+                                      future: _model
+                                          .fetchLeadsOwned(currentUserUid),
                                       builder: (context, snapshot) {
                                         // Customize what your widget looks like when it's loading.
                                         if (!snapshot.hasData) {
@@ -883,6 +847,8 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                 listViewLeadsRowList[
                                                     listViewIndex];
                                             return Padding(
+                                              key: ValueKey(
+                                                  listViewLeadsRow.id),
                                               padding: EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 0.0, 0.0, 15.0),
@@ -996,36 +962,12 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                                         children: [
                                                                           Expanded(
                                                                             child:
-                                                                                FutureBuilder<List<TypeProviderRow>>(
-                                                                              future: TypeProviderTable().querySingleRow(
-                                                                                queryFn: (q) => q.eqOrNull(
-                                                                                  'id',
-                                                                                  listViewLeadsRow.typeFornecedor,
-                                                                                ),
-                                                                              ),
-                                                                              builder: (context, snapshot) {
-                                                                                // Customize what your widget looks like when it's loading.
-                                                                                if (!snapshot.hasData) {
-                                                                                  return Center(
-                                                                                    child: SizedBox(
-                                                                                      width: 30.0,
-                                                                                      height: 30.0,
-                                                                                      child: CircularProgressIndicator(
-                                                                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                                                                          Color(0x004B39EF),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                  );
-                                                                                }
-                                                                                List<TypeProviderRow> richTextTypeProviderRowList = snapshot.data!;
-
-                                                                                // Return an empty Container when the item does not exist.
-                                                                                if (snapshot.data!.isEmpty) {
+                                                                                Builder(
+                                                                              builder: (context) {
+                                                                                final typeProvider = _model.typeProviderCache[listViewLeadsRow.typeFornecedor];
+                                                                                if (typeProvider == null || typeProvider.name == null) {
                                                                                   return Container();
                                                                                 }
-                                                                                final richTextTypeProviderRow = richTextTypeProviderRowList.isNotEmpty ? richTextTypeProviderRowList.first : null;
-
                                                                                 return RichText(
                                                                                   textScaler: MediaQuery.of(context).textScaler,
                                                                                   text: TextSpan(
@@ -1045,7 +987,7 @@ class _LeadPageWidgetState extends State<LeadPageWidget>
                                                                                       ),
                                                                                       TextSpan(
                                                                                         text: valueOrDefault<String>(
-                                                                                          richTextTypeProviderRow?.name,
+                                                                                          typeProvider.name,
                                                                                           '...',
                                                                                         ),
                                                                                         style: FlutterFlowTheme.of(context).bodyMedium.override(

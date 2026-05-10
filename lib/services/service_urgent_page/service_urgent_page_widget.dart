@@ -42,11 +42,19 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   LatLng? currentUserLocationValue;
+  Future<List<ServicesRow>>? _serviceFuture;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => ServiceUrgentPageModel());
+
+    _serviceFuture = ServicesTable().querySingleRow(
+      queryFn: (q) => q.eqOrNull(
+        'id',
+        FFAppState().serviceId,
+      ),
+    );
 
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'ServiceUrgentPage'});
@@ -91,6 +99,12 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
               _model.images = [];
               _model.show = false;
               _model.list = [];
+              _serviceFuture = ServicesTable().querySingleRow(
+                queryFn: (q) => q.eqOrNull(
+                  'id',
+                  FFAppState().serviceId,
+                ),
+              );
               safeSetState(() {});
             } else {
               return;
@@ -135,7 +149,6 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
       _model.uid = null;
       _model.dateStart = null;
       _model.dateEnd = null;
-      safeSetState(() {});
     }();
 
     _model.dispose();
@@ -170,17 +183,12 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
       },
       child: Scaffold(
         key: scaffoldKey,
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
           child: FutureBuilder<List<ServicesRow>>(
-            future: ServicesTable().querySingleRow(
-              queryFn: (q) => q.eqOrNull(
-                'id',
-                FFAppState().serviceId,
-              ),
-            ),
+            future: _serviceFuture,
             builder: (context, snapshot) {
               // Customize what your widget looks like when it's loading.
               if (!snapshot.hasData) {
@@ -987,16 +995,11 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                             Text(
                                                                           valueOrDefault<
                                                                               String>(
-                                                                            _model.dateStart != null
-                                                                                ? _model.dateStart?.toString()
-                                                                                : valueOrDefault<String>(
-                                                                                    dateTimeFormat(
-                                                                                      "d/M/y",
-                                                                                      stackServicesRow?.dateStart,
-                                                                                      locale: FFLocalizations.of(context).languageCode,
-                                                                                    ),
-                                                                                    '...',
-                                                                                  ),
+                                                                            dateTimeFormat(
+                                                                              "d/M/y",
+                                                                              stackServicesRow?.dateStart,
+                                                                              locale: FFLocalizations.of(context).languageCode,
+                                                                            ),
                                                                             '...',
                                                                           ),
                                                                           style: FlutterFlowTheme.of(context)
@@ -1102,14 +1105,6 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                         _datePicked1Date
                                                                             .day,
                                                                       );
-                                                                    });
-                                                                  } else if (_model
-                                                                          .datePicked1 !=
-                                                                      null) {
-                                                                    safeSetState(
-                                                                        () {
-                                                                      _model.datePicked1 =
-                                                                          getCurrentTimestamp;
                                                                     });
                                                                   }
                                                                   logFirebaseEvent(
@@ -1670,17 +1665,89 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                           );
                                           _shouldSetState = true;
                                           logFirebaseEvent('Button_page_view');
-                                          await _model.pageViewController
-                                              ?.nextPage(
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            curve: Curves.ease,
-                                          );
+                                          _model.pageViewController
+                                              ?.jumpToPage(2);
                                           if (_shouldSetState)
                                             safeSetState(() {});
                                           return;
                                         } else {
                                           if (FFAppState().typecompany != '') {
+                                            logFirebaseEvent(
+                                                'Button_validate_form');
+                                            if (_model.formKey.currentState ==
+                                                    null ||
+                                                !_model.formKey.currentState!
+                                                    .validate()) {
+                                              return;
+                                            }
+                                            if (_model.categoryValue == null) {
+                                              await showDialog(
+                                                context: context,
+                                                builder:
+                                                    (alertDialogContext) {
+                                                  return AlertDialog(
+                                                    title: Text('Erro'),
+                                                    content: Text(
+                                                        'A categoria é obrigatoria'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                                alertDialogContext),
+                                                        child: Text('Ok'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                              return;
+                                            }
+                                            if (_model.hourArrivedValue ==
+                                                null) {
+                                              await showDialog(
+                                                context: context,
+                                                builder:
+                                                    (alertDialogContext) {
+                                                  return AlertDialog(
+                                                    title: Text('Erro'),
+                                                    content: Text(
+                                                        'A Hora de chegada  é obrigatoria'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                                alertDialogContext),
+                                                        child: Text('Ok'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                              return;
+                                            }
+                                            if ((_model.dateStart == null) ||
+                                                (_model.dateEnd == null)) {
+                                              await showDialog(
+                                                context: context,
+                                                builder:
+                                                    (alertDialogContext) {
+                                                  return AlertDialog(
+                                                    title: Text('Opa!'),
+                                                    content: Text(
+                                                        'Verifique os campos de datas. Campos Obrigatorio'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                                alertDialogContext),
+                                                        child: Text('Ok'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                              return;
+                                            }
                                             logFirebaseEvent(
                                                 'Button_backend_call');
                                             _model.create1 =
@@ -1706,6 +1773,18 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                               'jobType': JobTypes.Urgente.name,
                                             });
                                             _shouldSetState = true;
+                                            if (_model.create1 == null) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      'Erro ao criar serviço'),
+                                                ),
+                                              );
+                                              if (_shouldSetState)
+                                                safeSetState(() {});
+                                              return;
+                                            }
                                             logFirebaseEvent(
                                                 'Button_update_app_state');
                                             FFAppState().serviceId =
@@ -1713,12 +1792,8 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                             safeSetState(() {});
                                             logFirebaseEvent(
                                                 'Button_page_view');
-                                            await _model.pageViewController
-                                                ?.nextPage(
-                                              duration:
-                                                  Duration(milliseconds: 300),
-                                              curve: Curves.ease,
-                                            );
+                                            _model.pageViewController
+                                                ?.jumpToPage(2);
                                             if (_shouldSetState)
                                               safeSetState(() {});
                                             return;
@@ -1817,6 +1892,19 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                         JobTypes.Urgente.name,
                                                   });
                                                   _shouldSetState = true;
+                                                  if (_model.create == null) {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                            'Erro ao criar serviço'),
+                                                      ),
+                                                    );
+                                                    if (_shouldSetState)
+                                                      safeSetState(() {});
+                                                    return;
+                                                  }
                                                   logFirebaseEvent(
                                                       'Button_update_app_state');
                                                   FFAppState().serviceId =
@@ -1842,13 +1930,9 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                   _shouldSetState = true;
                                                   logFirebaseEvent(
                                                       'Button_page_view');
-                                                  await _model
+                                                  _model
                                                       .pageViewController
-                                                      ?.nextPage(
-                                                    duration: Duration(
-                                                        milliseconds: 300),
-                                                    curve: Curves.ease,
-                                                  );
+                                                      ?.jumpToPage(2);
                                                   if (_shouldSetState)
                                                     safeSetState(() {});
                                                   return;
@@ -2171,6 +2255,8 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                             '',
                                                                         imageQuality:
                                                                             70,
+                                                                        maxWidth:
+                                                                            1080.0,
                                                                         allowPhoto:
                                                                             true,
                                                                         includeDimensions:
@@ -2192,6 +2278,7 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                         var downloadUrls =
                                                                             <String>[];
                                                                         try {
+                                                                          showUploadMessage(context, 'Subindo...', showLoading: true);
                                                                           selectedUploadedFiles = selectedMedia
                                                                               .map((m) => FFUploadedFile(
                                                                                     name: m.storagePath.split('/').last,
@@ -2211,6 +2298,7 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                                 selectedMedia,
                                                                           );
                                                                         } finally {
+                                                                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                                                           _model.isDataUploading_field0001 =
                                                                               false;
                                                                         }
@@ -2224,40 +2312,41 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                                             _model.uploadedFileUrl_field0001 =
                                                                                 downloadUrls.first;
                                                                           });
+                                                                          showUploadMessage(context, 'Sucesso!');
                                                                         } else {
                                                                           safeSetState(
                                                                               () {});
                                                                           return;
                                                                         }
+
+                                                                        logFirebaseEvent(
+                                                                            'IconButton_backend_call');
+                                                                        _model.createImage =
+                                                                            await ServicesImagesTable()
+                                                                                .insert({
+                                                                          'serviceId':
+                                                                              FFAppState().serviceId,
+                                                                          'image':
+                                                                              _model.uploadedFileUrl_field0001,
+                                                                        });
+                                                                        logFirebaseEvent(
+                                                                            'IconButton_update_page_state');
+                                                                        _model.addToImages(
+                                                                            _model
+                                                                                .uploadedFileUrl_field0001);
+                                                                        safeSetState(
+                                                                            () {});
+                                                                        logFirebaseEvent(
+                                                                            'IconButton_refresh_database_request');
+                                                                        safeSetState(() =>
+                                                                            _model.requestCompleter2 =
+                                                                                null);
+                                                                        await _model
+                                                                            .waitForRequestCompleted2();
+
+                                                                        safeSetState(
+                                                                            () {});
                                                                       }
-
-                                                                      logFirebaseEvent(
-                                                                          'IconButton_backend_call');
-                                                                      _model.createImage =
-                                                                          await ServicesImagesTable()
-                                                                              .insert({
-                                                                        'serviceId':
-                                                                            FFAppState().serviceId,
-                                                                        'image':
-                                                                            _model.uploadedFileUrl_field0001,
-                                                                      });
-                                                                      logFirebaseEvent(
-                                                                          'IconButton_update_page_state');
-                                                                      _model.addToImages(
-                                                                          _model
-                                                                              .uploadedFileUrl_field0001);
-                                                                      safeSetState(
-                                                                          () {});
-                                                                      logFirebaseEvent(
-                                                                          'IconButton_refresh_database_request');
-                                                                      safeSetState(() =>
-                                                                          _model.requestCompleter2 =
-                                                                              null);
-                                                                      await _model
-                                                                          .waitForRequestCompleted2();
-
-                                                                      safeSetState(
-                                                                          () {});
                                                                     },
                                                                   ),
                                                                 ],
@@ -3069,7 +3158,7 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                             FFAppState().serviceId,
                                           ),
                                         );
-                                        if (_model.countImages!.length > 0) {
+                                        if ((_model.countImages?.length ?? 0) > 0) {
                                           logFirebaseEvent('button_page_view');
                                           await _model.pageViewController
                                               ?.nextPage(
@@ -3316,12 +3405,8 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                           logFirebaseEvent(
                                               'SERVICE_URGENT_ANTERIOR_BTN_ON_TAP');
                                           logFirebaseEvent('Button_page_view');
-                                          await _model.pageViewController
-                                              ?.previousPage(
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            curve: Curves.ease,
-                                          );
+                                          _model.pageViewController
+                                              ?.jumpToPage(0);
                                         },
                                         text: 'Anterior',
                                         options: FFButtonOptions(
@@ -3376,6 +3461,29 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                         onPressed: () async {
                                           logFirebaseEvent(
                                               'SERVICE_URGENT_PAGE_PAGE_button_ON_TAP');
+                                          if (_model
+                                              .placePickerValue.address
+                                              .isEmpty) {
+                                            await showDialog(
+                                              context: context,
+                                              builder: (alertDialogContext) {
+                                                return AlertDialog(
+                                                  title: Text('Erro'),
+                                                  content: Text(
+                                                      'Selecione um endereço para o serviço'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              alertDialogContext),
+                                                      child: Text('Ok'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                            return;
+                                          }
                                           logFirebaseEvent(
                                               'button_backend_call');
                                           await ServicesTable().update(

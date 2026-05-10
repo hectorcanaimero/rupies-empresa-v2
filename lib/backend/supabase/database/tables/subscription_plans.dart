@@ -78,4 +78,23 @@ class SubscriptionPlansRow extends SupabaseDataRow {
 
   String? get image3 => getField<String>('image3');
   set image3(String? value) => setField<String>('image3', value);
+
+  int? get creditsPerMonth => getField<int>('credits_per_month');
+  set creditsPerMonth(int? value) => setField<int>('credits_per_month', value);
+
+  bool? get isUnlimited => getField<bool>('is_unlimited');
+  set isUnlimited(bool? value) => setField<bool>('is_unlimited', value);
+
+  bool? get isFree => getField<bool>('is_free');
+  set isFree(bool? value) => setField<bool>('is_free', value);
+
+  DateTime? get freeTierExpiresAt => getField<DateTime>('free_tier_expires_at');
+  set freeTierExpiresAt(DateTime? value) =>
+      setField<DateTime>('free_tier_expires_at', value);
+
+  int? get planVersion => getField<int>('plan_version');
+  set planVersion(int? value) => setField<int>('plan_version', value);
+
+  String? get planType => getField<String>('plan_type');
+  set planType(String? value) => setField<String>('plan_type', value);
 }

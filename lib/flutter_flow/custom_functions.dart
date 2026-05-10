@@ -100,7 +100,7 @@ double calcularMediaPrestador(List<ViewServiceRatingRow> ratings) {
     }
   }
 
-  if (contador == 0) return 0.0;
+  if (contador == 0) return 3.0;
   final media = suma / contador;
-  return double.parse(media.toStringAsFixed(1));
+  return double.parse(media.toStringAsFixed(1)).clamp(3.0, 5.0);
 }

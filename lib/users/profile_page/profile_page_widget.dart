@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'profile_page_model.dart';
@@ -72,6 +73,33 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Consulta ViaCEP y rellena automáticamente el campo de dirección.
+  /// Se llama cuando el CEP completa 8 dígitos numéricos.
+  Future<void> _fetchAddressFromCep(String rawCep) async {
+    try {
+      final response = await http
+          .get(Uri.parse('https://viacep.com.br/ws/$rawCep/json/'))
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        if (data['erro'] != true) {
+          final logradouro = data['logradouro'] as String? ?? '';
+          final bairro = data['bairro'] as String? ?? '';
+          final localidade = data['localidade'] as String? ?? '';
+          final uf = data['uf'] as String? ?? '';
+          final address = [logradouro, bairro, localidade, uf]
+              .where((s) => s.isNotEmpty)
+              .join(', ');
+          safeSetState(() {
+            _model.addressTextController?.text = address;
+          });
+        }
+      }
+    } catch (_) {
+      // Si falla la consulta, el usuario completa manualmente — sin crash
+    }
   }
 
   @override
@@ -1116,6 +1144,14 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                                 autofocus: false,
                                                 textCapitalization:
                                                     TextCapitalization.words,
+                                                onChanged: (value) {
+                                                  final rawCep = value
+                                                      .replaceAll(
+                                                          RegExp(r'\D'), '');
+                                                  if (rawCep.length == 8) {
+                                                    _fetchAddressFromCep(rawCep);
+                                                  }
+                                                },
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1552,6 +1588,7 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                                         context: context,
                                                         storageFolderPath: '',
                                                         imageQuality: 70,
+                                                        maxWidth: 1080.0,
                                                         allowPhoto: true,
                                                         includeDimensions: true,
                                                       );
@@ -1630,6 +1667,26 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                                           showUploadMessage(
                                                               context,
                                                               'Sucesso!');
+                                                          logFirebaseEvent(
+                                                              'IconButton_backend_call');
+                                                          await UsersTable().update(
+                                                            data: {
+                                                              'photo_url': _model
+                                                                  .uploadedFileUrl_uploadDataCrestePerfil,
+                                                            },
+                                                            matchingRows: (rows) =>
+                                                                rows.eqOrNull(
+                                                              'id',
+                                                              currentUserUid,
+                                                            ),
+                                                          );
+                                                          logFirebaseEvent(
+                                                              'IconButton_refresh_database_request');
+                                                          safeSetState(() => _model
+                                                                  .requestCompleter2 =
+                                                              null);
+                                                          await _model
+                                                              .waitForRequestCompleted2();
                                                         } else {
                                                           safeSetState(() {});
                                                           showUploadMessage(
@@ -1638,27 +1695,6 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                                                           return;
                                                         }
                                                       }
-
-                                                      logFirebaseEvent(
-                                                          'IconButton_backend_call');
-                                                      await UsersTable().update(
-                                                        data: {
-                                                          'photo_url': _model
-                                                              .uploadedFileUrl_uploadDataCrestePerfil,
-                                                        },
-                                                        matchingRows: (rows) =>
-                                                            rows.eqOrNull(
-                                                          'id',
-                                                          currentUserUid,
-                                                        ),
-                                                      );
-                                                      logFirebaseEvent(
-                                                          'IconButton_refresh_database_request');
-                                                      safeSetState(() => _model
-                                                              .requestCompleter2 =
-                                                          null);
-                                                      await _model
-                                                          .waitForRequestCompleted2();
                                                     },
                                                   ),
                                                 ),

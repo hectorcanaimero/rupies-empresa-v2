@@ -14,10 +14,12 @@ class CardAcceptedWidgetWidget extends StatefulWidget {
   const CardAcceptedWidgetWidget({
     super.key,
     required this.data,
+    this.contractor,
     Color? back,
   }) : this.back = back ?? Colors.white;
 
   final ViewServicesWithCategoriesRow? data;
+  final UsersRow? contractor;
   final Color back;
 
   @override
@@ -220,108 +222,64 @@ class _CardAcceptedWidgetWidgetState extends State<CardAcceptedWidgetWidget> {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 4.0),
-                            child: FutureBuilder<List<UsersRow>>(
-                              future: UsersTable().querySingleRow(
-                                queryFn: (q) => q.eqOrNull(
-                                  'id',
-                                  widget.data?.userAproved,
-                                ),
-                              ),
-                              builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 40.0,
-                                      height: 40.0,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          Color(0x004B39EF),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-                                List<UsersRow> richTextUsersRowList =
-                                    snapshot.data!;
-
-                                // Return an empty Container when the item does not exist.
-                                if (snapshot.data!.isEmpty) {
-                                  return Container();
-                                }
-                                final richTextUsersRow =
-                                    richTextUsersRowList.isNotEmpty
-                                        ? richTextUsersRowList.first
-                                        : null;
-
-                                return RichText(
-                                  textScaler: MediaQuery.of(context).textScaler,
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: 'Prestador: ',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight: FontWeight.bold,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              fontSize: 12.0,
-                                              letterSpacing: 0.0,
+                          if (widget.contractor != null)
+                            Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 4.0),
+                              child: RichText(
+                                textScaler: MediaQuery.of(context).textScaler,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Prestador: ',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts.inter(
                                               fontWeight: FontWeight.bold,
                                               fontStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
                                                       .fontStyle,
                                             ),
+                                            fontSize: 12.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                    TextSpan(
+                                      text: valueOrDefault<String>(
+                                        widget.contractor?.displayName,
+                                        'Candidato',
                                       ),
-                                      TextSpan(
-                                        text: valueOrDefault<String>(
-                                          richTextUsersRow?.displayName,
-                                          'Candidato',
-                                        ),
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight: FontWeight.w300,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              fontSize: 12.0,
-                                              letterSpacing: 0.0,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts.inter(
                                               fontWeight: FontWeight.w300,
                                               fontStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
                                                       .fontStyle,
                                             ),
-                                      )
-                                    ],
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
+                                            fontSize: 12.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w300,
                                             fontStyle:
                                                 FlutterFlowTheme.of(context)
                                                     .bodyMedium
                                                     .fontStyle,
                                           ),
-                                          letterSpacing: 0.0,
+                                    ),
+                                  ],
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
                                                   .bodyMedium
@@ -331,11 +289,17 @@ class _CardAcceptedWidgetWidgetState extends State<CardAcceptedWidgetWidget> {
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),
-                                  ),
-                                );
-                              },
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                ),
+                              ),
                             ),
-                          ),
                           Container(
                             decoration: BoxDecoration(),
                             child: Padding(

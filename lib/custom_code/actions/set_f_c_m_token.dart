@@ -104,6 +104,7 @@ void _setupFirebaseListeners() {
         notification.title ?? 'Notificación',
         notification.body ?? '',
         data['imageUrl'],
+        route: data['route'],
       );
     }
   });
@@ -123,8 +124,9 @@ void _setupFirebaseListeners() {
 Future<void> _showNotification(
   String title,
   String body,
-  String? imageUrl,
-) async {
+  String? imageUrl, {
+  String? route,
+}) async {
   BigPictureStyleInformation? bigPictureStyle;
 
   if (imageUrl != null && imageUrl.isNotEmpty) {
@@ -142,24 +144,28 @@ Future<void> _showNotification(
   }
 
   final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'default_channel_id',
-    'Default Channel',
-    channelDescription: 'Canal predeterminado',
+    'rupies_notifications_v2',
+    'Rupies Notifications',
+    channelDescription: 'Notificações do Rupies Empresas',
     importance: Importance.max,
     priority: Priority.high,
+    playSound: true,
     styleInformation: bigPictureStyle,
   );
 
-  const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
+  const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+    presentSound: true,
+  );
 
   final NotificationDetails platformDetails =
       NotificationDetails(android: androidDetails, iOS: iosDetails);
 
   await flutterLocalNotificationsPlugin.show(
-    0,
+    DateTime.now().millisecondsSinceEpoch ~/ 1000,
     title,
     body,
     platformDetails,
+    payload: route,
   );
 }
 
@@ -186,6 +192,7 @@ Future<void> _fbMessagingBackgroundHandler(RemoteMessage message) async {
     data['title'] ?? 'Notificación',
     data['body'] ?? '',
     data['imageUrl'],
+    route: data['route'],
   );
 }
 

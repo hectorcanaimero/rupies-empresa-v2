@@ -169,7 +169,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
           },
           child: Scaffold(
             key: scaffoldKey,
-            resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: true,
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             appBar: AppBar(
               backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
@@ -2036,6 +2036,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                   context: context,
                                                   storageFolderPath: '',
                                                   imageQuality: 70,
+                                                  maxWidth: 1080.0,
                                                   allowPhoto: true,
                                                   includeDimensions: true,
                                                   includeBlurHash: true,
@@ -2053,6 +2054,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
 
                                                   var downloadUrls = <String>[];
                                                   try {
+                                                    showUploadMessage(context, 'Subindo...', showLoading: true);
                                                     selectedUploadedFiles =
                                                         selectedMedia
                                                             .map((m) =>
@@ -2084,6 +2086,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                           selectedMedia,
                                                     );
                                                   } finally {
+                                                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                                     _model.isDataUploading_uploadStand =
                                                         false;
                                                   }
@@ -2101,30 +2104,31 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                       _model.uploadedFileUrl_uploadStand =
                                                           downloadUrls.first;
                                                     });
+                                                    showUploadMessage(context, 'Sucesso!');
                                                   } else {
                                                     safeSetState(() {});
                                                     return;
                                                   }
+
+                                                  logFirebaseEvent(
+                                                      'IconImage_backend_call');
+                                                  _model.createImage =
+                                                      await ServicesImagesTable()
+                                                          .insert({
+                                                    'lead_id':
+                                                        FFAppState().leadId,
+                                                    'image': _model
+                                                        .uploadedFileUrl_uploadStand,
+                                                  });
+                                                  logFirebaseEvent(
+                                                      'IconImage_refresh_database_request');
+                                                  safeSetState(() => _model
+                                                      .requestCompleter2 = null);
+                                                  await _model
+                                                      .waitForRequestCompleted2();
+
+                                                  safeSetState(() {});
                                                 }
-
-                                                logFirebaseEvent(
-                                                    'IconImage_backend_call');
-                                                _model.createImage =
-                                                    await ServicesImagesTable()
-                                                        .insert({
-                                                  'lead_id':
-                                                      FFAppState().leadId,
-                                                  'image': _model
-                                                      .uploadedFileUrl_uploadStand,
-                                                });
-                                                logFirebaseEvent(
-                                                    'IconImage_refresh_database_request');
-                                                safeSetState(() => _model
-                                                    .requestCompleter2 = null);
-                                                await _model
-                                                    .waitForRequestCompleted2();
-
-                                                safeSetState(() {});
                                               },
                                               child: Icon(
                                                 Icons.photo_camera,

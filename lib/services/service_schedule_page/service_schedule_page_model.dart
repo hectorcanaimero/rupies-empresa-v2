@@ -1,3 +1,4 @@
+import '/backend/schema/enums/enums.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -31,6 +32,8 @@ class ServiceSchedulePageModel
       images[index] = updateFn(images[index]);
 
   String? uid;
+
+  Future<List<ServicesRow>>? serviceFuture;
 
   DateTime? dateStart;
 
@@ -71,7 +74,7 @@ class ServiceSchedulePageModel
   String? _descriptionTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
-      return 'Campo Origatorio';
+      return 'Campo Obrigatório';
     }
 
     return null;
@@ -148,6 +151,31 @@ class ServiceSchedulePageModel
     tabBarController?.dispose();
     skillFocusNode?.dispose();
     skillTextController?.dispose();
+  }
+
+  /// Helper to build service insert data (avoids duplication).
+  Map<String, dynamic> buildServiceData({
+    required String userId,
+    required String title,
+    required String description,
+    required DateTime? dateStart,
+    required DateTime? dateEnd,
+    required double price,
+    required String? categoryId,
+    required String? time,
+  }) {
+    return {
+      'userId': userId,
+      'name': title,
+      'description': description,
+      'dateStart': supaSerialize<DateTime>(dateStart),
+      'dateEnd': supaSerialize<DateTime>(dateEnd),
+      'price': price,
+      'categoryId': categoryId,
+      'time': time,
+      'condition': Conditions.Openned.name,
+      'jobType': JobTypes.Agendado.name,
+    };
   }
 
   /// Additional helper methods.

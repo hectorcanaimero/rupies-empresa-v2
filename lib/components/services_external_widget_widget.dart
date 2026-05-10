@@ -8,6 +8,7 @@ import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'services_external_widget_model.dart';
 export 'services_external_widget_model.dart';
 
@@ -22,6 +23,7 @@ class ServicesExternalWidgetWidget extends StatefulWidget {
 class _ServicesExternalWidgetWidgetState
     extends State<ServicesExternalWidgetWidget> with TickerProviderStateMixin {
   late ServicesExternalWidgetModel _model;
+  Future<List<ExternalBannerRow>>? _externalBannerFuture;
 
   final animationsMap = <String, AnimationInfo>{};
 
@@ -64,6 +66,15 @@ class _ServicesExternalWidgetWidgetState
       this,
     );
 
+    _externalBannerFuture = ExternalBannerTable().queryRows(
+      queryFn: (q) => q
+          .isFilter(
+            'status',
+            true,
+          )
+          .order('order', ascending: true),
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -77,25 +88,39 @@ class _ServicesExternalWidgetWidgetState
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<ExternalBannerRow>>(
-      future: ExternalBannerTable().queryRows(
-        queryFn: (q) => q
-            .isFilter(
-              'status',
-              true,
-            )
-            .order('order', ascending: true),
-      ),
+      future: _externalBannerFuture,
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
-          return Center(
-            child: SizedBox(
-              width: 50.0,
-              height: 50.0,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  FlutterFlowTheme.of(context).primary,
-                ),
+          return Padding(
+            padding:
+                EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 12.0),
+            child: Shimmer.fromColors(
+              baseColor: FlutterFlowTheme.of(context).alternate,
+              highlightColor: FlutterFlowTheme.of(context)
+                  .alternate
+                  .withValues(alpha: 0.4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 160.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).alternate,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.0),
+                  Expanded(
+                    child: Container(
+                      height: 160.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).alternate,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           );

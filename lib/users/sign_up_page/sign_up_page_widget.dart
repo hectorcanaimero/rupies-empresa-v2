@@ -40,6 +40,26 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
     _model.signupConfirmPasswordTextController ??= TextEditingController();
     _model.signupConfirmPasswordFocusNode ??= FocusNode();
 
+    // Validación en tiempo real — activa con autovalidateMode.onUserInteraction
+    _model.signupEmailTextControllerValidator = (context, value) {
+      if (value == null || value.isEmpty) return 'Informe seu e-mail';
+      final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+      if (!emailRegex.hasMatch(value)) return 'E-mail inválido';
+      return null;
+    };
+    _model.signupPasswordTextControllerValidator = (context, value) {
+      if (value == null || value.isEmpty) return 'Informe uma senha';
+      if (value.length < 6) return 'Mínimo 6 caracteres';
+      return null;
+    };
+    _model.signupConfirmPasswordTextControllerValidator = (context, value) {
+      if (value == null || value.isEmpty) return 'Confirme sua senha';
+      if (value != _model.signupPasswordTextController?.text) {
+        return 'As senhas não coincidem';
+      }
+      return null;
+    };
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -298,6 +318,8 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                                             .fontStyle,
                                                   ),
                                               maxLines: null,
+                                              autovalidateMode: AutovalidateMode
+                                                  .onUserInteraction,
                                               validator: _model
                                                   .signupEmailTextControllerValidator
                                                   .asValidator(context),
@@ -486,6 +508,8 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                                             .bodyMedium
                                                             .fontStyle,
                                                   ),
+                                              autovalidateMode: AutovalidateMode
+                                                  .onUserInteraction,
                                               validator: _model
                                                   .signupPasswordTextControllerValidator
                                                   .asValidator(context),
@@ -674,6 +698,8 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                                             .bodyMedium
                                                             .fontStyle,
                                                   ),
+                                              autovalidateMode: AutovalidateMode
+                                                  .onUserInteraction,
                                               validator: _model
                                                   .signupConfirmPasswordTextControllerValidator
                                                   .asValidator(context),
@@ -722,25 +748,41 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                               }
 
                                               logFirebaseEvent(
-                                                  'Button_wait__delay');
-                                              await Future.delayed(
-                                                Duration(
-                                                  milliseconds: 500,
-                                                ),
-                                              );
-                                              logFirebaseEvent(
                                                   'Button_backend_call');
-                                              await UsersTable().update(
-                                                data: {
-                                                  'fcm_token':
-                                                      FFAppState().fcmToken,
-                                                },
-                                                matchingRows: (rows) =>
-                                                    rows.eqOrNull(
-                                                  'id',
-                                                  currentUserUid,
-                                                ),
-                                              );
+                                              // Retry con backoff exponencial para esperar que
+                                              // el trigger de Supabase cree el registro en users.
+                                              // Más robusto que un delay fijo de 500ms:
+                                              // intento 1 → 200ms, 2 → 400ms, 3 → 600ms.
+                                              for (int _attempt = 0;
+                                                  _attempt < 3;
+                                                  _attempt++) {
+                                                await Future.delayed(Duration(
+                                                    milliseconds:
+                                                        200 * (_attempt + 1)));
+                                                try {
+                                                  final _rows =
+                                                      await UsersTable()
+                                                          .queryRows(
+                                                    queryFn: (q) => q.eqOrNull(
+                                                        'id', currentUserUid),
+                                                  );
+                                                  if (_rows.isNotEmpty) {
+                                                    await UsersTable().update(
+                                                      data: {
+                                                        'fcm_token':
+                                                            FFAppState()
+                                                                .fcmToken,
+                                                      },
+                                                      matchingRows: (rows) =>
+                                                          rows.eqOrNull(
+                                                        'id',
+                                                        currentUserUid,
+                                                      ),
+                                                    );
+                                                    break;
+                                                  }
+                                                } catch (_) {}
+                                              }
                                               logFirebaseEvent(
                                                   'Button_navigate_to');
 

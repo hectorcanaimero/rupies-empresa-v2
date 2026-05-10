@@ -86,4 +86,41 @@ class ViewSubsRow extends SupabaseDataRow {
 
   String? get spName => getField<String>('sp_name');
   set spName(String? value) => setField<String>('sp_name', value);
+
+  String? get provider => getField<String>('provider');
+  set provider(String? value) => setField<String>('provider', value);
+
+  String? get spPlanType => getField<String>('sp_plan_type');
+  set spPlanType(String? value) => setField<String>('sp_plan_type', value);
+
+  int? get spCreditsPerMonth => getField<int>('sp_credits_per_month');
+  set spCreditsPerMonth(int? value) =>
+      setField<int>('sp_credits_per_month', value);
+
+  bool? get spIsUnlimited => getField<bool>('sp_is_unlimited');
+  set spIsUnlimited(bool? value) => setField<bool>('sp_is_unlimited', value);
+
+  bool? get spIsFree => getField<bool>('sp_is_free');
+  set spIsFree(bool? value) => setField<bool>('sp_is_free', value);
+
+  int? get spPlanVersion => getField<int>('sp_plan_version');
+  set spPlanVersion(int? value) => setField<int>('sp_plan_version', value);
+
+  DateTime? get spFreeTierExpiresAt =>
+      getField<DateTime>('sp_free_tier_expires_at');
+  set spFreeTierExpiresAt(DateTime? value) =>
+      setField<DateTime>('sp_free_tier_expires_at', value);
+
+  int? get creditsRemaining => getField<int>('credits_remaining');
+  set creditsRemaining(int? value) =>
+      setField<int>('credits_remaining', value);
+
+  int? get creditsGranted => getField<int>('credits_granted');
+  set creditsGranted(int? value) => setField<int>('credits_granted', value);
+
+  int? get creditsUsed => getField<int>('credits_used');
+  set creditsUsed(int? value) => setField<int>('credits_used', value);
+
+  bool? get cbIsUnlimited => getField<bool>('cb_is_unlimited');
+  set cbIsUnlimited(bool? value) => setField<bool>('cb_is_unlimited', value);
 }

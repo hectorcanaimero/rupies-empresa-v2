@@ -28,7 +28,7 @@ Future<dynamic> createSubscription(
 
     final token = session.accessToken;
     final url = Uri.parse(
-        'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/create-asaas-subscription');
+        'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/create-subscription');
 
     final response = await http.post(
       url,
@@ -46,7 +46,11 @@ Future<dynamic> createSubscription(
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
       if (jsonResponse['success'] == true) {
-        return jsonResponse['data'];
+        final data = jsonResponse['data'];
+        if (data is Map<String, dynamic>) {
+          return {...data, 'success': true};
+        }
+        return {'success': true, 'data': data};
       } else {
         return {
           'success': false,

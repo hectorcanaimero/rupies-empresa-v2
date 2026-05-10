@@ -1,3 +1,4 @@
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/widgets/nav_bar_widget/nav_bar_widget_widget.dart';
 import '/widgets/user_widget/user_widget_widget.dart';
@@ -13,10 +14,16 @@ class MenuPageModel extends FlutterFlowModel<MenuPageWidget> {
   // Model for navBarWidget component.
   late NavBarWidgetModel navBarWidgetModel;
 
+  // Cached future — initialized once in initState to avoid re-fetching on rebuild.
+  late final Future<List<SettingsRow>> subscriptionSettingFuture;
+
   @override
   void initState(BuildContext context) {
     userWidgetModel = createModel(context, () => UserWidgetModel());
     navBarWidgetModel = createModel(context, () => NavBarWidgetModel());
+    subscriptionSettingFuture = SettingsTable().querySingleRow(
+      queryFn: (q) => q.eqOrNull('type', 'subscription'),
+    );
   }
 
   @override

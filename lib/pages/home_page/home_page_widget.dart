@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'home_page_model.dart';
 export 'home_page_model.dart';
 
@@ -33,11 +34,61 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   late HomePageModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  Future<(List<ViewServicesWithCategoriesRow>, Map<String, UsersRow>)>?
+      _acceptedServicesWithContractorsFuture;
+  Future<List<ViewServicesWithCategoriesFilteredRow>>? _filteredServicesFuture;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => HomePageModel());
+
+    _acceptedServicesWithContractorsFuture =
+        ViewServicesWithCategoriesTable().queryRows(
+      queryFn: (q) => q
+          .eqOrNull(
+            'condition',
+            Conditions.Accepted.name,
+          )
+          .eqOrNull(
+            'userId',
+            currentUserUid,
+          )
+          .order('created_at'),
+    ).then((services) async {
+      final userIds = services
+          .map((s) => s.userAproved)
+          .whereType<String>()
+          .toSet()
+          .toList();
+      if (userIds.isEmpty) {
+        return (services, <String, UsersRow>{});
+      }
+      final contractorResults = await Future.wait(
+        userIds.map(
+          (id) => UsersTable().querySingleRow(
+            queryFn: (q) => q.eqOrNull('id', id),
+          ),
+        ),
+      );
+      return (
+        services,
+        <String, UsersRow>{
+          for (int i = 0; i < userIds.length; i++)
+            if (contractorResults[i].isNotEmpty)
+              userIds[i]: contractorResults[i].first
+        },
+      );
+    });
+    _filteredServicesFuture =
+        ViewServicesWithCategoriesFilteredTable().queryRows(
+      queryFn: (q) => q
+          .eqOrNull(
+            'userId',
+            currentUserUid,
+          )
+          .order('created_at'),
+    );
 
     logFirebaseEvent('screen_view', parameters: {'screen_name': 'HomePage'});
     // On page load action.
@@ -52,14 +103,16 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               currentUserUid,
             ),
           );
-          if (_model.profile!.firstOrNull!.endRegister!) {
+          final _userProfile = _model.profile?.firstOrNull;
+          if (_userProfile != null &&
+              _userProfile.endRegister == true) {
             logFirebaseEvent('HomePage_update_app_state');
             FFAppState().updateUserStruct(
               (e) => e
-                ..rating = _model.profile?.firstOrNull?.rating
-                ..photoUrl = _model.profile?.firstOrNull?.photoUrl,
+                ..rating = _userProfile.rating
+                ..photoUrl = _userProfile.photoUrl,
             );
-            FFAppState().trial = _model.profile!.firstOrNull!.trial!;
+            FFAppState().trial = _userProfile.trial ?? 0;
             safeSetState(() {});
             return;
           } else {
@@ -166,21 +219,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               child: UserWidgetWidget(),
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                12.0, 0.0, 12.0, 15.0),
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(9.0),
-                              ),
-                              child: wrapWithModel(
-                                model: _model.bannerWidgetModel,
-                                updateCallback: () => safeSetState(() {}),
-                                child: BannerWidgetWidget(
-                                  position: 0,
-                                ),
-                              ),
+                          wrapWithModel(
+                            model: _model.bannerWidgetModel,
+                            updateCallback: () => safeSetState(() {}),
+                            child: BannerWidgetWidget(
+                              position: 0,
                             ),
                           ),
                           Padding(
@@ -266,39 +309,72 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 12.0, 0.0, 12.0, 0.0),
                             child: FutureBuilder<
-                                List<ViewServicesWithCategoriesRow>>(
+                                (List<ViewServicesWithCategoriesRow>,
+                                    Map<String, UsersRow>)>(
                               future:
-                                  ViewServicesWithCategoriesTable().queryRows(
-                                queryFn: (q) => q
-                                    .eqOrNull(
-                                      'condition',
-                                      Conditions.Accepted.name,
-                                    )
-                                    .eqOrNull(
-                                      'userId',
-                                      currentUserUid,
-                                    )
-                                    .order('created_at'),
-                              ),
+                                  _acceptedServicesWithContractorsFuture,
                               builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
                                 if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 40.0,
-                                      height: 40.0,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          Color(0x004B39EF),
+                                  return Shimmer.fromColors(
+                                    baseColor: FlutterFlowTheme.of(context)
+                                        .alternate,
+                                    highlightColor:
+                                        FlutterFlowTheme.of(context)
+                                            .alternate
+                                            .withValues(alpha: 0.4),
+                                    child: Column(
+                                      children: List.generate(
+                                        2,
+                                        (_) => Padding(
+                                          padding:
+                                              EdgeInsets.only(bottom: 8.0),
+                                          child: Container(
+                                            width: double.infinity,
+                                            height: 80.0,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                              borderRadius:
+                                                  BorderRadius.circular(9.0),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   );
                                 }
-                                List<ViewServicesWithCategoriesRow>
-                                    listViewViewServicesWithCategoriesRowList =
+                                final (services, contractorMap) =
                                     snapshot.data!;
+
+                                if (services.isEmpty) {
+                                  return Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.work_outline_rounded,
+                                          size: 48.0,
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                        ),
+                                        SizedBox(height: 12.0),
+                                        Text(
+                                          'Nenhum serviço aceito ainda',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.inter(),
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
 
                                 return ListView.builder(
                                   padding: EdgeInsets.fromLTRB(
@@ -310,13 +386,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                   primary: false,
                                   shrinkWrap: true,
                                   scrollDirection: Axis.vertical,
-                                  itemCount:
-                                      listViewViewServicesWithCategoriesRowList
-                                          .length,
+                                  itemCount: services.length,
                                   itemBuilder: (context, listViewIndex) {
-                                    final listViewViewServicesWithCategoriesRow =
-                                        listViewViewServicesWithCategoriesRowList[
-                                            listViewIndex];
+                                    final row = services[listViewIndex];
                                     return wrapWithModel(
                                       model: _model.cardAcceptedWidgetModels
                                           .getModel(
@@ -328,8 +400,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                         key: Key(
                                           'Key7n1_${listViewIndex.toString()}',
                                         ),
-                                        data:
-                                            listViewViewServicesWithCategoriesRow,
+                                        data: row,
+                                        contractor: contractorMap[
+                                            row.userAproved ?? ''],
                                       ),
                                     );
                                   },
@@ -342,26 +415,25 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 12.0, 0.0, 12.0, 0.0),
                             child: FutureBuilder<
                                 List<ViewServicesWithCategoriesFilteredRow>>(
-                              future: ViewServicesWithCategoriesFilteredTable()
-                                  .queryRows(
-                                queryFn: (q) => q
-                                    .eqOrNull(
-                                      'userId',
-                                      currentUserUid,
-                                    )
-                                    .order('created_at'),
-                              ),
+                              future: _filteredServicesFuture,
                               builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
                                 if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 40.0,
-                                      height: 40.0,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          Color(0x004B39EF),
+                                  return Column(
+                                    children: List.generate(
+                                      2,
+                                      (_) => Padding(
+                                        padding:
+                                            EdgeInsets.only(bottom: 8.0),
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: 80.0,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                            borderRadius:
+                                                BorderRadius.circular(9.0),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -370,6 +442,36 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 List<ViewServicesWithCategoriesFilteredRow>
                                     listViewFilteredViewServicesWithCategoriesFilteredRowList =
                                     snapshot.data!;
+
+                                if (listViewFilteredViewServicesWithCategoriesFilteredRowList
+                                    .isEmpty) {
+                                  return Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.inbox_outlined,
+                                          size: 48.0,
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                        ),
+                                        SizedBox(height: 12.0),
+                                        Text(
+                                          'Nenhum serviço em aberto',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.inter(),
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
 
                                 return ListView.builder(
                                   padding: EdgeInsets.fromLTRB(

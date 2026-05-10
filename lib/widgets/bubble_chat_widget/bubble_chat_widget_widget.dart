@@ -27,6 +27,7 @@ class BubbleChatWidgetWidget extends StatefulWidget {
 
 class _BubbleChatWidgetWidgetState extends State<BubbleChatWidgetWidget> {
   late BubbleChatWidgetModel _model;
+  Future<(ChatsRow?, List<ViewChatsMessageWithDetailsRow>)>? _chatDataFuture;
 
   @override
   void setState(VoidCallback callback) {
@@ -38,6 +39,28 @@ class _BubbleChatWidgetWidgetState extends State<BubbleChatWidgetWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => BubbleChatWidgetModel());
+
+    _chatDataFuture = ChatsTable()
+        .querySingleRow(
+          queryFn: (q) => q
+              .eqOrNull('serviceId', widget.serviceId)
+              .eqOrNull('userCandidate', widget.userCandidate)
+              .eqOrNull('userId', currentUserUid),
+        )
+        .then((chatList) async {
+      final chat = chatList.isNotEmpty ? chatList.first : null;
+      if (chat == null) {
+        return (null as ChatsRow?,
+            <ViewChatsMessageWithDetailsRow>[]);
+      }
+      final messages = await ViewChatsMessageWithDetailsTable().queryRows(
+        queryFn: (q) => q
+            .eqOrNull('chatId', chat.id)
+            .eqOrNull('typeMessage', MessageSendType.Prestador.name)
+            .eqOrNull('readMessage', false),
+      );
+      return (chat, messages);
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -51,207 +74,130 @@ class _BubbleChatWidgetWidgetState extends State<BubbleChatWidgetWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<ChatsRow>>(
-      future: ChatsTable().querySingleRow(
-        queryFn: (q) => q
-            .eqOrNull(
-              'serviceId',
-              widget.serviceId,
-            )
-            .eqOrNull(
-              'userCandidate',
-              widget.userCandidate,
-            )
-            .eqOrNull(
-              'userId',
-              currentUserUid,
-            ),
-      ),
+    return FutureBuilder<(ChatsRow?, List<ViewChatsMessageWithDetailsRow>)>(
+      future: _chatDataFuture,
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
-          return Center(
-            child: SizedBox(
-              width: 40.0,
-              height: 40.0,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Color(0x004B39EF),
+          return SizedBox(
+            width: 40.0,
+            height: 40.0,
+            child: FlutterFlowIconButton(
+              borderColor: Colors.transparent,
+              borderRadius: 25.0,
+              borderWidth: 1.0,
+              buttonSize: 40.0,
+              fillColor: FlutterFlowTheme.of(context).accent3,
+              icon: Icon(
+                Icons.wechat_rounded,
+                color: FlutterFlowTheme.of(context).alternate,
+                size: 24.0,
+              ),
+              onPressed: null,
+            ),
+          );
+        }
+
+        final (chat, messages) = snapshot.data!;
+
+        if (messages.isNotEmpty) {
+          return Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+            child: badges.Badge(
+              badgeContent: Text(
+                messages.length.toString(),
+                style: FlutterFlowTheme.of(context).titleSmall.override(
+                      font: GoogleFonts.interTight(
+                        fontWeight:
+                            FlutterFlowTheme.of(context).titleSmall.fontWeight,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                      ),
+                      color: Colors.white,
+                      fontSize: 12.0,
+                      letterSpacing: 0.0,
+                      fontWeight:
+                          FlutterFlowTheme.of(context).titleSmall.fontWeight,
+                      fontStyle:
+                          FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                    ),
+              ),
+              showBadge: true,
+              shape: badges.BadgeShape.circle,
+              badgeColor: FlutterFlowTheme.of(context).primary,
+              elevation: 4.0,
+              padding: EdgeInsets.all(6.0),
+              position: badges.BadgePosition.topEnd(),
+              animationType: badges.BadgeAnimationType.scale,
+              toAnimate: true,
+              child: FlutterFlowIconButton(
+                borderColor: Colors.transparent,
+                borderRadius: 25.0,
+                borderWidth: 1.0,
+                buttonSize: 40.0,
+                fillColor: FlutterFlowTheme.of(context).accent3,
+                icon: Icon(
+                  Icons.wechat_rounded,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 24.0,
                 ),
+                onPressed: () async {
+                  logFirebaseEvent(
+                      'BUBBLE_CHAT_WIDGET_wechat_rounded_ICN_ON');
+                  logFirebaseEvent('IconButton_navigate_to');
+                  context.pushNamed(
+                    ChatPageWidget.routeName,
+                    queryParameters: {
+                      'chatId': serializeParam(
+                        chat?.id,
+                        ParamType.String,
+                      ),
+                    }.withoutNulls,
+                  );
+                },
               ),
             ),
           );
         }
-        List<ChatsRow> containerChatsRowList = snapshot.data!;
 
-        final containerChatsRow = containerChatsRowList.isNotEmpty
-            ? containerChatsRowList.first
-            : null;
-
-        return Container(
-          decoration: BoxDecoration(),
-          child: FutureBuilder<List<ViewChatsMessageWithDetailsRow>>(
-            future: ViewChatsMessageWithDetailsTable().queryRows(
-              queryFn: (q) => q
-                  .eqOrNull(
-                    'chatId',
-                    containerChatsRow?.id,
-                  )
-                  .eqOrNull(
-                    'typeMessage',
-                    MessageSendType.Prestador.name,
-                  )
-                  .eqOrNull(
-                    'readMessage',
-                    false,
-                  ),
-            ),
-            builder: (context, snapshot) {
-              // Customize what your widget looks like when it's loading.
-              if (!snapshot.hasData) {
-                return Center(
-                  child: SizedBox(
-                    width: 40.0,
-                    height: 40.0,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0x004B39EF),
-                      ),
-                    ),
-                  ),
-                );
-              }
-              List<ViewChatsMessageWithDetailsRow>
-                  conditionalBuilderViewChatsMessageWithDetailsRowList =
-                  snapshot.data!;
-
-              return Builder(
-                builder: (context) {
-                  if (conditionalBuilderViewChatsMessageWithDetailsRowList
-                          .length >
-                      0) {
-                    return Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
-                      child: badges.Badge(
-                        badgeContent: Text(
-                          conditionalBuilderViewChatsMessageWithDetailsRowList
-                              .length
-                              .toString(),
-                          style:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.interTight(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                    color: Colors.white,
-                                    fontSize: 12.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
-                                  ),
-                        ),
-                        showBadge: true,
-                        shape: badges.BadgeShape.circle,
-                        badgeColor: FlutterFlowTheme.of(context).primary,
-                        elevation: 4.0,
-                        padding: EdgeInsets.all(6.0),
-                        position: badges.BadgePosition.topEnd(),
-                        animationType: badges.BadgeAnimationType.scale,
-                        toAnimate: true,
-                        child: FlutterFlowIconButton(
-                          borderColor: Colors.transparent,
-                          borderRadius: 25.0,
-                          borderWidth: 1.0,
-                          buttonSize: 40.0,
-                          fillColor: FlutterFlowTheme.of(context).accent3,
-                          icon: Icon(
-                            Icons.wechat_rounded,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 24.0,
-                          ),
-                          onPressed: () async {
-                            logFirebaseEvent(
-                                'BUBBLE_CHAT_WIDGET_wechat_rounded_ICN_ON');
-                            logFirebaseEvent('IconButton_navigate_to');
-
-                            context.pushNamed(
-                              ChatPageWidget.routeName,
-                              queryParameters: {
-                                'chatId': serializeParam(
-                                  containerChatsRow?.id,
-                                  ParamType.String,
-                                ),
-                              }.withoutNulls,
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  } else {
-                    return FlutterFlowIconButton(
-                      borderColor: Colors.transparent,
-                      borderRadius: 25.0,
-                      borderWidth: 1.0,
-                      buttonSize: 40.0,
-                      fillColor: FlutterFlowTheme.of(context).accent3,
-                      icon: Icon(
-                        Icons.wechat_rounded,
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        size: 24.0,
-                      ),
-                      onPressed: () async {
-                        logFirebaseEvent(
-                            'BUBBLE_CHAT_WIDGET_wechat_rounded_ICN_ON');
-                        if (containerChatsRow?.id != null &&
-                            containerChatsRow?.id != '') {
-                          logFirebaseEvent('IconButton_navigate_to');
-
-                          context.pushNamed(
-                            ChatPageWidget.routeName,
-                            queryParameters: {
-                              'chatId': serializeParam(
-                                containerChatsRow?.id,
-                                ParamType.String,
-                              ),
-                            }.withoutNulls,
-                          );
-                        } else {
-                          logFirebaseEvent('IconButton_backend_call');
-                          _model.newChat = await ChatsTable().insert({
-                            'serviceId': widget.serviceId,
-                            'userId': currentUserUid,
-                            'userCandidate': widget.userCandidate,
-                          });
-                          logFirebaseEvent('IconButton_navigate_to');
-
-                          context.pushNamed(
-                            ChatPageWidget.routeName,
-                            queryParameters: {
-                              'chatId': serializeParam(
-                                _model.newChat?.id,
-                                ParamType.String,
-                              ),
-                            }.withoutNulls,
-                          );
-                        }
-
-                        safeSetState(() {});
-                      },
-                    );
-                  }
-                },
-              );
-            },
+        return FlutterFlowIconButton(
+          borderColor: Colors.transparent,
+          borderRadius: 25.0,
+          borderWidth: 1.0,
+          buttonSize: 40.0,
+          fillColor: FlutterFlowTheme.of(context).accent3,
+          icon: Icon(
+            Icons.wechat_rounded,
+            color: FlutterFlowTheme.of(context).primaryText,
+            size: 24.0,
           ),
+          onPressed: () async {
+            logFirebaseEvent('BUBBLE_CHAT_WIDGET_wechat_rounded_ICN_ON');
+            if (chat?.id != null && chat?.id != '') {
+              logFirebaseEvent('IconButton_navigate_to');
+              context.pushNamed(
+                ChatPageWidget.routeName,
+                queryParameters: {
+                  'chatId': serializeParam(chat?.id, ParamType.String),
+                }.withoutNulls,
+              );
+            } else {
+              logFirebaseEvent('IconButton_backend_call');
+              _model.newChat = await ChatsTable().insert({
+                'serviceId': widget.serviceId,
+                'userId': currentUserUid,
+                'userCandidate': widget.userCandidate,
+              });
+              logFirebaseEvent('IconButton_navigate_to');
+              context.pushNamed(
+                ChatPageWidget.routeName,
+                queryParameters: {
+                  'chatId':
+                      serializeParam(_model.newChat?.id, ParamType.String),
+                }.withoutNulls,
+              );
+            }
+            safeSetState(() {});
+          },
         );
       },
     );

@@ -32,4 +32,7 @@ class NotificationsRow extends SupabaseDataRow {
 
   bool get isRead => getField<bool>('is_read')!;
   set isRead(bool value) => setField<bool>('is_read', value);
+
+  dynamic get notificationData => getField<dynamic>('data');
+  set notificationData(dynamic value) => setField<dynamic>('data', value);
 }

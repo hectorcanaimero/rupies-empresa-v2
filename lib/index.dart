@@ -42,3 +42,5 @@ export '/subscription/subscription_checkout_page/subscription_checkout_page_widg
 export '/users/reset_senha_page/reset_senha_page_widget.dart'
     show ResetSenhaPageWidget;
 export '/pages/termos_page/termos_page_widget.dart' show TermosPageWidget;
+export '/pages/notifications_page/notifications_page_widget.dart'
+    show NotificationsPageWidget;

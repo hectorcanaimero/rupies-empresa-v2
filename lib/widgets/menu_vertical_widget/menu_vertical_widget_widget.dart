@@ -3,7 +3,9 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/widgets/option_service_widget/option_service_widget_widget.dart';
 import '/custom_code/actions/index.dart' as actions;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'menu_vertical_widget_model.dart';
 export 'menu_vertical_widget_model.dart';
 
@@ -17,6 +19,7 @@ class MenuVerticalWidgetWidget extends StatefulWidget {
 
 class _MenuVerticalWidgetWidgetState extends State<MenuVerticalWidgetWidget> {
   late MenuVerticalWidgetModel _model;
+  Future<List<MenusRow>>? _menusFuture;
 
   @override
   void setState(VoidCallback callback) {
@@ -28,6 +31,15 @@ class _MenuVerticalWidgetWidgetState extends State<MenuVerticalWidgetWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => MenuVerticalWidgetModel());
+
+    _menusFuture = MenusTable().queryRows(
+      queryFn: (q) => q
+          .eqOrNull(
+            'active',
+            true,
+          )
+          .order('order', ascending: true),
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -42,24 +54,28 @@ class _MenuVerticalWidgetWidgetState extends State<MenuVerticalWidgetWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<MenusRow>>(
-      future: MenusTable().queryRows(
-        queryFn: (q) => q
-            .eqOrNull(
-              'active',
-              true,
-            )
-            .order('order', ascending: true),
-      ),
+      future: _menusFuture,
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
-          return Center(
-            child: SizedBox(
-              width: 40.0,
-              height: 40.0,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Color(0x004B39EF),
+          return Shimmer.fromColors(
+            baseColor: FlutterFlowTheme.of(context).alternate,
+            highlightColor:
+                FlutterFlowTheme.of(context).alternate.withValues(alpha: 0.4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                4,
+                (i) => Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.5),
+                    child: Container(
+                      height: 60.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).alternate,
+                        borderRadius: BorderRadius.circular(9.0),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

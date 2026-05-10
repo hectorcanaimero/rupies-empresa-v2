@@ -19,4 +19,12 @@ Future lockOrientation() async {
   await SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.light, // iOS: dark icons
+      statusBarIconBrightness: Brightness.dark, // Android: dark icons
+    ),
+  );
 }

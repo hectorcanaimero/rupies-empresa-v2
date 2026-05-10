@@ -15,6 +15,10 @@ class SubsDataTypeStruct extends BaseStruct {
     DateTime? currentPeriodEnd,
     String? typePlan,
     String? planId,
+    int? creditsRemaining,
+    int? creditsGranted,
+    bool? isUnlimited,
+    String? planType,
   })  : _id = id,
         _asaasSubscriptionId = asaasSubscriptionId,
         _status = status,
@@ -22,7 +26,11 @@ class SubsDataTypeStruct extends BaseStruct {
         _billingCycle = billingCycle,
         _currentPeriodEnd = currentPeriodEnd,
         _typePlan = typePlan,
-        _planId = planId;
+        _planId = planId,
+        _creditsRemaining = creditsRemaining,
+        _creditsGranted = creditsGranted,
+        _isUnlimited = isUnlimited,
+        _planType = planType;
 
   // "id" field.
   String? _id;
@@ -80,6 +88,34 @@ class SubsDataTypeStruct extends BaseStruct {
 
   bool hasPlanId() => _planId != null;
 
+  // "creditsRemaining" field.
+  int? _creditsRemaining;
+  int get creditsRemaining => _creditsRemaining ?? 0;
+  set creditsRemaining(int? val) => _creditsRemaining = val;
+
+  bool hasCreditsRemaining() => _creditsRemaining != null;
+
+  // "creditsGranted" field.
+  int? _creditsGranted;
+  int get creditsGranted => _creditsGranted ?? 0;
+  set creditsGranted(int? val) => _creditsGranted = val;
+
+  bool hasCreditsGranted() => _creditsGranted != null;
+
+  // "isUnlimited" field.
+  bool? _isUnlimited;
+  bool get isUnlimited => _isUnlimited ?? false;
+  set isUnlimited(bool? val) => _isUnlimited = val;
+
+  bool hasIsUnlimited() => _isUnlimited != null;
+
+  // "planType" field.
+  String? _planType;
+  String get planType => _planType ?? '';
+  set planType(String? val) => _planType = val;
+
+  bool hasPlanType() => _planType != null;
+
   static SubsDataTypeStruct fromMap(Map<String, dynamic> data) =>
       SubsDataTypeStruct(
         id: data['id'] as String?,
@@ -90,6 +126,10 @@ class SubsDataTypeStruct extends BaseStruct {
         currentPeriodEnd: data['currentPeriodEnd'] as DateTime?,
         typePlan: data['typePlan'] as String?,
         planId: data['planId'] as String?,
+        creditsRemaining: data['creditsRemaining'] as int?,
+        creditsGranted: data['creditsGranted'] as int?,
+        isUnlimited: data['isUnlimited'] as bool?,
+        planType: data['planType'] as String?,
       );
 
   static SubsDataTypeStruct? maybeFromMap(dynamic data) => data is Map
@@ -105,6 +145,10 @@ class SubsDataTypeStruct extends BaseStruct {
         'currentPeriodEnd': _currentPeriodEnd,
         'typePlan': _typePlan,
         'planId': _planId,
+        'creditsRemaining': _creditsRemaining,
+        'creditsGranted': _creditsGranted,
+        'isUnlimited': _isUnlimited,
+        'planType': _planType,
       }.withoutNulls;
 
   @override
@@ -139,6 +183,22 @@ class SubsDataTypeStruct extends BaseStruct {
         ),
         'planId': serializeParam(
           _planId,
+          ParamType.String,
+        ),
+        'creditsRemaining': serializeParam(
+          _creditsRemaining,
+          ParamType.int,
+        ),
+        'creditsGranted': serializeParam(
+          _creditsGranted,
+          ParamType.int,
+        ),
+        'isUnlimited': serializeParam(
+          _isUnlimited,
+          ParamType.bool,
+        ),
+        'planType': serializeParam(
+          _planType,
           ParamType.String,
         ),
       }.withoutNulls;
@@ -185,6 +245,26 @@ class SubsDataTypeStruct extends BaseStruct {
           ParamType.String,
           false,
         ),
+        creditsRemaining: deserializeParam(
+          data['creditsRemaining'],
+          ParamType.int,
+          false,
+        ),
+        creditsGranted: deserializeParam(
+          data['creditsGranted'],
+          ParamType.int,
+          false,
+        ),
+        isUnlimited: deserializeParam(
+          data['isUnlimited'],
+          ParamType.bool,
+          false,
+        ),
+        planType: deserializeParam(
+          data['planType'],
+          ParamType.String,
+          false,
+        ),
       );
 
   @override
@@ -200,7 +280,11 @@ class SubsDataTypeStruct extends BaseStruct {
         billingCycle == other.billingCycle &&
         currentPeriodEnd == other.currentPeriodEnd &&
         typePlan == other.typePlan &&
-        planId == other.planId;
+        planId == other.planId &&
+        creditsRemaining == other.creditsRemaining &&
+        creditsGranted == other.creditsGranted &&
+        isUnlimited == other.isUnlimited &&
+        planType == other.planType;
   }
 
   @override
@@ -212,7 +296,11 @@ class SubsDataTypeStruct extends BaseStruct {
         billingCycle,
         currentPeriodEnd,
         typePlan,
-        planId
+        planId,
+        creditsRemaining,
+        creditsGranted,
+        isUnlimited,
+        planType,
       ]);
 }
 
@@ -225,6 +313,10 @@ SubsDataTypeStruct createSubsDataTypeStruct({
   DateTime? currentPeriodEnd,
   String? typePlan,
   String? planId,
+  int? creditsRemaining,
+  int? creditsGranted,
+  bool? isUnlimited,
+  String? planType,
 }) =>
     SubsDataTypeStruct(
       id: id,
@@ -235,4 +327,8 @@ SubsDataTypeStruct createSubsDataTypeStruct({
       currentPeriodEnd: currentPeriodEnd,
       typePlan: typePlan,
       planId: planId,
+      creditsRemaining: creditsRemaining,
+      creditsGranted: creditsGranted,
+      isUnlimited: isUnlimited,
+      planType: planType,
     );

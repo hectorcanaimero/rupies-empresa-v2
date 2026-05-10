@@ -7,29 +7,20 @@ class SubscriptionPlansPageModel
     extends FlutterFlowModel<SubscriptionPlansPageWidget> {
   ///  Local state fields for this page.
 
-  String? selectedPlanId;
+  /// Index do plano selecionado no radio group.
+  /// 0 = Gratuito, 1 = Ilimitado (Plano 1), 2 = 30 Créditos (Plano 2)
+  int selectedPlanIndex = 0;
 
-  String selectedBillingCycle = 'monthly';
+  String? selectedPlanId;
 
   bool isCreating = false;
 
   ///  State fields for stateful widgets in this page.
 
   Stream<List<ViewSubsRow>>? subscriptionPlansPageSupabaseStream;
-  // Stores action output result for [Backend Call - Query Rows] action in SubscriptionPlansPage widget.
-  List<SubscriptionPlansRow>? planos;
-  // Stores action output result for [Custom Action - createSubscription] action in Button widget.
+
+  // Stores action output result for [Custom Action - createSubscription]
   dynamic createSubResult;
-  // Stores action output result for [Backend Call - Query Rows] action in Button widget.
-  List<SubscriptionsRow>? dtaSubs;
-  // Stores action output result for [Custom Action - createSubscription] action in Button widget.
-  dynamic createSubResult1;
-  // Stores action output result for [Backend Call - Query Rows] action in Button widget.
-  List<SubscriptionsRow>? dtaSubs1;
-  // Stores action output result for [Custom Action - createSubscription] action in Button widget.
-  dynamic createSubResult2;
-  // Stores action output result for [Backend Call - Query Rows] action in Button widget.
-  List<SubscriptionsRow>? dtaSubs2;
 
   @override
   void initState(BuildContext context) {}

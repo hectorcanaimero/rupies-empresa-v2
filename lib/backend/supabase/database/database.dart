@@ -47,3 +47,4 @@ export 'tables/users_rrss.dart';
 export 'tables/notifications.dart';
 export 'tables/view_services_candidated_users.dart';
 export 'tables/lead_contact.dart';
+export 'tables/credit_balances.dart';

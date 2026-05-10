@@ -2,12 +2,14 @@ import '/auth/supabase_auth/auth_util.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
+import '/pages/notifications_page/notifications_page_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'user_widget_model.dart';
 export 'user_widget_model.dart';
 
@@ -20,6 +22,8 @@ class UserWidgetWidget extends StatefulWidget {
 
 class _UserWidgetWidgetState extends State<UserWidgetWidget> {
   late UserWidgetModel _model;
+  Future<List<ViewServiceRatingRow>>? _ratingFuture;
+  Future<int>? _notificationCountFuture;
 
   @override
   void setState(VoidCallback callback) {
@@ -31,6 +35,16 @@ class _UserWidgetWidgetState extends State<UserWidgetWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => UserWidgetModel());
+
+    _ratingFuture = ViewServiceRatingTable().queryRows(
+      queryFn: (q) => q.eqOrNull('sr_contractor', currentUserUid),
+    );
+    _notificationCountFuture = SupaFlow.client
+        .from('notifications')
+        .select('id')
+        .eq('recipient_id', currentUserUid)
+        .eq('is_read', false)
+        .then<int>((data) => (data as List).length);
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -84,24 +98,36 @@ class _UserWidgetWidgetState extends State<UserWidgetWidget> {
             ),
             Expanded(
               child: FutureBuilder<List<ViewServiceRatingRow>>(
-                future: ViewServiceRatingTable().queryRows(
-                  queryFn: (q) => q.eqOrNull(
-                    'sr_contractor',
-                    currentUserUid,
-                  ),
-                ),
+                future: _ratingFuture,
                 builder: (context, snapshot) {
-                  // Customize what your widget looks like when it's loading.
                   if (!snapshot.hasData) {
-                    return Center(
-                      child: SizedBox(
-                        width: 40.0,
-                        height: 40.0,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0x004B39EF),
+                    return Shimmer.fromColors(
+                      baseColor: FlutterFlowTheme.of(context).alternate,
+                      highlightColor: FlutterFlowTheme.of(context)
+                          .alternate
+                          .withValues(alpha: 0.4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: 14.0,
+                            width: 120.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).alternate,
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
                           ),
-                        ),
+                          SizedBox(height: 4.0),
+                          Container(
+                            height: 12.0,
+                            width: 80.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).alternate,
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   }
@@ -230,144 +256,47 @@ class _UserWidgetWidgetState extends State<UserWidgetWidget> {
                 },
               ),
             ),
-            Builder(
-              builder: (context) {
-                if (FFAppState().subscription.status == 'active') {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      FFAppState().subscription.typePlan,
-                      width: 60.0,
-                      height: 60.0,
-                      fit: BoxFit.cover,
+            FutureBuilder<int>(
+              future: _notificationCountFuture,
+              builder: (context, snapshot) {
+                final unreadCount = snapshot.data ?? 0;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.notifications_outlined,
+                        color: FlutterFlowTheme.of(context).primaryText,
+                        size: 26.0,
+                      ),
+                      onPressed: () => context
+                          .pushNamed(NotificationsPageWidget.routeName),
                     ),
-                  );
-                } else {
-                  return Container(
-                    height: 36.0,
-                    decoration: BoxDecoration(),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Créditos Gratuitos',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    fontSize: 11.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                        ),
-                        RichText(
-                          textScaler: MediaQuery.of(context).textScaler,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: valueOrDefault<String>(
-                                  getJsonField(
-                                    FFAppState().trial,
-                                    r'''$.limit''',
-                                  )?.toString(),
-                                  '0',
-                                ),
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 14.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context).error,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              unreadCount > 9 ? '9+' : '$unreadCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
                               ),
-                              TextSpan(
-                                text: ' de ',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 14.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                              TextSpan(
-                                text: valueOrDefault<String>(
-                                  getJsonField(
-                                    FFAppState().trial,
-                                    r'''$.total''',
-                                  )?.toString(),
-                                  '...',
-                                ),
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 14.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              )
-                            ],
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }
+                      ),
+                  ],
+                );
               },
             ),
           ].divide(SizedBox(width: 12.0)),

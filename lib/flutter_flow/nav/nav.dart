@@ -270,6 +270,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) {
             builder: (context, params) => TermosPageWidget(),
           ),
           FFRoute(
+            name: NotificationsPageWidget.routeName,
+            path: NotificationsPageWidget.routePath,
+            builder: (context, params) => NotificationsPageWidget(),
+          ),
+          FFRoute(
             name: $utility_functions_library_8g4bud.TestPageWidget.routeName,
             path: $utility_functions_library_8g4bud.TestPageWidget.routePath,
             builder: (context, params) =>

@@ -21,9 +21,8 @@ void main() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
-  await initFirebase();
-
-  await SupaFlow.initialize();
+  // Firebase e Supabase en paralelo — ninguno depende del otro
+  await Future.wait([initFirebase(), SupaFlow.initialize()]);
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
@@ -32,13 +31,11 @@ void main() async {
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   }
 
-  // Start final custom actions code
-  await actions.setFCMToken();
-  await actions.appTracking();
-  await actions.inAppUpdate();
+  // lockOrientation es síncrono y crítico para el layout inicial
   await actions.lockOrientation();
-  // End final custom actions code
 
+  // setFCMToken, appTracking e inAppUpdate no bloquean la UI inicial —
+  // se lanzan en background después de runApp
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(
@@ -47,6 +44,11 @@ void main() async {
     ],
     child: MyApp(),
   ));
+
+  // Acciones no críticas para la primera pantalla — corren en background
+  actions.setFCMToken();
+  actions.appTracking();
+  actions.inAppUpdate();
 }
 
 class MyApp extends StatefulWidget {
@@ -99,8 +101,10 @@ class _MyAppState extends State<MyApp> {
         _appStateNotifier.update(user);
       });
     jwtTokenStream.listen((_) {});
+    // Splash mínimo de 500ms. Si el user stream tarda más,
+    // loading sigue true (user == null) hasta que emita — sin flicker.
     Future.delayed(
-      Duration(milliseconds: 2000),
+      Duration(milliseconds: 500),
       () => _appStateNotifier.stopShowingSplashImage(),
     );
   }
