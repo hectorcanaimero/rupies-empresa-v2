@@ -258,12 +258,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                   ),
                 );
               }
-              List<ChatsRow> containerChatsRowList = snapshot.data!;
-
-              final containerChatsRow = containerChatsRowList.isNotEmpty
-                  ? containerChatsRowList.first
-                  : null;
-
               return Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -810,20 +804,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                         MessageSendType.Contractor.name,
                                     'sendType': TypeMessage.text.name,
                                   });
-                                  logFirebaseEvent('content_backend_call');
-                                  await NotificationsTable().insert({
-                                    'title': 'Nova mensagem!',
-                                    'body': messageText.length > 50
-                                        ? '${messageText.substring(0, 50)}...'
-                                        : messageText,
-                                    'recipient_id':
-                                        containerChatsRow?.userCandidate,
-                                    'data': {
-                                      'route':
-                                          '/chatPage?chatId=${widget.chatId}',
-                                      'chatId': widget.chatId,
-                                    },
-                                  });
                                   if (_model.chatListController?.hasClients ?? false) {
                                     _model.chatListController!.animateTo(
                                       0.0,
@@ -990,23 +970,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                     ?.clear();
                                                 _model.typeText = false;
                                               });
-                                              logFirebaseEvent(
-                                                  'Icon_backend_call');
-                                              await NotificationsTable()
-                                                  .insert({
-                                                'title': 'Nova mensagem!',
-                                                'body': messageText.length > 50
-                                                    ? '${messageText.substring(0, 50)}...'
-                                                    : messageText,
-                                                'recipient_id':
-                                                    containerChatsRow
-                                                        ?.userCandidate,
-                                                'data': {
-                                                  'route':
-                                                      '/chatPage?chatId=${widget.chatId}',
-                                                  'chatId': widget.chatId,
-                                                },
-                                              });
                                               if (_model.chatListController?.hasClients ?? false) {
                                                 _model.chatListController!.animateTo(
                                                   0.0,
@@ -1134,21 +1097,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                           MessageSendType
                                                               .Contractor.name,
                                                     });
-                                                    logFirebaseEvent(
-                                                        'Icon_backend_call');
-                                                    await NotificationsTable()
-                                                        .insert({
-                                                      'title': 'Nova mensagem!',
-                                                      'body': '📷 Imagem',
-                                                      'recipient_id':
-                                                          containerChatsRow
-                                                              ?.userCandidate,
-                                                      'data': {
-                                                        'route':
-                                                            '/chatPage?chatId=${widget.chatId}',
-                                                        'chatId': widget.chatId,
-                                                      },
-                                                    });
                                                     if (_model.chatListController?.hasClients ?? false) {
                                                       _model.chatListController!.animateTo(
                                                         0.0,
@@ -1223,23 +1171,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                                                             MessageSendType
                                                                 .Contractor
                                                                 .name,
-                                                      });
-
-                                                      await NotificationsTable()
-                                                          .insert({
-                                                        'title':
-                                                            'Nova mensagem!',
-                                                        'body':
-                                                            '🎙️ Áudio',
-                                                        'recipient_id':
-                                                            containerChatsRow
-                                                                ?.userCandidate,
-                                                        'data': {
-                                                          'route':
-                                                              '/chatPage?chatId=${widget.chatId}',
-                                                          'chatId':
-                                                              widget.chatId,
-                                                        },
                                                       });
                                                     }
                                                   } else {

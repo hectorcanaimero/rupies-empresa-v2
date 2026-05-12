@@ -9,6 +9,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
+import '/custom_code/actions/index.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
@@ -1812,6 +1813,10 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                             curve: Curves.ease,
                                           );
                                         } else {
+                                          if (!await validatePlanAndCredits(
+                                              context)) {
+                                            return;
+                                          }
                                           logFirebaseEvent(
                                               'Button_backend_call');
                                           _model.create =
@@ -1844,61 +1849,17 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                           FFAppState().leadId =
                                               _model.create!.id;
                                           safeSetState(() {});
-                                          if (FFAppState().typecompany == '') {
-                                            if (functions.validateTrial(
-                                                FFAppState().trial)) {
-                                              logFirebaseEvent(
-                                                  'Button_update_app_state');
-                                              FFAppState().trial =
-                                                  functions.newValuetrial(
-                                                      FFAppState().trial, 1);
-                                              safeSetState(() {});
-                                              logFirebaseEvent(
-                                                  'Button_backend_call');
-                                              await UsersTable().update(
-                                                data: {
-                                                  'trial': FFAppState().trial,
-                                                },
-                                                matchingRows: (rows) =>
-                                                    rows.eqOrNull(
-                                                  'id',
-                                                  currentUserUid,
-                                                ),
-                                              );
-                                              _shouldSetState = true;
-                                              logFirebaseEvent(
-                                                  'Button_page_view');
-                                              await _model.pageViewController
-                                                  ?.nextPage(
-                                                duration:
-                                                    Duration(milliseconds: 300),
-                                                curve: Curves.ease,
-                                              );
-                                            } else {
-                                              logFirebaseEvent(
-                                                  'Button_page_view');
-                                              await _model.pageViewController
-                                                  ?.nextPage(
-                                                duration:
-                                                    Duration(milliseconds: 300),
-                                                curve: Curves.ease,
-                                              );
-                                            }
-
-                                            if (_shouldSetState)
-                                              safeSetState(() {});
-                                            return;
-                                          } else {
-                                            logFirebaseEvent(
-                                                'Button_page_view');
-                                            await _model.pageViewController
-                                                ?.nextPage(
-                                              duration:
-                                                  Duration(milliseconds: 300),
-                                              curve: Curves.ease,
-                                            );
-                                          }
-
+                                          await consumeCredit(
+                                            'lead_created',
+                                            _model.create!.id,
+                                          );
+                                          logFirebaseEvent('Button_page_view');
+                                          await _model.pageViewController
+                                              ?.nextPage(
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            curve: Curves.ease,
+                                          );
                                           if (_shouldSetState)
                                             safeSetState(() {});
                                           return;

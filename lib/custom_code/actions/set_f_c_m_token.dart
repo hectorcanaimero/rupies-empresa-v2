@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io' show Platform;
 
@@ -38,7 +39,7 @@ Future setFCMToken() async {
     }
 
     await _initializeLocalNotifications();
-    _setupFirebaseListeners();
+    await _setupFirebaseListeners();
 
     final String? token = await fbMessaging.getToken();
     if (token != null) {
@@ -94,7 +95,7 @@ Future<void> _initializeLocalNotifications() async {
 // FIREBASE LISTENERS
 // --------------------
 
-void _setupFirebaseListeners() {
+Future<void> _setupFirebaseListeners() async {
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     final notification = message.notification;
     final data = message.data;
@@ -115,6 +116,16 @@ void _setupFirebaseListeners() {
   });
 
   FirebaseMessaging.onBackgroundMessage(_fbMessagingBackgroundHandler);
+
+  // Cold-start: app was launched from a notification tap (terminated state)
+  final RemoteMessage? initialMessage =
+      await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    final route = initialMessage.data['route'];
+    if (route is String && route.isNotEmpty) {
+      _handleNotificationClick(route);
+    }
+  }
 }
 
 // --------------------
@@ -186,14 +197,27 @@ Future<ByteArrayAndroidBitmap> _downloadImage(String url) async {
 // BACKGROUND HANDLER
 // --------------------
 
+@pragma('vm:entry-point')
 Future<void> _fbMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
   final data = message.data;
-  await _showNotification(
-    data['title'] ?? 'Notificación',
-    data['body'] ?? '',
-    data['imageUrl'],
-    route: data['route'],
-  );
+  final route = data['route'];
+  if (route is String && route.isNotEmpty) {
+    _handleNotificationClick(route);
+  }
+
+  // Only show a local notification if this is a data-only message.
+  // If `notification` is present, FCM already shows the system notification
+  // in background — showing another would duplicate it.
+  if (message.notification == null) {
+    await _showNotification(
+      data['title'] ?? 'Notificación',
+      data['body'] ?? '',
+      data['imageUrl'],
+      route: route is String ? route : null,
+    );
+  }
 }
 
 // --------------------

@@ -1,3 +1,4 @@
+import '/custom_code/actions/index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/index.dart';
@@ -95,46 +96,13 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                       onPressed: () async {
                         logFirebaseEvent(
                             'OPTION_SERVICE_WIDGET_URGENTE_BTN_ON_TAP');
-                        if (FFAppState().subscription.status == 'active') {
-                          logFirebaseEvent('Button_navigate_to');
-
-                          context.pushNamed(ServiceUrgentPageWidget.routeName);
-
-                          logFirebaseEvent('Button_close_dialog_drawer_etc');
-                          Navigator.pop(context);
-                        } else {
-                          if (getJsonField(
-                                FFAppState().trial,
-                                r'''$.limit''',
-                              ) ==
-                              getJsonField(
-                                FFAppState().trial,
-                                r'''$.total''',
-                              )) {
-                            logFirebaseEvent('Button_navigate_to');
-
-                            context.goNamed(
-                              SubscriptionPlansPageWidget.routeName,
-                              extra: <String, dynamic>{
-                                '__transition_info__': TransitionInfo(
-                                  hasTransition: true,
-                                  transitionType:
-                                      PageTransitionType.bottomToTop,
-                                ),
-                              },
-                            );
-                          } else {
-                            logFirebaseEvent('Button_navigate_to');
-
-                            context
-                                .pushNamed(ServiceUrgentPageWidget.routeName);
-
-                            logFirebaseEvent('Button_close_dialog_drawer_etc');
-                            Navigator.pop(context);
-                          }
-
-                          return;
-                        }
+                        final canProceed =
+                            await validatePlanAndCredits(context);
+                        if (!canProceed) return;
+                        logFirebaseEvent('Button_navigate_to');
+                        context.pushNamed(ServiceUrgentPageWidget.routeName);
+                        logFirebaseEvent('Button_close_dialog_drawer_etc');
+                        Navigator.pop(context);
                       },
                       text: 'Urgente',
                       options: FFButtonOptions(
@@ -177,47 +145,13 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                       onPressed: () async {
                         logFirebaseEvent(
                             'OPTION_SERVICE_WIDGET_AGENDADO_BTN_ON_TA');
-                        if (FFAppState().subscription.status == 'active') {
-                          logFirebaseEvent('Button_navigate_to');
-
-                          context
-                              .pushNamed(ServiceSchedulePageWidget.routeName);
-
-                          logFirebaseEvent('Button_close_dialog_drawer_etc');
-                          Navigator.pop(context);
-                        } else {
-                          if (getJsonField(
-                                FFAppState().trial,
-                                r'''$.limit''',
-                              ) ==
-                              getJsonField(
-                                FFAppState().trial,
-                                r'''$.total''',
-                              )) {
-                            logFirebaseEvent('Button_navigate_to');
-
-                            context.goNamed(
-                              SubscriptionPlansPageWidget.routeName,
-                              extra: <String, dynamic>{
-                                '__transition_info__': TransitionInfo(
-                                  hasTransition: true,
-                                  transitionType:
-                                      PageTransitionType.bottomToTop,
-                                ),
-                              },
-                            );
-                          } else {
-                            logFirebaseEvent('Button_navigate_to');
-
-                            context
-                                .pushNamed(ServiceSchedulePageWidget.routeName);
-
-                            logFirebaseEvent('Button_close_dialog_drawer_etc');
-                            Navigator.pop(context);
-                          }
-
-                          return;
-                        }
+                        final canProceed =
+                            await validatePlanAndCredits(context);
+                        if (!canProceed) return;
+                        logFirebaseEvent('Button_navigate_to');
+                        context.pushNamed(ServiceSchedulePageWidget.routeName);
+                        logFirebaseEvent('Button_close_dialog_drawer_etc');
+                        Navigator.pop(context);
                       },
                       text: 'Agendado',
                       options: FFButtonOptions(

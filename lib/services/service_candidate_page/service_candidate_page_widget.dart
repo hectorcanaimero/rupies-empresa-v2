@@ -703,7 +703,14 @@ class _ServiceCandidatePageWidgetState
                                                       'Button_navigate_to');
 
                                                   context.pushNamed(
-                                                      HomePageWidget.routeName);
+                                                    ServiceIdPageWidget.routeName,
+                                                    queryParameters: {
+                                                      'uid': serializeParam(
+                                                        widget.uid,
+                                                        ParamType.String,
+                                                      ),
+                                                    }.withoutNulls,
+                                                  );
                                                 }
 
                                                 safeSetState(() {});

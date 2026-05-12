@@ -186,6 +186,10 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                       containerServicesImagesRowList =
                                       snapshot.data!;
 
+                                  if (containerServicesImagesRowList.isEmpty) {
+                                    return SizedBox.shrink();
+                                  }
+
                                   return Container(
                                     constraints: BoxConstraints(
                                       minHeight: 300.0,
@@ -1334,30 +1338,32 @@ class _LeadDetailPageWidgetState extends State<LeadDetailPageWidget> {
                                             ),
                                           ),
                                         ),
-                                      Container(
-                                        width: double.infinity,
-                                        height: 500.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(0.0),
-                                        ),
-                                        child: Builder(builder: (context) {
-                                          final _googleMapMarker =
-                                              functions.parseTextToLatLng(
-                                                  leadDetailPageLeadsRow
-                                                      .location!);
-                                          return FlutterFlowGoogleMap(
-                                            controller:
-                                                _model.googleMapsController,
-                                            onCameraIdle: (latLng) => _model
-                                                .googleMapsCenter = latLng,
-                                            initialLocation:
-                                                _model.googleMapsCenter ??=
-                                                    functions.parseTextToLatLng(
-                                                        leadDetailPageLeadsRow
-                                                            .location!),
+                                      if (leadDetailPageLeadsRow.location !=
+                                          null)
+                                        Container(
+                                          width: double.infinity,
+                                          height: 500.0,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                            borderRadius:
+                                                BorderRadius.circular(0.0),
+                                          ),
+                                          child: Builder(builder: (context) {
+                                            final _googleMapMarker =
+                                                functions.parseTextToLatLng(
+                                                    leadDetailPageLeadsRow
+                                                        .location!);
+                                            return FlutterFlowGoogleMap(
+                                              controller:
+                                                  _model.googleMapsController,
+                                              onCameraIdle: (latLng) => _model
+                                                  .googleMapsCenter = latLng,
+                                              initialLocation:
+                                                  _model.googleMapsCenter ??=
+                                                      functions.parseTextToLatLng(
+                                                          leadDetailPageLeadsRow
+                                                              .location!),
                                             markers: [
                                               FlutterFlowMarker(
                                                 _googleMapMarker.serialize(),

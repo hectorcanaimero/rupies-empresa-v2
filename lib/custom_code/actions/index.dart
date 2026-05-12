@@ -13,3 +13,4 @@ export 'record_audio.dart'
     show startAudioRecording, stopAudioRecording, cancelAudioRecording;
 export 'consume_credit.dart' show consumeCredit;
 export 'get_credit_balance.dart' show getCreditBalance;
+export 'validate_plan_and_credits.dart' show validatePlanAndCredits;

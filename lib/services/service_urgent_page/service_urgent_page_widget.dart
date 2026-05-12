@@ -10,6 +10,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
+import '/custom_code/actions/validate_plan_and_credits.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
@@ -1746,6 +1747,10 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
                                                   );
                                                 },
                                               );
+                                              return;
+                                            }
+                                            if (!await validatePlanAndCredits(
+                                                context)) {
                                               return;
                                             }
                                             logFirebaseEvent(

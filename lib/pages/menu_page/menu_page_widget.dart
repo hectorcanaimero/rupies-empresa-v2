@@ -218,7 +218,7 @@ class _MenuPageWidgetState extends State<MenuPageWidget> {
                                           .primaryText,
                                       size: 24.0,
                                     ),
-                                    label: 'Clube dos 100',
+                                    label: 'Planos e Créditos',
                                     onTap: () {
                                       logFirebaseEvent(
                                           'MENU_PAGE_PAGE_Row_5kybd4qj_ON_TAP');
