@@ -75,9 +75,27 @@ app.*.map.json
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Pods/
 
 # Web
 lib/generated_plugin_registrant.dart
+
+# Firebase
+**/android/app/google-services.json
+**/ios/Runner/GoogleService-Info.plist
+**/ios/firebase_app_id_file.json
+firebase/functions/node_modules/
+
+# Environment / secrets
+.env
+.env.*
+*.env
+
+# AI agent config (local only)
+.agents/
+.claude/
+.kiro/
+skills-lock.json
 
 # Exceptions to above rules
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
