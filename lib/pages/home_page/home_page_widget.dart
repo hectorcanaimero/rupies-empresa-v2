@@ -145,7 +145,12 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               ..status = _model.subs?.firstOrNull?.status
               ..typePlan = _model.subs?.firstOrNull?.spImage3
               ..id = _model.subs?.firstOrNull?.id
-              ..planId = _model.subs?.firstOrNull?.planId,
+              ..planId = _model.subs?.firstOrNull?.planId
+              ..creditsRemaining = _model.subs?.firstOrNull?.creditsRemaining
+              ..creditsGranted = _model.subs?.firstOrNull?.creditsGranted
+              ..isUnlimited = _model.subs?.firstOrNull?.cbIsUnlimited ??
+                  _model.subs?.firstOrNull?.spIsUnlimited
+              ..planType = _model.subs?.firstOrNull?.spPlanType,
           );
           safeSetState(() {});
         }),
