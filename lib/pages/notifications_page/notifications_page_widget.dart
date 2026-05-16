@@ -53,6 +53,48 @@ class _NotificationsPageWidgetState extends State<NotificationsPageWidget> {
     safeSetState(() => _loadNotifications());
   }
 
+  Future<void> _markAllAsRead() async {
+    await NotificationsTable().update(
+      data: {'is_read': true},
+      matchingRows: (rows) =>
+          rows.eqOrNull('recipient_id', currentUserUid).eqOrNull('is_read', false),
+    );
+    safeSetState(() => _loadNotifications());
+  }
+
+  Future<void> _deleteNotification(NotificationsRow notification) async {
+    await NotificationsTable().delete(
+      matchingRows: (rows) => rows.eqOrNull('id', notification.id),
+    );
+    safeSetState(() => _loadNotifications());
+  }
+
+  Future<void> _deleteAll() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir todas'),
+        content:
+            const Text('Tem certeza que deseja excluir todas as notificações?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await NotificationsTable().delete(
+      matchingRows: (rows) => rows.eqOrNull('recipient_id', currentUserUid),
+    );
+    safeSetState(() => _loadNotifications());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +119,46 @@ class _NotificationsPageWidgetState extends State<NotificationsPageWidget> {
                 letterSpacing: 0,
               ),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(
+              Icons.more_vert_rounded,
+              color: FlutterFlowTheme.of(context).primaryText,
+            ),
+            onSelected: (value) {
+              switch (value) {
+                case 'mark_all_read':
+                  _markAllAsRead();
+                  break;
+                case 'delete_all':
+                  _deleteAll();
+                  break;
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'mark_all_read',
+                child: Row(
+                  children: [
+                    Icon(Icons.done_all_rounded, size: 20),
+                    SizedBox(width: 8),
+                    Text('Marcar todas como lidas'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete_all',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_sweep_rounded, size: 20, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Eliminar todas', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: FutureBuilder<List<NotificationsRow>>(
         future: _notificationsFuture,
@@ -124,7 +206,20 @@ class _NotificationsPageWidgetState extends State<NotificationsPageWidget> {
             ),
             itemBuilder: (context, index) {
               final notif = notifications[index];
-              return InkWell(
+              return Dismissible(
+                key: ValueKey(notif.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 24),
+                  color: Colors.red,
+                  child: const Icon(
+                    Icons.delete_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                onDismissed: (_) => _deleteNotification(notif),
+                child: InkWell(
                 onTap: () => _markAsRead(notif),
                 child: Container(
                   color: notif.isRead
@@ -218,6 +313,7 @@ class _NotificationsPageWidgetState extends State<NotificationsPageWidget> {
                     ],
                   ),
                 ),
+              ),
               );
             },
           );

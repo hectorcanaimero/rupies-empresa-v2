@@ -384,7 +384,6 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
           if (widget.isSearchable) {
             _textEditingController.clear();
           }
-          _focusNode.requestFocus();
         }
       },
     );

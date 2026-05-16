@@ -43,57 +43,61 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     super.initState();
     _model = createModel(context, () => HomePageModel());
 
-    _acceptedServicesWithContractorsFuture =
-        ViewServicesWithCategoriesTable().queryRows(
-      queryFn: (q) => q
-          .eqOrNull(
-            'condition',
-            Conditions.Accepted.name,
-          )
-          .eqOrNull(
-            'userId',
-            currentUserUid,
-          )
-          .order('created_at'),
-    ).then((services) async {
-      final userIds = services
-          .map((s) => s.userAproved)
-          .whereType<String>()
-          .toSet()
-          .toList();
-      if (userIds.isEmpty) {
-        return (services, <String, UsersRow>{});
-      }
-      final contractorResults = await Future.wait(
-        userIds.map(
-          (id) => UsersTable().querySingleRow(
-            queryFn: (q) => q.eqOrNull('id', id),
-          ),
-        ),
-      );
-      return (
-        services,
-        <String, UsersRow>{
-          for (int i = 0; i < userIds.length; i++)
-            if (contractorResults[i].isNotEmpty)
-              userIds[i]: contractorResults[i].first
-        },
-      );
-    });
-    _filteredServicesFuture =
-        ViewServicesWithCategoriesFilteredTable().queryRows(
-      queryFn: (q) => q
-          .eqOrNull(
-            'userId',
-            currentUserUid,
-          )
-          .order('created_at'),
-    );
+    final _uid = currentUserUid;
+    _acceptedServicesWithContractorsFuture = _uid.isEmpty
+        ? Future.value((<ViewServicesWithCategoriesRow>[], <String, UsersRow>{}))
+        : ViewServicesWithCategoriesTable().queryRows(
+            queryFn: (q) => q
+                .eqOrNull(
+                  'condition',
+                  Conditions.Accepted.name,
+                )
+                .eqOrNull(
+                  'userId',
+                  _uid,
+                )
+                .order('created_at'),
+          ).then((services) async {
+            final userIds = services
+                .map((s) => s.userAproved)
+                .whereType<String>()
+                .toSet()
+                .toList();
+            if (userIds.isEmpty) {
+              return (services, <String, UsersRow>{});
+            }
+            final contractorResults = await Future.wait(
+              userIds.map(
+                (id) => UsersTable().querySingleRow(
+                  queryFn: (q) => q.eqOrNull('id', id),
+                ),
+              ),
+            );
+            return (
+              services,
+              <String, UsersRow>{
+                for (int i = 0; i < userIds.length; i++)
+                  if (contractorResults[i].isNotEmpty)
+                    userIds[i]: contractorResults[i].first
+              },
+            );
+          });
+    _filteredServicesFuture = _uid.isEmpty
+        ? Future.value(<ViewServicesWithCategoriesFilteredRow>[])
+        : ViewServicesWithCategoriesFilteredTable().queryRows(
+            queryFn: (q) => q
+                .eqOrNull(
+                  'userId',
+                  _uid,
+                )
+                .order('created_at'),
+          );
 
     logFirebaseEvent('screen_view', parameters: {'screen_name': 'HomePage'});
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       logFirebaseEvent('HOME_PAGE_PAGE_HomePage_ON_INIT_STATE');
+      if (currentUserUid.isEmpty) return;
       await Future.wait([
         Future(() async {
           logFirebaseEvent('HomePage_backend_call');
@@ -134,10 +138,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         Future(() async {
           logFirebaseEvent('HomePage_backend_call');
           _model.subs = await ViewSubsTable().queryRows(
-            queryFn: (q) => q.eqOrNull(
-              'user_id',
-              currentUserUid,
-            ),
+            queryFn: (q) => q
+                .eqOrNull(
+                  'user_id',
+                  currentUserUid,
+                )
+                .eqOrNull(
+                  'status',
+                  'active',
+                ),
           );
           logFirebaseEvent('HomePage_update_app_state');
           FFAppState().updateSubscriptionStruct(

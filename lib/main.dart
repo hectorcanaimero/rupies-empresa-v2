@@ -21,6 +21,8 @@ void main() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
+  setTimeagoLocales();
+
   // Firebase e Supabase en paralelo — ninguno depende del otro
   await Future.wait([initFirebase(), SupaFlow.initialize()]);
 

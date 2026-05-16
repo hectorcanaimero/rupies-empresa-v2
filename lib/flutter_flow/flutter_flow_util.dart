@@ -34,7 +34,7 @@ export 'nav/nav.dart';
 T valueOrDefault<T>(T? value, T defaultValue) =>
     (value is String && value.isEmpty) || value == null ? defaultValue : value;
 
-void _setTimeagoLocales() {
+void setTimeagoLocales() {
   timeago.setLocaleMessages('pt', timeago.PtBrMessages());
   timeago.setLocaleMessages('pt_short', timeago.PtBrShortMessages());
 }
@@ -44,7 +44,7 @@ String dateTimeFormat(String format, DateTime? dateTime, {String? locale}) {
     return '';
   }
   if (format == 'relative') {
-    _setTimeagoLocales();
+    setTimeagoLocales();
     return timeago.format(dateTime, locale: locale, allowFromNow: true);
   }
   return DateFormat(format, locale).format(dateTime);

@@ -14,6 +14,8 @@ class CreateLeadPageModel extends FlutterFlowModel<CreateLeadPageWidget> {
 
   DateTime? dateRetorno;
 
+  Future<List<LeadsRow>>? leadFuture;
+
   ///  State fields for stateful widgets in this page.
 
   final formKey = GlobalKey<FormState>();

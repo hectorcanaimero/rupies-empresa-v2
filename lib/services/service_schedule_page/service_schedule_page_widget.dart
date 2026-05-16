@@ -55,7 +55,17 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
       _model.serviceFuture = ServicesTable().querySingleRow(
         queryFn: (q) => q.eqOrNull('id', FFAppState().serviceId),
       );
+    } else {
+      // New service: resolve immediately with empty list so FutureBuilder proceeds.
+      _model.serviceFuture = Future.value(<ServicesRow>[]);
     }
+
+    // Pre-fetch categories in parallel with service query
+    FFAppState().categories(
+      requestFn: () => CategoriesTable().queryRows(
+        queryFn: (q) => q.eqOrNull('status', true),
+      ),
+    );
 
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'ServiceSchedulePage'});
@@ -1908,6 +1918,8 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                   _shouldSetState = true;
                                                   logFirebaseEvent(
                                                       'Button_update_app_state');
+                                                  FFAppState().serviceId =
+                                                      _model.create!.id;
                                                   FFAppState().trial =
                                                       functions.newValuetrial(
                                                           FFAppState().trial,
@@ -2323,6 +2335,12 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                           return;
                                                                         }
 
+                                                                        debugPrint('[Upload] serviceId: "${FFAppState().serviceId}"');
+                                                                        if (FFAppState().serviceId == '') {
+                                                                          debugPrint('[Upload] ⚠️ serviceId is EMPTY → skipping DB insert');
+                                                                          return;
+                                                                        }
+                                                                        debugPrint('[Upload] Inserting image into ServicesImages...');
                                                                         logFirebaseEvent(
                                                                             'IconButton_backend_call');
                                                                         _model.createImage =
@@ -2333,6 +2351,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                           'image':
                                                                               _model.uploadedFileUrl_uploadUrgenteEditar,
                                                                         });
+                                                                        debugPrint('[Upload] ✅ Image inserted: ${_model.createImage?.id}');
                                                                         logFirebaseEvent(
                                                                             'IconButton_update_page_state');
                                                                         _model.addToImages(
@@ -2340,13 +2359,16 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                                 .uploadedFileUrl_uploadUrgenteEditar);
                                                                         safeSetState(
                                                                             () {});
+                                                                        debugPrint('[Upload] Refreshing completer...');
                                                                         logFirebaseEvent(
                                                                             'IconButton_refresh_database_request');
                                                                         safeSetState(() =>
                                                                             _model.requestCompleter1 =
                                                                                 null);
+                                                                        debugPrint('[Upload] Waiting for requestCompleter1...');
                                                                         await _model
                                                                             .waitForRequestCompleted1();
+                                                                        debugPrint('[Upload] ✅ Completer done');
 
                                                                         safeSetState(
                                                                             () {});
@@ -2384,14 +2406,16 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                             ServicesImagesRow>>(
                                                                       future: (_model
                                                                               .requestCompleter1 ??= Completer<List<ServicesImagesRow>>()
-                                                                            ..complete(ServicesImagesTable().queryRows(
-                                                                              queryFn: (q) => q
-                                                                                  .eqOrNull(
-                                                                                    'serviceId',
-                                                                                    FFAppState().serviceId,
-                                                                                  )
-                                                                                  .order('created_at'),
-                                                                            )))
+                                                                            ..complete(FFAppState().serviceId == ''
+                                                                                ? Future.value(<ServicesImagesRow>[])
+                                                                                : ServicesImagesTable().queryRows(
+                                                                                    queryFn: (q) => q
+                                                                                        .eqOrNull(
+                                                                                          'serviceId',
+                                                                                          FFAppState().serviceId,
+                                                                                        )
+                                                                                        .order('created_at'),
+                                                                                  )))
                                                                           .future,
                                                                       builder:
                                                                           (context,
@@ -2622,6 +2646,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                                       .skillFocusNode,
                                                                   onFieldSubmitted:
                                                                       (_) async {
+                                                                    if (FFAppState().serviceId == '') return;
                                                                     logFirebaseEvent(
                                                                         'SERVICE_SCHEDULE_skill_ON_TEXTFIELD_SUBM');
                                                                     logFirebaseEvent(
@@ -2811,6 +2836,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                             FFButtonWidget(
                                                               onPressed:
                                                                   () async {
+                                                                if (FFAppState().serviceId == '') return;
                                                                 logFirebaseEvent(
                                                                     'SERVICE_SCHEDULE_PAGE_PAGE__BTN_ON_TAP');
                                                                 logFirebaseEvent(
@@ -2931,8 +2957,9 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                                               future: (_model.requestCompleter2 ??= Completer<
                                                                       List<
                                                                           ServicesSkillsRow>>()
-                                                                    ..complete(
-                                                                        ServicesSkillsTable()
+                                                                    ..complete(FFAppState().serviceId == ''
+                                                                        ? Future.value(<ServicesSkillsRow>[])
+                                                                        : ServicesSkillsTable()
                                                                             .queryRows(
                                                                       queryFn: (q) => q
                                                                           .eqOrNull(
@@ -3151,6 +3178,7 @@ class _ServiceSchedulePageWidgetState extends State<ServiceSchedulePageWidget>
                                     ),
                                     FFButtonWidget(
                                       onPressed: () async {
+                                        if (FFAppState().serviceId == '') return;
                                         logFirebaseEvent(
                                             'SERVICE_SCHEDULE_PAGE_PAGE_button_ON_TAP');
                                         logFirebaseEvent('button_backend_call');

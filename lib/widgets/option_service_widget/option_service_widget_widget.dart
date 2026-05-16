@@ -99,10 +99,10 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                         final canProceed =
                             await validatePlanAndCredits(context);
                         if (!canProceed) return;
-                        logFirebaseEvent('Button_navigate_to');
-                        context.pushNamed(ServiceUrgentPageWidget.routeName);
                         logFirebaseEvent('Button_close_dialog_drawer_etc');
                         Navigator.pop(context);
+                        logFirebaseEvent('Button_navigate_to');
+                        context.pushNamed(ServiceUrgentPageWidget.routeName);
                       },
                       text: 'Urgente',
                       options: FFButtonOptions(
@@ -148,10 +148,10 @@ class _OptionServiceWidgetWidgetState extends State<OptionServiceWidgetWidget> {
                         final canProceed =
                             await validatePlanAndCredits(context);
                         if (!canProceed) return;
-                        logFirebaseEvent('Button_navigate_to');
-                        context.pushNamed(ServiceSchedulePageWidget.routeName);
                         logFirebaseEvent('Button_close_dialog_drawer_etc');
                         Navigator.pop(context);
+                        logFirebaseEvent('Button_navigate_to');
+                        context.pushNamed(ServiceSchedulePageWidget.routeName);
                       },
                       text: 'Agendado',
                       options: FFButtonOptions(

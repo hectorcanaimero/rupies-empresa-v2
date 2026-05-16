@@ -46,6 +46,14 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
     super.initState();
     _model = createModel(context, () => CreateLeadPageModel());
 
+    if (FFAppState().leadId != '') {
+      _model.leadFuture = LeadsTable().querySingleRow(
+        queryFn: (q) => q.eqOrNull('id', FFAppState().leadId),
+      );
+    } else {
+      _model.leadFuture = Future.value(<LeadsRow>[]);
+    }
+
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'CreateLeadPage'});
     // On page load action.
@@ -100,12 +108,9 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
   @override
   void dispose() {
     // On page dispose action.
-    () async {
-      logFirebaseEvent('CREATE_LEAD_CreateLeadPage_ON_DISPOSE');
-      logFirebaseEvent('CreateLeadPage_update_page_state');
-      _model.dateEvent = null;
-      safeSetState(() {});
-    }();
+    logFirebaseEvent('CREATE_LEAD_CreateLeadPage_ON_DISPOSE');
+    logFirebaseEvent('CreateLeadPage_update_page_state');
+    _model.dateEvent = null;
 
     _model.dispose();
 
@@ -133,12 +138,7 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
     }
 
     return FutureBuilder<List<LeadsRow>>(
-      future: LeadsTable().querySingleRow(
-        queryFn: (q) => q.eqOrNull(
-          'id',
-          FFAppState().leadId,
-        ),
-      ),
+      future: _model.leadFuture,
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
@@ -2115,17 +2115,19 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                         List<
                                                             ServicesImagesRow>>()
                                                       ..complete(
-                                                          ServicesImagesTable()
-                                                              .queryRows(
-                                                        queryFn: (q) => q
-                                                            .eqOrNull(
-                                                              'lead_id',
-                                                              FFAppState()
-                                                                  .leadId,
-                                                            )
-                                                            .order(
-                                                                'created_at'),
-                                                      )))
+                                                          FFAppState().leadId == ''
+                                                              ? Future.value(<ServicesImagesRow>[])
+                                                              : ServicesImagesTable()
+                                                                    .queryRows(
+                                                                  queryFn: (q) => q
+                                                                      .eqOrNull(
+                                                                        'lead_id',
+                                                                        FFAppState()
+                                                                            .leadId,
+                                                                      )
+                                                                      .order(
+                                                                          'created_at'),
+                                                                )))
                                                 .future,
                                             builder: (context, snapshot) {
                                               // Customize what your widget looks like when it's loading.
@@ -2508,15 +2510,17 @@ class _CreateLeadPageWidgetState extends State<CreateLeadPageWidget> {
                                                   Completer<
                                                       List<LeadAttachmentRow>>()
                                                     ..complete(
-                                                        LeadAttachmentTable()
-                                                            .queryRows(
-                                                      queryFn: (q) => q
-                                                          .eqOrNull(
-                                                            'leadId',
-                                                            FFAppState().leadId,
-                                                          )
-                                                          .order('created_at'),
-                                                    )))
+                                                        FFAppState().leadId == ''
+                                                            ? Future.value(<LeadAttachmentRow>[])
+                                                            : LeadAttachmentTable()
+                                                                  .queryRows(
+                                                                queryFn: (q) => q
+                                                                    .eqOrNull(
+                                                                      'leadId',
+                                                                      FFAppState().leadId,
+                                                                    )
+                                                                    .order('created_at'),
+                                                              )))
                                               .future,
                                           builder: (context, snapshot) {
                                             // Customize what your widget looks like when it's loading.

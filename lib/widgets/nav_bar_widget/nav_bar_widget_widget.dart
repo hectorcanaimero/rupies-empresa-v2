@@ -281,8 +281,8 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Icon(
-                                  Icons.design_services_rounded,
+                                FaIcon(
+                                  FontAwesomeIcons.screwdriverWrench,
                                   color: valueOrDefault<Color>(
                                     widget.jobs
                                         ? FlutterFlowTheme.of(context)
@@ -291,7 +291,7 @@ class _NavBarWidgetWidgetState extends State<NavBarWidgetWidget> {
                                             .secondaryText,
                                     FlutterFlowTheme.of(context).secondaryText,
                                   ),
-                                  size: 26.0,
+                                  size: 24.0,
                                 ),
                                 Text(
                                   'Serviços',
