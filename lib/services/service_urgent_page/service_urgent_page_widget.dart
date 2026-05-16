@@ -57,6 +57,13 @@ class _ServiceUrgentPageWidgetState extends State<ServiceUrgentPageWidget>
       ),
     );
 
+    // Pre-fetch categories in parallel with service query
+    FFAppState().categories(
+      requestFn: () => CategoriesTable().queryRows(
+        queryFn: (q) => q.eqOrNull('status', true),
+      ),
+    );
+
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'ServiceUrgentPage'});
     // On page load action.
