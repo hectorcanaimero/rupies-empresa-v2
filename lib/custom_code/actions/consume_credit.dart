@@ -15,6 +15,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+// Sentinel for "authToken not provided by caller" — distinguishes from explicit null.
+const _unset = Object();
+
 /// Resultado do consumo de crédito
 class ConsumeCreditResult {
   final bool success;
@@ -41,11 +44,15 @@ class ConsumeCreditResult {
 /// - success=false + error='no_active_balance': sem assinatura ativa
 Future<dynamic> consumeCredit(
   String actionType,
-  String? referenceId,
-) async {
+  String? referenceId, {
+  http.Client? client,
+  Object? authToken = _unset,
+}) async {
   try {
-    final session = SupaFlow.client.auth.currentSession;
-    if (session == null) {
+    final token = authToken == _unset
+        ? SupaFlow.client.auth.currentSession?.accessToken
+        : authToken as String?;
+    if (token == null) {
       return {
         'success': false,
         'error': 'unauthenticated',
@@ -54,52 +61,56 @@ Future<dynamic> consumeCredit(
       };
     }
 
-    final token = session.accessToken;
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/consume-credit');
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'actionType': actionType,
-        if (referenceId != null) 'referenceId': referenceId,
-        'cost': 1,
-      }),
-    );
+    final c = client ?? http.Client();
+    try {
+      final response = await c.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'actionType': actionType,
+          if (referenceId != null) 'referenceId': referenceId,
+          'cost': 1,
+        }),
+      );
 
-    final jsonResponse = jsonDecode(response.body);
+      final jsonResponse = jsonDecode(response.body);
 
-    if (response.statusCode == 200 && jsonResponse['success'] == true) {
-      final data = jsonResponse['data'];
-      return {
-        'success': true,
-        'creditsRemaining': data['creditsRemaining'] ?? 0,
-        'isUnlimited': data['isUnlimited'] ?? false,
-        'error': null,
-      };
-    }
+      if (response.statusCode == 200 && jsonResponse['success'] == true) {
+        final data = jsonResponse['data'];
+        return {
+          'success': true,
+          'creditsRemaining': data['creditsRemaining'] ?? 0,
+          'isUnlimited': data['isUnlimited'] ?? false,
+          'error': null,
+        };
+      }
 
-    // HTTP 402 — créditos insuficientes ou sem balanço
-    if (response.statusCode == 402) {
+      // HTTP 402 — créditos insuficientes ou sem balanço
+      if (response.statusCode == 402) {
+        return {
+          'success': false,
+          'error': jsonResponse['error'] ?? 'insufficient_credits',
+          'creditsRemaining': jsonResponse['creditsRemaining'] ?? 0,
+          'isUnlimited': false,
+        };
+      }
+
+      // Outros erros
       return {
         'success': false,
-        'error': jsonResponse['error'] ?? 'insufficient_credits',
-        'creditsRemaining': jsonResponse['creditsRemaining'] ?? 0,
+        'error': jsonResponse['error'] ?? 'unknown_error',
+        'creditsRemaining': 0,
         'isUnlimited': false,
       };
+    } finally {
+      if (client == null) c.close();
     }
-
-    // Outros erros
-    return {
-      'success': false,
-      'error': jsonResponse['error'] ?? 'unknown_error',
-      'creditsRemaining': 0,
-      'isUnlimited': false,
-    };
   } catch (e) {
     debugPrint('consumeCredit error: $e');
     return {
