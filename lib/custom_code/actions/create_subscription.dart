@@ -15,58 +15,68 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+const _unset = Object();
+
 Future<dynamic> createSubscription(
   String planId,
   String billingCycle,
-  String paymentMethod,
-) async {
+  String paymentMethod, {
+  http.Client? client,
+  Object? authToken = _unset,
+}) async {
   try {
-    final session = SupaFlow.client.auth.currentSession;
-    if (session == null) {
+    final token = authToken == _unset
+        ? SupaFlow.client.auth.currentSession?.accessToken
+        : authToken as String?;
+    if (token == null) {
       return {'success': false, 'error': 'Usuário não autenticado'};
     }
 
-    final token = session.accessToken;
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/create-subscription');
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'planId': planId,
-        'billingCycle': billingCycle,
-        'paymentMethod': paymentMethod,
-      }),
-    );
+    final c = client ?? http.Client();
+    try {
+      final response = await c.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'planId': planId,
+          'billingCycle': billingCycle,
+          'paymentMethod': paymentMethod,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      if (jsonResponse['success'] == true) {
-        final data = jsonResponse['data'];
-        if (data is Map<String, dynamic>) {
-          return {...data, 'success': true};
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['success'] == true) {
+          final data = jsonResponse['data'];
+          if (data is Map<String, dynamic>) {
+            return {...data, 'success': true};
+          }
+          return {'success': true, 'data': data};
+        } else {
+          return {
+            'success': false,
+            'error': jsonResponse['error'] ?? 'Erro desconhecido',
+          };
         }
-        return {'success': true, 'data': data};
       } else {
-        return {
-          'success': false,
-          'error': jsonResponse['error'] ?? 'Erro desconhecido',
-        };
+        try {
+          final errorResp = jsonDecode(response.body);
+          return {
+            'success': false,
+            'error': errorResp['error'] ?? 'Erro ao criar assinatura',
+          };
+        } catch (e) {
+          return {'success': false, 'error': 'Erro ao criar assinatura'};
+        }
       }
-    } else {
-      try {
-        final errorResponse = jsonDecode(response.body);
-        return {
-          'success': false,
-          'error': errorResponse['error'] ?? 'Erro ao criar assinatura',
-        };
-      } catch (e) {
-        return {'success': false, 'error': 'Erro ao criar assinatura'};
-      }
+    } finally {
+      if (client == null) c.close();
     }
   } catch (e) {
     debugPrint('createSubscription error: $e');

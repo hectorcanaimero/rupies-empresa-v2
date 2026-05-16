@@ -12,10 +12,13 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-Future<bool> checkSubscription(String? featureKey) async {
+Future<bool> checkSubscription(
+  String? featureKey, {
+  Future<dynamic> Function()? getStatusFn,
+}) async {
   try {
     // Obter status completo da subscription
-    final status = await getSubscriptionStatus();
+    final status = await (getStatusFn ?? getSubscriptionStatus)();
 
     if (status == null) {
       debugPrint('❌ Status é null');

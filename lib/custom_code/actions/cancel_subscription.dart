@@ -15,22 +15,29 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+const _unset = Object();
+
 Future<dynamic> cancelSubscription(
   String subscriptionId,
   bool immediate,
-  String? reason,
-) async {
-  try {
-    final session = SupaFlow.client.auth.currentSession;
-    if (session == null) {
-      return {'success': false, 'error': 'Usuário não autenticado'};
-    }
+  String? reason, {
+  http.Client? client,
+  Object? authToken = _unset,
+}) async {
+  final token = authToken == _unset
+      ? SupaFlow.client.auth.currentSession?.accessToken
+      : authToken as String?;
 
-    final token = session.accessToken;
+  if (token == null) {
+    return {'success': false, 'error': 'Usuário não autenticado'};
+  }
+
+  final c = client ?? http.Client();
+  try {
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/cancel-subscription');
 
-    final response = await http.post(
+    final response = await c.post(
       url,
       headers: {
         'Authorization': 'Bearer $token',
@@ -67,5 +74,7 @@ Future<dynamic> cancelSubscription(
   } catch (e) {
     debugPrint('cancelSubscription error: $e');
     return {'success': false, 'error': 'Erro: $e'};
+  } finally {
+    if (client == null) c.close();
   }
 }

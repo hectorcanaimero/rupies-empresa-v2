@@ -17,8 +17,11 @@ import 'package:flutter/material.dart';
 ///
 /// Exibe um [AlertDialog] explicativo se a validação falhar.
 /// Retorna [true] se pode prosseguir, [false] caso contrário.
-Future<bool> validatePlanAndCredits(BuildContext context) async {
-  final sub = FFAppState().subscription;
+Future<bool> validatePlanAndCredits(
+  BuildContext context, {
+  SubsDataTypeStruct? subscriptionOverride,
+}) async {
+  final sub = subscriptionOverride ?? FFAppState().subscription;
   final isActive = sub.status == 'active';
   final hasCredits = sub.isUnlimited || sub.creditsRemaining > 0;
 

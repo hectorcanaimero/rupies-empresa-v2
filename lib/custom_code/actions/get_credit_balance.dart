@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+const _unset = Object();
+
 /// Retorna o saldo de créditos atual do usuário.
 ///
 /// Retorna um Map com:
@@ -25,10 +27,15 @@ import 'package:http/http.dart' as http;
 /// - isUnlimited (bool): true para plano ilimitado
 /// - periodEnd (String?): data de fim do período atual
 /// - plan (Map?): informações do plano ativo
-Future<dynamic> getCreditBalance() async {
+Future<dynamic> getCreditBalance({
+  http.Client? client,
+  Object? authToken = _unset,
+}) async {
   try {
-    final session = SupaFlow.client.auth.currentSession;
-    if (session == null) {
+    final token = authToken == _unset
+        ? SupaFlow.client.auth.currentSession?.accessToken
+        : authToken as String?;
+    if (token == null) {
       return {
         'hasBalance': false,
         'creditsRemaining': 0,
@@ -40,26 +47,30 @@ Future<dynamic> getCreditBalance() async {
       };
     }
 
-    final token = session.accessToken;
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/get-credit-balance');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final c = client ?? http.Client();
+    try {
+      final response = await c.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      if (jsonResponse['success'] == true) {
-        return jsonResponse['data'];
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['success'] == true) {
+          return jsonResponse['data'];
+        }
+        debugPrint('getCreditBalance error: ${jsonResponse['error']}');
+      } else {
+        debugPrint('getCreditBalance HTTP ${response.statusCode}');
       }
-      debugPrint('getCreditBalance error: ${jsonResponse['error']}');
-    } else {
-      debugPrint('getCreditBalance HTTP ${response.statusCode}');
+    } finally {
+      if (client == null) c.close();
     }
 
     return {

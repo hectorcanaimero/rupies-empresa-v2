@@ -15,36 +15,47 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-Future<dynamic> getSubscriptionStatus() async {
+const _unset = Object();
+
+Future<dynamic> getSubscriptionStatus({
+  http.Client? client,
+  Object? authToken = _unset,
+}) async {
   try {
-    final session = SupaFlow.client.auth.currentSession;
-    if (session == null) {
+    final token = authToken == _unset
+        ? SupaFlow.client.auth.currentSession?.accessToken
+        : authToken as String?;
+    if (token == null) {
       return null;
     }
 
-    final token = session.accessToken;
     final url = Uri.parse(
         'https://ejnzgjczritznohpdnxl.supabase.co/functions/v1/get-subscription-history');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final c = client ?? http.Client();
+    try {
+      final response = await c.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      if (jsonResponse['success'] == true) {
-        return jsonResponse['data'];
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['success'] == true) {
+          return jsonResponse['data'];
+        } else {
+          debugPrint('getSubscriptionStatus error: ${jsonResponse['error']}');
+          return null;
+        }
       } else {
-        debugPrint('getSubscriptionStatus error: ${jsonResponse['error']}');
+        debugPrint('getSubscriptionStatus HTTP ${response.statusCode}');
         return null;
       }
-    } else {
-      debugPrint('getSubscriptionStatus HTTP ${response.statusCode}');
-      return null;
+    } finally {
+      if (client == null) c.close();
     }
   } catch (e) {
     debugPrint('getSubscriptionStatus error: $e');
