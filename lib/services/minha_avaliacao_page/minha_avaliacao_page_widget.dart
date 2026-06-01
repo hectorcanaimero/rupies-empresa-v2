@@ -372,7 +372,7 @@ class _MinhaAvaliacaoPageWidgetState extends State<MinhaAvaliacaoPageWidget> {
                                             child: Text(
                                               dateTimeFormat(
                                                 "dd/MM/yy H:mm",
-                                                dataItem.createdAt!,
+                                                dataItem.createdAt,
                                                 locale:
                                                     FFLocalizations.of(context)
                                                         .languageCode,
@@ -442,7 +442,8 @@ class _MinhaAvaliacaoPageWidgetState extends State<MinhaAvaliacaoPageWidget> {
                                               ),
                                               direction: Axis.horizontal,
                                               rating:
-                                                  dataItem.srContractorRating!,
+                                                  dataItem.srContractorRating ??
+                                                      0.0,
                                               unratedColor:
                                                   FlutterFlowTheme.of(context)
                                                       .accent1,
