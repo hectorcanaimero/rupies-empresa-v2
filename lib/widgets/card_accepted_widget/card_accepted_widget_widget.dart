@@ -1,6 +1,7 @@
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/services_refresh_notifier.dart';
 import '/widgets/bubble_chat_widget/bubble_chat_widget_widget.dart';
 import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
@@ -634,6 +635,7 @@ class _CardAcceptedWidgetWidgetState extends State<CardAcceptedWidgetWidget> {
                                   widget.data?.id,
                                 ),
                               );
+                              ServicesRefreshNotifier.instance.notifyRefresh();
                             }
                           },
                           text: 'Cancelar',

@@ -7,6 +7,7 @@ import '/widgets/user_widget/user_widget_widget.dart';
 import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'menu_page_model.dart';
 export 'menu_page_model.dart';
 
@@ -257,8 +258,10 @@ class _MenuPageWidgetState extends State<MenuPageWidget> {
                                   logFirebaseEvent(
                                       'MENU_PAGE_PAGE_Row_zs3b4nw8_ON_TAP');
                                   logFirebaseEvent('Row_navigate_to');
-                                  context
-                                      .pushNamed(TermosPageWidget.routeName);
+                                  context.pushNamed(
+                                    TermosPageWidget.routeName,
+                                    queryParameters: {'from': 'menu'},
+                                  );
                                 },
                               ),
                               _MenuItem(
@@ -270,6 +273,30 @@ class _MenuPageWidgetState extends State<MenuPageWidget> {
                                 ),
                                 label: 'Sair do Sistema',
                                 onTap: () => _handleLogout(),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 16.0),
+                                child: FutureBuilder<PackageInfo>(
+                                  future: _model.packageInfoFuture,
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    final info = snapshot.data!;
+                                    return Text(
+                                      'v${info.version} (${info.buildNumber})',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodySmall
+                                          .copyWith(
+                                            letterSpacing: 0.0,
+                                            color:
+                                                FlutterFlowTheme.of(context)
+                                                    .secondaryText,
+                                          ),
+                                    );
+                                  },
+                                ),
                               ),
                             ],
                           ),

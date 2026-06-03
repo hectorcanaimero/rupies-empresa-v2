@@ -32,6 +32,14 @@ class AppStateNotifier extends ChangeNotifier {
   bool showSplashImage = true;
   String? _redirectLocation;
 
+  /// Cached acceptance flags for the current logged-in user. `null` means
+  /// "not yet fetched" — in that case the top-level redirect treats the
+  /// user as not-yet-accepted and routes to `/termosPage`. Refreshed via
+  /// [refreshAcceptance] on auth change and after the user accepts.
+  bool? termosAccepted;
+  bool? privacidadeAccepted;
+  bool _acceptanceLoading = false;
+
   /// Determines whether the app will refresh and build again when a sign
   /// in or sign out happens. This is useful when the app is launched or
   /// on an unexpected logout. However, this must be turned off when we
@@ -43,6 +51,13 @@ class AppStateNotifier extends ChangeNotifier {
   bool get loggedIn => user?.loggedIn ?? false;
   bool get initiallyLoggedIn => initialUser?.loggedIn ?? false;
   bool get shouldRedirect => loggedIn && _redirectLocation != null;
+
+  /// True when the user must be sent to `/termosPage` because the
+  /// `users.termos` / `users.privacidade` flags are not both `true`.
+  /// While the flags are still being fetched (`null`), we conservatively
+  /// treat the user as needing acceptance to avoid leaking pages.
+  bool get needsTermsAcceptance =>
+      loggedIn && (termosAccepted != true || privacidadeAccepted != true);
 
   String getRedirectLocation() => _redirectLocation!;
   bool hasRedirect() => _redirectLocation != null;
@@ -66,11 +81,60 @@ class AppStateNotifier extends ChangeNotifier {
     // Once again mark the notifier as needing to update on auth change
     // (in order to catch sign in / out events).
     updateNotifyOnAuthChange(true);
+
+    // Whenever auth identity changes, the cached acceptance flags are
+    // invalid — wipe and refetch in the background.
+    if (shouldUpdate) {
+      termosAccepted = null;
+      privacidadeAccepted = null;
+      if (loggedIn) {
+        // Fire-and-forget — when it resolves it notifies and the router
+        // re-evaluates the redirect.
+        refreshAcceptance();
+      }
+    }
   }
 
   void stopShowingSplashImage() {
     showSplashImage = false;
     notifyListeners();
+  }
+
+  /// Synchronously update cached acceptance flags. Call after a successful
+  /// Supabase update to avoid a redirect loop while we wait for the
+  /// background refresh.
+  void markAcceptance({required bool termos, required bool privacidade}) {
+    termosAccepted = termos;
+    privacidadeAccepted = privacidade;
+    notifyListeners();
+  }
+
+  /// Fetch `users.termos` and `users.privacidade` for the currently
+  /// authenticated user and update the cached flags. Safe to call
+  /// multiple times — concurrent calls are de-duplicated.
+  Future<void> refreshAcceptance() async {
+    if (_acceptanceLoading) return;
+    final uid = user?.uid;
+    if (uid == null || uid.isEmpty) {
+      termosAccepted = null;
+      privacidadeAccepted = null;
+      return;
+    }
+    _acceptanceLoading = true;
+    try {
+      final rows = await UsersTable().querySingleRow(
+        queryFn: (q) => q.eqOrNull('id', uid),
+      );
+      final row = rows.isNotEmpty ? rows.first : null;
+      termosAccepted = row?.termos ?? false;
+      privacidadeAccepted = row?.privacidade ?? false;
+      notifyListeners();
+    } catch (_) {
+      // On failure, leave flags as `null` so the redirect treats the
+      // user as not-accepted (safer default).
+    } finally {
+      _acceptanceLoading = false;
+    }
   }
 }
 
@@ -87,6 +151,44 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) {
     navigatorKey: appNavigatorKey,
     errorBuilder: (context, state) =>
         appStateNotifier.loggedIn ? HomePageWidget() : SignPageWidget(),
+    redirect: (context, state) {
+      // Mandatory terms+privacy acceptance gate.
+      //
+      // Runs on every navigation. The rules:
+      // - If not logged in → no redirect (auth flow handles its own).
+      // - If already on `/termosPage` → no redirect (avoid loop).
+      // - If the user explicitly opened TermosPage from the menu to
+      //   re-read documents (query `from=menu`) → no redirect.
+      // - If on an auth-only path (`/`, `/signPage`, `/signUpPage`,
+      //   `/resetSenhaPage`) → no redirect.
+      // - Otherwise, if either `users.termos` or `users.privacidade`
+      //   is not true → send to `/termosPage`.
+      if (!appStateNotifier.loggedIn) return null;
+
+      final location = state.uri.path;
+      const authOnlyPaths = <String>{
+        '/',
+        '/signPage',
+        '/signUpPage',
+        '/resetSenhaPage',
+      };
+      if (authOnlyPaths.contains(location)) return null;
+      if (location == '/termosPage') return null;
+
+      // Acceptance flags haven't been loaded yet. We can't safely allow
+      // navigation, but kicking off the fetch lets us re-evaluate once
+      // it resolves (refreshListenable triggers a re-run).
+      if (appStateNotifier.termosAccepted == null ||
+          appStateNotifier.privacidadeAccepted == null) {
+        appStateNotifier.refreshAcceptance();
+        return '/termosPage';
+      }
+
+      if (appStateNotifier.needsTermsAcceptance) {
+        return '/termosPage';
+      }
+      return null;
+    },
     routes: [
       FFRoute(
         name: '_initialize',
@@ -267,7 +369,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) {
           FFRoute(
             name: TermosPageWidget.routeName,
             path: TermosPageWidget.routePath,
-            builder: (context, params) => TermosPageWidget(),
+            builder: (context, params) => TermosPageWidget(
+              from: params.getParam(
+                'from',
+                ParamType.String,
+              ),
+            ),
           ),
           FFRoute(
             name: NotificationsPageWidget.routeName,

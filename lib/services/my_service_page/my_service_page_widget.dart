@@ -4,6 +4,7 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_button_tabbar.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/services/services_refresh_notifier.dart';
 import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
@@ -614,6 +615,9 @@ class _MyServicePageWidgetState extends State<MyServicePageWidget>
                                                                             .id,
                                                                       ),
                                                                     );
+                                                                    ServicesRefreshNotifier
+                                                                        .instance
+                                                                        .notifyRefresh();
                                                                   }
                                                                 },
                                                                 child: FaIcon(
@@ -1202,6 +1206,9 @@ class _MyServicePageWidgetState extends State<MyServicePageWidget>
                                                                             .id,
                                                                       ),
                                                                     );
+                                                                    ServicesRefreshNotifier
+                                                                        .instance
+                                                                        .notifyRefresh();
                                                                   }
                                                                 },
                                                                 child: FaIcon(

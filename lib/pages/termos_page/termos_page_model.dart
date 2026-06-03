@@ -6,10 +6,8 @@ import 'package:flutter/material.dart';
 class TermosPageModel extends FlutterFlowModel<TermosPageWidget> {
   ///  State fields for stateful widgets in this page.
 
-  // State field(s) for Checkbox widget.
-  bool? checkboxValue1;
-  // State field(s) for Checkbox widget.
-  bool? checkboxValue2;
+  /// True while the "Aceitar e Continuar" Supabase update is in flight.
+  bool isSubmitting = false;
 
   @override
   void initState(BuildContext context) {}

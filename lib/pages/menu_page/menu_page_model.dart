@@ -5,6 +5,7 @@ import '/widgets/user_widget/user_widget_widget.dart';
 import '/index.dart';
 import 'menu_page_widget.dart' show MenuPageWidget;
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class MenuPageModel extends FlutterFlowModel<MenuPageWidget> {
   ///  State fields for stateful widgets in this page.
@@ -16,6 +17,7 @@ class MenuPageModel extends FlutterFlowModel<MenuPageWidget> {
 
   // Cached future — initialized once in initState to avoid re-fetching on rebuild.
   late final Future<List<SettingsRow>> subscriptionSettingFuture;
+  late final Future<PackageInfo> packageInfoFuture;
 
   @override
   void initState(BuildContext context) {
@@ -24,6 +26,7 @@ class MenuPageModel extends FlutterFlowModel<MenuPageWidget> {
     subscriptionSettingFuture = SettingsTable().querySingleRow(
       queryFn: (q) => q.eqOrNull('type', 'subscription'),
     );
+    packageInfoFuture = PackageInfo.fromPlatform();
   }
 
   @override

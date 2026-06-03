@@ -1,8 +1,9 @@
 import '/auth/supabase_auth/auth_util.dart';
-import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -11,7 +12,9 @@ import 'termos_page_model.dart';
 export 'termos_page_model.dart';
 
 class TermosPageWidget extends StatefulWidget {
-  const TermosPageWidget({super.key});
+  const TermosPageWidget({super.key, this.from});
+
+  final String? from;
 
   static String routeName = 'TermosPage';
   static String routePath = 'termosPage';
@@ -24,6 +27,16 @@ class _TermosPageWidgetState extends State<TermosPageWidget> {
   late TermosPageModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  /// True when the page was opened from the menu (read-only mode):
+  /// user already accepted and just wants to re-read the documents.
+  /// Determined from the `from=menu` query parameter OR from the
+  /// cached acceptance flags on `AppStateNotifier`.
+  bool get _isReadOnlyMode {
+    if (widget.from == 'menu') return true;
+    final n = AppStateNotifier.instance;
+    return n.termosAccepted == true && n.privacidadeAccepted == true;
+  }
 
   @override
   void initState() {
@@ -41,173 +54,225 @@ class _TermosPageWidgetState extends State<TermosPageWidget> {
     super.dispose();
   }
 
+  Future<void> _onAcceptPressed() async {
+    if (_model.isSubmitting) return;
+    final uid = currentUserUid;
+    if (uid.isEmpty) return;
+
+    safeSetState(() => _model.isSubmitting = true);
+    logFirebaseEvent('TERMOS_PAGE_aceitar_e_continuar_ON_TAP');
+
+    try {
+      logFirebaseEvent('AceitarContinuar_backend_call');
+      await UsersTable().update(
+        data: {
+          'termos': true,
+          'privacidade': true,
+        },
+        matchingRows: (rows) => rows.eqOrNull('id', uid),
+      );
+
+      // Update cached flags BEFORE navigating so the top-level redirect
+      // doesn't bounce the user back to /termosPage.
+      AppStateNotifier.instance
+          .markAcceptance(termos: true, privacidade: true);
+
+      if (!mounted) return;
+      logFirebaseEvent('AceitarContinuar_navigate_to');
+      context.goNamedAuth(HomePageWidget.routeName, context.mounted);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Erro ao salvar sua aceitação. Tente novamente.',
+            style: TextStyle(
+              color: FlutterFlowTheme.of(context).info,
+            ),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        safeSetState(() => _model.isSubmitting = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<UsersRow>>(
-      future: UsersTable().querySingleRow(
-        queryFn: (q) => q.eqOrNull(
-          'id',
-          currentUserUid,
-        ),
-      ),
-      builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
-        if (!snapshot.hasData) {
-          return Scaffold(
+    final readOnly = _isReadOnlyMode;
+
+    return PopScope(
+      // When mandatory acceptance is pending, block the system back gesture
+      // and the AppBar back button. The only way out is "Aceitar e Continuar".
+      // In read-only mode (came from the menu), allow popping normally.
+      canPop: readOnly,
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: Scaffold(
+          key: scaffoldKey,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          appBar: AppBar(
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-            body: Center(
-              child: SizedBox(
-                width: 40.0,
-                height: 40.0,
-                child: SpinKitPulse(
-                  color: FlutterFlowTheme.of(context).primary,
-                  size: 40.0,
-                ),
-              ),
-            ),
-          );
-        }
-        List<UsersRow> termosPageUsersRowList = snapshot.data!;
-
-        final termosPageUsersRow = termosPageUsersRowList.isNotEmpty
-            ? termosPageUsersRowList.first
-            : null;
-
-        return GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
-          child: Scaffold(
-            key: scaffoldKey,
-            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-            appBar: AppBar(
-              backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-              automaticallyImplyLeading: false,
-              leading: FlutterFlowIconButton(
-                borderColor: Colors.transparent,
-                borderRadius: 30.0,
-                borderWidth: 1.0,
-                buttonSize: 60.0,
-                icon: Icon(
-                  Icons.arrow_back_rounded,
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  size: 30.0,
-                ),
-                onPressed: () async {
-                  logFirebaseEvent('TERMOS_arrow_back_rounded_ICN_ON_TAP');
-                  if (termosPageUsersRow!.termos! ||
-                      termosPageUsersRow.privacidade!) {
-                    logFirebaseEvent('IconButton_navigate_back');
-                    context.pop();
-                  } else {
-                    logFirebaseEvent('IconButton_alert_dialog');
-                    var confirmDialogResponse = await showDialog<bool>(
-                          context: context,
-                          builder: (alertDialogContext) {
-                            return AlertDialog(
-                              title: Text('Opa!'),
-                              content: Text(
-                                  'Para continuar, debe aceitar o termos de uso e/ou a política de privacidade'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(alertDialogContext, false),
-                                  child: Text('Voltar'),
-                                ),
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(alertDialogContext, true),
-                                  child: Text('Não quero aceitar'),
-                                ),
-                              ],
-                            );
-                          },
-                        ) ??
-                        false;
-                    if (confirmDialogResponse) {
-                      logFirebaseEvent('IconButton_alert_dialog');
-                      confirmDialogResponse = await showDialog<bool>(
-                            context: context,
-                            builder: (alertDialogContext) {
-                              return AlertDialog(
-                                title: Text('Fica de olho'),
-                                content: Text('Vamos a deslogar sua conta?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(
-                                        alertDialogContext, false),
-                                    child: Text(
-                                        'Não vou aceitar os termos e/ou a política de privacidade'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(alertDialogContext, true),
-                                    child: Text('Sim'),
-                                  ),
-                                ],
-                              );
-                            },
-                          ) ??
-                          false;
-                      if (confirmDialogResponse) {
-                        logFirebaseEvent('IconButton_update_app_state');
-                        FFAppState().deleteUser();
-                        FFAppState().user = UserStruct();
-
-                        FFAppState().deleteServiceId();
-                        FFAppState().serviceId = '';
-
-                        FFAppState().deleteLeadId();
-                        FFAppState().leadId = '';
-
-                        safeSetState(() {});
-                        logFirebaseEvent('IconButton_auth');
-                        GoRouter.of(context).prepareAuthEvent();
-                        await authManager.signOut();
-                        GoRouter.of(context).clearRedirectLocation();
-                      }
-                    }
-                  }
-                },
-              ),
-              title: Text(
-                'Documentos',
-                style: FlutterFlowTheme.of(context).headlineMedium.override(
-                      font: GoogleFonts.interTight(
-                        fontWeight: FlutterFlowTheme.of(context)
-                            .headlineMedium
-                            .fontWeight,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .headlineMedium
-                            .fontStyle,
-                      ),
+            automaticallyImplyLeading: false,
+            leading: readOnly
+                ? FlutterFlowIconButton(
+                    borderColor: Colors.transparent,
+                    borderRadius: 30.0,
+                    borderWidth: 1.0,
+                    buttonSize: 60.0,
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
                       color: FlutterFlowTheme.of(context).primaryText,
-                      fontSize: 22.0,
-                      letterSpacing: 0.0,
+                      size: 30.0,
+                    ),
+                    onPressed: () async {
+                      logFirebaseEvent('TERMOS_arrow_back_rounded_ICN_ON_TAP');
+                      context.safePop();
+                    },
+                  )
+                : const SizedBox.shrink(),
+            title: Text(
+              'Documentos',
+              style: FlutterFlowTheme.of(context).headlineMedium.override(
+                    font: GoogleFonts.interTight(
                       fontWeight: FlutterFlowTheme.of(context)
                           .headlineMedium
                           .fontWeight,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).headlineMedium.fontStyle,
+                      fontStyle: FlutterFlowTheme.of(context)
+                          .headlineMedium
+                          .fontStyle,
                     ),
-              ),
-              actions: [],
-              centerTitle: false,
-              elevation: 0.0,
+                    color: FlutterFlowTheme.of(context).primaryText,
+                    fontSize: 22.0,
+                    letterSpacing: 0.0,
+                    fontWeight: FlutterFlowTheme.of(context)
+                        .headlineMedium
+                        .fontWeight,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).headlineMedium.fontStyle,
+                  ),
             ),
-            body: SafeArea(
-              top: true,
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
+            actions: const [],
+            centerTitle: false,
+            elevation: 0.0,
+          ),
+          body: SafeArea(
+            top: true,
+            child: Padding(
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const SizedBox(height: 18.0),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 0.0, 28.0),
+                    child: Text(
+                      ' Li e Concordo com os Termos de Uso e Política de Privacidade do Aplicativo',
+                      style:
+                          FlutterFlowTheme.of(context).titleMedium.override(
+                                font: GoogleFonts.interTight(
+                                  fontWeight: FontWeight.w600,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .titleMedium
+                                      .fontStyle,
+                                ),
+                                letterSpacing: 0.0,
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .titleMedium
+                                    .fontStyle,
+                                lineHeight: 1.5,
+                              ),
+                    ),
+                  ),
+                  _DocumentLink(
+                    label: 'Ler os Termos de Uso do Aplicativo',
+                    url:
+                        'https://rupies.com.br/termos-de-uso-e-servico-da-rupies/#',
+                    logEvent: 'TERMOS_PAGE_PAGE_Text_rjtck824_ON_TAP',
+                  ),
+                  const SizedBox(height: 12.0),
+                  _DocumentLink(
+                    label: 'Ler a Política de Privacidade',
+                    url:
+                        'https://rupies.com.br/politica-de-privacidade-da-rupies/',
+                    logEvent: 'TERMOS_PAGE_PAGE_Text_xxtpj8xw_ON_TAP',
+                  ),
+                  const Spacer(),
+                  if (!readOnly)
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 28.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 16.0, 0.0, 8.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FFButtonWidget(
+                          onPressed:
+                              _model.isSubmitting ? null : _onAcceptPressed,
+                          text: _model.isSubmitting
+                              ? 'Aguarde...'
+                              : 'Aceitar e Continuar',
+                          options: FFButtonOptions(
+                            height: 52.0,
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                16.0, 0.0, 16.0, 0.0),
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 12.0, 0.0),
+                            color: FlutterFlowTheme.of(context).primary,
+                            textStyle: FlutterFlowTheme.of(context)
+                                .titleMedium
+                                .override(
+                                  font: GoogleFonts.interTight(
+                                    fontWeight: FontWeight.w600,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleMedium
+                                        .fontStyle,
+                                  ),
+                                  color: FlutterFlowTheme.of(context).info,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .titleMedium
+                                      .fontStyle,
+                                ),
+                            elevation: 0.0,
+                            borderRadius: BorderRadius.circular(12.0),
+                            disabledColor: FlutterFlowTheme.of(context)
+                                .primary
+                                .withValues(alpha: 0.6),
+                            disabledTextColor:
+                                FlutterFlowTheme.of(context).info,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (!readOnly && _model.isSubmitting)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 8.0, 0.0, 8.0),
+                      child: SizedBox(
+                        width: 28.0,
+                        height: 28.0,
+                        child: SpinKitPulse(
+                          color: FlutterFlowTheme.of(context).primary,
+                          size: 28.0,
+                        ),
+                      ),
+                    ),
+                  if (readOnly)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 16.0, 0.0, 8.0),
                       child: Text(
-                        ' Li e Concordo com os Termos de Uso e Política de Privacidade do Aplicativo',
+                        'Já aceito ✓',
                         style:
                             FlutterFlowTheme.of(context).titleMedium.override(
                                   font: GoogleFonts.interTight(
@@ -216,239 +281,93 @@ class _TermosPageWidgetState extends State<TermosPageWidget> {
                                         .titleMedium
                                         .fontStyle,
                                   ),
+                                  color: FlutterFlowTheme.of(context).success,
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.w600,
                                   fontStyle: FlutterFlowTheme.of(context)
                                       .titleMedium
                                       .fontStyle,
-                                  lineHeight: 1.5,
                                 ),
                       ),
                     ),
-                    Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 18.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Theme(
-                            data: ThemeData(
-                              checkboxTheme: CheckboxThemeData(
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                              ),
-                              unselectedWidgetColor:
-                                  FlutterFlowTheme.of(context).alternate,
-                            ),
-                            child: Checkbox(
-                              value: _model.checkboxValue1 ??=
-                                  termosPageUsersRow!.termos!,
-                              onChanged: (newValue) async {
-                                safeSetState(
-                                    () => _model.checkboxValue1 = newValue!);
-                                if (newValue!) {
-                                  logFirebaseEvent(
-                                      'TERMOS_Checkbox_6whu0idt_ON_TOGGLE_ON');
-                                  logFirebaseEvent('Checkbox_backend_call');
-                                  await UsersTable().update(
-                                    data: {
-                                      'termos': true,
-                                    },
-                                    matchingRows: (rows) => rows.eqOrNull(
-                                      'id',
-                                      termosPageUsersRow?.id,
-                                    ),
-                                  );
-                                } else {
-                                  logFirebaseEvent(
-                                      'TERMOS_Checkbox_6whu0idt_ON_TOGGLE_OFF');
-                                  logFirebaseEvent('Checkbox_backend_call');
-                                  await UsersTable().update(
-                                    data: {
-                                      'termos': false,
-                                    },
-                                    matchingRows: (rows) => rows.eqOrNull(
-                                      'id',
-                                      termosPageUsersRow?.id,
-                                    ),
-                                  );
-                                }
-                              },
-                              side: (FlutterFlowTheme.of(context).alternate !=
-                                      null)
-                                  ? BorderSide(
-                                      width: 2,
-                                      color: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                    )
-                                  : null,
-                              activeColor: FlutterFlowTheme.of(context).primary,
-                              checkColor: FlutterFlowTheme.of(context).info,
-                            ),
-                          ),
-                          Expanded(
-                            child: InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                logFirebaseEvent(
-                                    'TERMOS_PAGE_PAGE_Text_rjtck824_ON_TAP');
-                                logFirebaseEvent('Text_launch_u_r_l');
-                                await launchURL(
-                                    'https://rupies.com.br/termos-de-uso-e-servico-da-rupies/#');
-                              },
-                              child: Text(
-                                'Termos de uso do Aplicativo.',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyLarge
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyLarge
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyLarge
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyLarge
-                                          .fontStyle,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ].divide(SizedBox(width: 12.0)),
-                      ),
-                    ),
-                    Container(
-                      height: 50.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Theme(
-                            data: ThemeData(
-                              checkboxTheme: CheckboxThemeData(
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                              ),
-                              unselectedWidgetColor:
-                                  FlutterFlowTheme.of(context).alternate,
-                            ),
-                            child: Checkbox(
-                              value: _model.checkboxValue2 ??=
-                                  termosPageUsersRow!.privacidade!,
-                              onChanged: (newValue) async {
-                                safeSetState(
-                                    () => _model.checkboxValue2 = newValue!);
-                                if (newValue!) {
-                                  logFirebaseEvent(
-                                      'TERMOS_Checkbox_ryti3j9d_ON_TOGGLE_ON');
-                                  logFirebaseEvent('Checkbox_backend_call');
-                                  await UsersTable().update(
-                                    data: {
-                                      'privacidade': true,
-                                    },
-                                    matchingRows: (rows) => rows.eqOrNull(
-                                      'id',
-                                      currentUserUid,
-                                    ),
-                                  );
-                                } else {
-                                  logFirebaseEvent(
-                                      'TERMOS_Checkbox_ryti3j9d_ON_TOGGLE_OFF');
-                                  logFirebaseEvent('Checkbox_backend_call');
-                                  await UsersTable().update(
-                                    data: {
-                                      'privacidade': false,
-                                    },
-                                    matchingRows: (rows) => rows.eqOrNull(
-                                      'id',
-                                      currentUserUid,
-                                    ),
-                                  );
-                                }
-                              },
-                              side: (FlutterFlowTheme.of(context).alternate !=
-                                      null)
-                                  ? BorderSide(
-                                      width: 2,
-                                      color: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                    )
-                                  : null,
-                              activeColor: FlutterFlowTheme.of(context).primary,
-                              checkColor: FlutterFlowTheme.of(context).info,
-                            ),
-                          ),
-                          Expanded(
-                            child: InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                logFirebaseEvent(
-                                    'TERMOS_PAGE_PAGE_Text_xxtpj8xw_ON_TAP');
-                                logFirebaseEvent('Text_launch_u_r_l');
-                                await launchURL(
-                                    'https://rupies.com.br/politica-de-privacidade-da-rupies/');
-                              },
-                              child: Text(
-                                'Política de Privacidade.',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyLarge
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyLarge
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyLarge
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyLarge
-                                          .fontStyle,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ].divide(SizedBox(width: 12.0)),
-                      ),
-                    ),
-                  ]
-                      .addToStart(SizedBox(height: 18.0))
-                      .addToEnd(SizedBox(height: 24.0)),
-                ),
+                ],
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
+    );
+  }
+}
+
+class _DocumentLink extends StatelessWidget {
+  const _DocumentLink({
+    required this.label,
+    required this.url,
+    required this.logEvent,
+  });
+
+  final String label;
+  final String url;
+  final String logEvent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(
+          color: FlutterFlowTheme.of(context).alternate,
+          width: 1.0,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8.0),
+        onTap: () async {
+          logFirebaseEvent(logEvent);
+          logFirebaseEvent('Text_launch_u_r_l');
+          await launchURL(url);
+        },
+        child: Padding(
+          padding:
+              const EdgeInsetsDirectional.fromSTEB(16.0, 14.0, 16.0, 14.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Icon(
+                Icons.description_outlined,
+                color: FlutterFlowTheme.of(context).primary,
+                size: 22.0,
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  label,
+                  style: FlutterFlowTheme.of(context).bodyLarge.override(
+                        font: GoogleFonts.inter(
+                          fontWeight: FontWeight.w500,
+                          fontStyle: FlutterFlowTheme.of(context)
+                              .bodyLarge
+                              .fontStyle,
+                        ),
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w500,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyLarge.fontStyle,
+                      ),
+                ),
+              ),
+              Icon(
+                Icons.open_in_new_rounded,
+                color: FlutterFlowTheme.of(context).secondaryText,
+                size: 20.0,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import '/backend/schema/enums/enums.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/services_refresh_notifier.dart';
 import '/index.dart';
 import 'package:ff_theme/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
@@ -647,6 +648,7 @@ class _CardOpennedInProcessWidgetWidgetState
                                       widget.data?.id,
                                     ),
                                   );
+                                  ServicesRefreshNotifier.instance.notifyRefresh();
                                 }
                               },
                               text: 'Cancelar',

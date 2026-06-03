@@ -39,6 +39,27 @@ class _SignPageWidgetState extends State<SignPageWidget> {
     _model.passTextController ??= TextEditingController();
     _model.passFocusNode ??= FocusNode();
 
+    _model.emailTextControllerValidator = (context, val) {
+      if (val == null || val.trim().isEmpty) {
+        return 'Informe seu e-mail';
+      }
+      final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+      if (!emailRegex.hasMatch(val.trim())) {
+        return 'E-mail inválido';
+      }
+      return null;
+    };
+
+    _model.passTextControllerValidator = (context, val) {
+      if (val == null || val.isEmpty) {
+        return 'Informe sua senha';
+      }
+      if (val.length < 6) {
+        return 'Mínimo 6 caracteres';
+      }
+      return null;
+    };
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -71,7 +92,7 @@ class _SignPageWidgetState extends State<SignPageWidget> {
               alignment: AlignmentDirectional(0.0, 0.0),
               child: Form(
                 key: _model.formKey,
-                autovalidateMode: AutovalidateMode.always,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                   child: SingleChildScrollView(
@@ -396,12 +417,16 @@ class _SignPageWidgetState extends State<SignPageWidget> {
                             onPressed: () async {
                               logFirebaseEvent(
                                   'SIGN_FAA_LOGIN_COM_SENHA_BTN_ON_TAP');
+                              if (_model.formKey.currentState == null ||
+                                  !_model.formKey.currentState!.validate()) {
+                                return;
+                              }
                               logFirebaseEvent('Button_auth');
                               GoRouter.of(context).prepareAuthEvent();
 
                               final user = await authManager.signInWithEmail(
                                 context,
-                                _model.emailTextController.text,
+                                _model.emailTextController.text.trim(),
                                 _model.passTextController.text,
                               );
                               if (user == null) {

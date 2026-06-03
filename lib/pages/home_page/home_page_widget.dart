@@ -3,6 +3,7 @@ import '/backend/schema/enums/enums.dart';
 import '/backend/supabase/supabase.dart';
 import '/components/services_external_widget_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/services/services_refresh_notifier.dart';
 import '/widgets/banner_widget/banner_widget_widget.dart';
 import '/widgets/card_accepted_widget/card_accepted_widget_widget.dart';
 import '/widgets/card_openned_in_process_widget/card_openned_in_process_widget_widget.dart';
@@ -38,11 +39,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       _acceptedServicesWithContractorsFuture;
   Future<List<ViewServicesWithCategoriesFilteredRow>>? _filteredServicesFuture;
 
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => HomePageModel());
-
+  void _loadServices() {
     final _uid = currentUserUid;
     _acceptedServicesWithContractorsFuture = _uid.isEmpty
         ? Future.value((<ViewServicesWithCategoriesRow>[], <String, UsersRow>{}))
@@ -92,6 +89,20 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 )
                 .order('created_at'),
           );
+  }
+
+  void _refreshServices() {
+    if (!mounted) return;
+    safeSetState(_loadServices);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _model = createModel(context, () => HomePageModel());
+
+    _loadServices();
+    ServicesRefreshNotifier.instance.addListener(_refreshServices);
 
     logFirebaseEvent('screen_view', parameters: {'screen_name': 'HomePage'});
     // On page load action.
@@ -187,6 +198,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
   @override
   void dispose() {
+    ServicesRefreshNotifier.instance.removeListener(_refreshServices);
     _model.dispose();
 
     super.dispose();
@@ -220,10 +232,20 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     width: double.infinity,
                     height: double.infinity,
                     decoration: BoxDecoration(),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        _loadServices();
+                        safeSetState(() {});
+                        await Future.wait([
+                          _acceptedServicesWithContractorsFuture ?? Future.value(),
+                          _filteredServicesFuture ?? Future.value(),
+                        ]);
+                      },
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
                           Padding(
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 12.0, 0.0, 12.0, 0.0),
@@ -526,7 +548,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               },
                             ),
                           ),
-                        ].addToStart(SizedBox(height: 12.0)),
+                          ].addToStart(SizedBox(height: 12.0)),
+                        ),
                       ),
                     ),
                   ),

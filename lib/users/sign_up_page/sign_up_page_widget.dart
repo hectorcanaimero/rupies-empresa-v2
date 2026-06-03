@@ -563,7 +563,7 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                                               .labelMedium
                                                               .fontStyle,
                                                     ),
-                                                hintText: 'Confirma sua senha',
+                                                hintText: 'Confirme sua senha',
                                                 hintStyle: FlutterFlowTheme.of(
                                                         context)
                                                     .labelMedium
@@ -714,31 +714,22 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                             onPressed: () async {
                                               logFirebaseEvent(
                                                   'SIGN_UP_FAA_CADASTRO_COM_SENHA_BTN_ON_TA');
+                                              if (_model.formKey.currentState ==
+                                                      null ||
+                                                  !_model.formKey.currentState!
+                                                      .validate()) {
+                                                return;
+                                              }
                                               logFirebaseEvent('Button_auth');
                                               GoRouter.of(context)
                                                   .prepareAuthEvent();
-                                              if (_model
-                                                      .signupPasswordTextController
-                                                      .text !=
-                                                  _model
-                                                      .signupConfirmPasswordTextController
-                                                      .text) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'Senha invalida',
-                                                    ),
-                                                  ),
-                                                );
-                                                return;
-                                              }
 
                                               final user = await authManager
                                                   .createAccountWithEmail(
                                                 context,
                                                 _model.signupEmailTextController
-                                                    .text,
+                                                    .text
+                                                    .trim(),
                                                 _model
                                                     .signupPasswordTextController
                                                     .text,
